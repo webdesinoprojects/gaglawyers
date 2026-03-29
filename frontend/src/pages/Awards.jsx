@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Award as AwardIcon, Calendar, Building } from 'lucide-react';
+import API_BASE_URL from '../config/api';
 
 const Awards = () => {
   const [awards, setAwards] = useState([]);
@@ -11,7 +12,7 @@ const Awards = () => {
 
   const fetchAwards = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/awards');
+      const response = await fetch(`${API_BASE_URL}/api/awards`);
       const data = await response.json();
       if (data.success) {
         setAwards(data.data);

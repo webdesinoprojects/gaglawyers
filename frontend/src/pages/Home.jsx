@@ -6,6 +6,7 @@ import ServiceCard from '../components/ServiceCard';
 import StatCard from '../components/StatCard';
 import TestimonialCard from '../components/TestimonialCard';
 import SEOHead from '../components/SEOHead';
+import API_BASE_URL from '../config/api';
 
 const Home = () => {
   const [services, setServices] = useState([]);
@@ -59,8 +60,8 @@ const Home = () => {
   const fetchDynamicContent = async () => {
     try {
       const [servicesRes, reviewsRes] = await Promise.all([
-        fetch('http://localhost:5000/api/services'),
-        fetch('http://localhost:5000/api/reviews?featured=true'),
+        fetch(`${API_BASE_URL}/api/services`),
+        fetch(`${API_BASE_URL}/api/reviews?featured=true`),
       ]);
 
       const servicesData = await servicesRes.json();

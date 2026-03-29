@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
 import Button from '../../components/Button';
 import ImageUploader from '../../components/ImageUploader';
+import API_BASE_URL from '../../config/api';
 
 const TeamManager = () => {
   const [members, setMembers] = useState([]);
@@ -23,7 +24,7 @@ const TeamManager = () => {
     const token = localStorage.getItem('adminToken');
     
     try {
-      const response = await fetch('http://localhost:5000/api/team', {
+      const response = await fetch(`${API_BASE_URL}/api/team`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -45,8 +46,8 @@ const TeamManager = () => {
 
     try {
       const url = editingMember
-        ? `http://localhost:5000/api/team/${editingMember._id}`
-        : 'http://localhost:5000/api/team';
+        ? `${API_BASE_URL}/api/team/${editingMember._id}`
+        : `${API_BASE_URL}/api/team`;
       
       const method = editingMember ? 'PUT' : 'POST';
 
@@ -86,7 +87,7 @@ const TeamManager = () => {
     const token = localStorage.getItem('adminToken');
 
     try {
-      await fetch(`http://localhost:5000/api/team/${id}`, {
+      await fetch(`${API_BASE_URL}/api/team/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import Button from './Button';
+import API_BASE_URL from '../config/api';
 
 const DisclaimerModal = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,8 +15,8 @@ const DisclaimerModal = () => {
   const fetchDisclaimerSettings = async () => {
     try {
       const [enabledRes, textRes] = await Promise.all([
-        fetch('http://localhost:5000/api/settings/disclaimerEnabled'),
-        fetch('http://localhost:5000/api/settings/disclaimerText'),
+        fetch(`${API_BASE_URL}/api/settings/disclaimerEnabled`),
+        fetch(`${API_BASE_URL}/api/settings/disclaimerText`),
       ]);
 
       const enabledData = await enabledRes.json();

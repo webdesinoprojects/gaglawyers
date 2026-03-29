@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Mail, Phone, Calendar, Trash2 } from 'lucide-react';
+import API_BASE_URL from '../../config/api';
 
 const ContactForms = () => {
   const [submissions, setSubmissions] = useState([]);
@@ -13,7 +14,7 @@ const ContactForms = () => {
     const token = localStorage.getItem('adminToken');
     
     try {
-      const response = await fetch('http://localhost:5000/api/contact', {
+      const response = await fetch(`${API_BASE_URL}/api/contact`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();

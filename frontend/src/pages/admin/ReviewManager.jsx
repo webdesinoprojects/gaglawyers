@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Edit, Trash2, Save, X, Star } from 'lucide-react';
 import Button from '../../components/Button';
 import ImageUploader from '../../components/ImageUploader';
+import API_BASE_URL from '../../config/api';
 
 const ReviewManager = () => {
   const [reviews, setReviews] = useState([]);
@@ -26,7 +27,7 @@ const ReviewManager = () => {
     const token = localStorage.getItem('adminToken');
     
     try {
-      const response = await fetch('http://localhost:5000/api/reviews', {
+      const response = await fetch(`${API_BASE_URL}/api/reviews`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -48,8 +49,8 @@ const ReviewManager = () => {
 
     try {
       const url = editingReview
-        ? `http://localhost:5000/api/reviews/${editingReview._id}`
-        : 'http://localhost:5000/api/reviews';
+        ? `${API_BASE_URL}/api/reviews/${editingReview._id}`
+        : `${API_BASE_URL}/api/reviews`;
       
       const method = editingReview ? 'PUT' : 'POST';
 
@@ -92,7 +93,7 @@ const ReviewManager = () => {
     const token = localStorage.getItem('adminToken');
 
     try {
-      await fetch(`http://localhost:5000/api/reviews/${id}`, {
+      await fetch(`${API_BASE_URL}/api/reviews/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

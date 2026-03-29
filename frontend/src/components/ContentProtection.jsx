@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import API_BASE_URL from '../config/api';
 
 const ContentProtection = () => {
   const [settings, setSettings] = useState({
@@ -13,8 +14,8 @@ const ContentProtection = () => {
   const fetchSettings = async () => {
     try {
       const [rightClickRes, copyProtectionRes] = await Promise.all([
-        fetch('http://localhost:5000/api/settings/rightClickDisabled'),
-        fetch('http://localhost:5000/api/settings/copyProtectionEnabled'),
+        fetch(`${API_BASE_URL}/api/settings/rightClickDisabled`),
+        fetch(`${API_BASE_URL}/api/settings/copyProtectionEnabled`),
       ]);
 
       const rightClickData = await rightClickRes.json();

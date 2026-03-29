@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MapPin, Phone, Mail, ArrowRight } from 'lucide-react';
 import Button from '../components/Button';
+import API_BASE_URL from '../config/api';
 
 const LocationPage = () => {
   const { slug } = useParams();
@@ -14,7 +15,7 @@ const LocationPage = () => {
 
   const fetchLocationPage = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/locations/${slug}`);
+      const response = await fetch(`${API_BASE_URL}/api/locations/${slug}`);
       const data = await response.json();
       if (data.success) {
         setPageData(data.data);

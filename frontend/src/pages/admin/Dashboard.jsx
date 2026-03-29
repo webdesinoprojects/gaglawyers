@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Users, Briefcase, MessageSquare, BookOpen, TrendingUp } from 'lucide-react';
+import API_BASE_URL from '../../config/api';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -18,13 +19,13 @@ const AdminDashboard = () => {
     
     try {
       const [teamRes, servicesRes, blogRes] = await Promise.all([
-        fetch('http://localhost:5000/api/team', {
+        fetch(`${API_BASE_URL}/api/team`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch('http://localhost:5000/api/services', {
+        fetch(`${API_BASE_URL}/api/services`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch('http://localhost:5000/api/blog', {
+        fetch(`${API_BASE_URL}/api/blog`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);

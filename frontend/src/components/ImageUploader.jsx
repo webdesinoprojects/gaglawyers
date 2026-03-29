@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Upload, X, Loader } from 'lucide-react';
+import API_BASE_URL from '../config/api';
 
 const ImageUploader = ({ onImageUploaded, currentImage = '', label = 'Upload Image' }) => {
   const [uploading, setUploading] = useState(false);
@@ -29,7 +30,7 @@ const ImageUploader = ({ onImageUploaded, currentImage = '', label = 'Upload Ima
     try {
       const token = localStorage.getItem('adminToken');
       
-      const response = await fetch('http://localhost:5000/api/cloudinary/upload', {
+      const response = await fetch(`${API_BASE_URL}/api/cloudinary/upload`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

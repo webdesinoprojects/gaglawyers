@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
 import Button from '../../components/Button';
 import ImageUploader from '../../components/ImageUploader';
+import API_BASE_URL from '../../config/api';
 
 const AwardManager = () => {
   const [awards, setAwards] = useState([]);
@@ -25,7 +26,7 @@ const AwardManager = () => {
     const token = localStorage.getItem('adminToken');
     
     try {
-      const response = await fetch('http://localhost:5000/api/awards', {
+      const response = await fetch(`${API_BASE_URL}/api/awards`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -47,8 +48,8 @@ const AwardManager = () => {
 
     try {
       const url = editingAward
-        ? `http://localhost:5000/api/awards/${editingAward._id}`
-        : 'http://localhost:5000/api/awards';
+        ? `${API_BASE_URL}/api/awards/${editingAward._id}`
+        : `${API_BASE_URL}/api/awards`;
       
       const method = editingAward ? 'PUT' : 'POST';
 
@@ -90,7 +91,7 @@ const AwardManager = () => {
     const token = localStorage.getItem('adminToken');
 
     try {
-      await fetch(`http://localhost:5000/api/awards/${id}`, {
+      await fetch(`${API_BASE_URL}/api/awards/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

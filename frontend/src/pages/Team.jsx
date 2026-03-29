@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import TeamCard from '../components/TeamCard';
+import API_BASE_URL from '../config/api';
 
 const Team = () => {
   const [teamMembers, setTeamMembers] = useState([]);
@@ -11,7 +12,7 @@ const Team = () => {
 
   const fetchTeam = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/team');
+      const response = await fetch(`${API_BASE_URL}/api/team`);
       const data = await response.json();
       if (data.success) {
         setTeamMembers(data.data);

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Save } from 'lucide-react';
 import Button from '../../components/Button';
+import API_BASE_URL from '../../config/api';
 
 const SiteSettings = () => {
   const [settings, setSettings] = useState({
@@ -25,7 +26,7 @@ const SiteSettings = () => {
     const token = localStorage.getItem('adminToken');
     
     try {
-      const response = await fetch('http://localhost:5000/api/settings', {
+      const response = await fetch(`${API_BASE_URL}/api/settings`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -58,7 +59,7 @@ const SiteSettings = () => {
 
     try {
       const updates = Object.keys(settings).map(async (key) => {
-        return fetch(`http://localhost:5000/api/settings/${key}`, {
+        return fetch(`${API_BASE_URL}/api/settings/${key}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

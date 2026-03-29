@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { X, ZoomIn } from 'lucide-react';
+import API_BASE_URL from '../config/api';
 
 const Gallery = () => {
   const [images, setImages] = useState([]);
@@ -13,7 +14,7 @@ const Gallery = () => {
 
   const fetchImages = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/gallery');
+      const response = await fetch(`${API_BASE_URL}/api/gallery`);
       const data = await response.json();
       if (data.success) {
         setImages(data.data);

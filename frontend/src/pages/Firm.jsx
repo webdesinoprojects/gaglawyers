@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Building2, Target, Eye, Heart } from 'lucide-react';
+import API_BASE_URL from '../config/api';
 
 const Firm = () => {
   const [pageContent, setPageContent] = useState(null);
@@ -11,7 +12,7 @@ const Firm = () => {
 
   const fetchPageContent = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/pages/firm');
+      const response = await fetch(`${API_BASE_URL}/api/pages/firm`);
       const data = await response.json();
       if (data.success) {
         setPageContent(data.data);

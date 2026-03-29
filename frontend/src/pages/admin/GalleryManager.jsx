@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
 import Button from '../../components/Button';
 import ImageUploader from '../../components/ImageUploader';
+import API_BASE_URL from '../../config/api';
 
 const GalleryManager = () => {
   const [images, setImages] = useState([]);
@@ -24,7 +25,7 @@ const GalleryManager = () => {
     const token = localStorage.getItem('adminToken');
     
     try {
-      const response = await fetch('http://localhost:5000/api/gallery', {
+      const response = await fetch(`${API_BASE_URL}/api/gallery`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -46,8 +47,8 @@ const GalleryManager = () => {
 
     try {
       const url = editingImage
-        ? `http://localhost:5000/api/gallery/${editingImage._id}`
-        : 'http://localhost:5000/api/gallery';
+        ? `${API_BASE_URL}/api/gallery/${editingImage._id}`
+        : `${API_BASE_URL}/api/gallery`;
       
       const method = editingImage ? 'PUT' : 'POST';
 
@@ -88,7 +89,7 @@ const GalleryManager = () => {
     const token = localStorage.getItem('adminToken');
 
     try {
-      await fetch(`http://localhost:5000/api/gallery/${id}`, {
+      await fetch(`${API_BASE_URL}/api/gallery/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

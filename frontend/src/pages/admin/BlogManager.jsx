@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Edit, Trash2, Save, X, Eye, EyeOff } from 'lucide-react';
 import Button from '../../components/Button';
 import ImageUploader from '../../components/ImageUploader';
+import API_BASE_URL from '../../config/api';
 
 const BlogManager = () => {
   const [posts, setPosts] = useState([]);
@@ -26,7 +27,7 @@ const BlogManager = () => {
     const token = localStorage.getItem('adminToken');
     
     try {
-      const response = await fetch('http://localhost:5000/api/blog', {
+      const response = await fetch(`${API_BASE_URL}/api/blog`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -64,8 +65,8 @@ const BlogManager = () => {
 
     try {
       const url = editingPost
-        ? `http://localhost:5000/api/blog/${editingPost._id}`
-        : 'http://localhost:5000/api/blog';
+        ? `${API_BASE_URL}/api/blog/${editingPost._id}`
+        : `${API_BASE_URL}/api/blog`;
       
       const method = editingPost ? 'PUT' : 'POST';
 
@@ -108,7 +109,7 @@ const BlogManager = () => {
     const token = localStorage.getItem('adminToken');
 
     try {
-      await fetch(`http://localhost:5000/api/blog/${id}`, {
+      await fetch(`${API_BASE_URL}/api/blog/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

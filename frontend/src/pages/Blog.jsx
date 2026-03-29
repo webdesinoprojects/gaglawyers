@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, User, ArrowRight } from 'lucide-react';
+import API_BASE_URL from '../config/api';
 
 const Blog = () => {
   const [posts, setPosts] = useState([]);
@@ -12,7 +13,7 @@ const Blog = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/blog?published=true');
+      const response = await fetch(`${API_BASE_URL}/api/blog?published=true`);
       const data = await response.json();
       if (data.success) {
         setPosts(data.data);
