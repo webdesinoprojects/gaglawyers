@@ -14,6 +14,7 @@ const AwardManager = () => {
     year: new Date().getFullYear(),
     issuingBody: '',
     imageUrl: '',
+    cloudinaryPublicId: '',
     order: 0,
     isPublished: true,
   });
@@ -200,7 +201,7 @@ const AwardManager = () => {
             <ImageUploader
               label="Award Image/Logo"
               currentImage={formData.imageUrl}
-              onImageUploaded={(url) => setFormData({ ...formData, imageUrl: url })}
+              onImageUploaded={(url, publicId) => setFormData({ ...formData, imageUrl: url, cloudinaryPublicId: publicId })}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

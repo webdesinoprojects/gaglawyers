@@ -14,6 +14,7 @@ const BlogManager = () => {
     excerpt: '',
     content: '',
     featuredImage: '',
+    featuredImagePublicId: '',
     category: 'Legal News',
     tags: '',
     isPublished: false,
@@ -220,7 +221,7 @@ const BlogManager = () => {
             <ImageUploader
               label="Featured Image"
               currentImage={formData.featuredImage}
-              onImageUploaded={(url) => setFormData({ ...formData, featuredImage: url })}
+              onImageUploaded={(url, publicId) => setFormData({ ...formData, featuredImage: url, featuredImagePublicId: publicId })}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

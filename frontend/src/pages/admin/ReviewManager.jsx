@@ -14,6 +14,7 @@ const ReviewManager = () => {
     content: '',
     rating: 5,
     imageUrl: '',
+    cloudinaryPublicId: '',
     order: 0,
     isPublished: true,
     isFeatured: false,
@@ -189,7 +190,7 @@ const ReviewManager = () => {
             <ImageUploader
               label="Client Photo (Optional)"
               currentImage={formData.imageUrl}
-              onImageUploaded={(url) => setFormData({ ...formData, imageUrl: url })}
+              onImageUploaded={(url, publicId) => setFormData({ ...formData, imageUrl: url, cloudinaryPublicId: publicId })}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

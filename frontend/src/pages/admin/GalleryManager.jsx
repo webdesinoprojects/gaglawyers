@@ -11,6 +11,7 @@ const GalleryManager = () => {
   const [formData, setFormData] = useState({
     title: '',
     imageUrl: '',
+    cloudinaryPublicId: '',
     category: 'office',
     description: '',
     order: 0,
@@ -140,7 +141,7 @@ const GalleryManager = () => {
             <ImageUploader
               label="Gallery Image"
               currentImage={formData.imageUrl}
-              onImageUploaded={(url) => setFormData({ ...formData, imageUrl: url })}
+              onImageUploaded={(url, publicId) => setFormData({ ...formData, imageUrl: url, cloudinaryPublicId: publicId })}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

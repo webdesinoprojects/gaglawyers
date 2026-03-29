@@ -13,6 +13,7 @@ const TeamManager = () => {
     designation: '',
     bio: '',
     imageUrl: '',
+    cloudinaryPublicId: '',
     order: 0,
   });
 
@@ -177,7 +178,7 @@ const TeamManager = () => {
                 <ImageUploader
                   label="Team Member Photo"
                   currentImage={formData.imageUrl}
-                  onImageUploaded={(url) => setFormData({ ...formData, imageUrl: url })}
+                  onImageUploaded={(url, publicId) => setFormData({ ...formData, imageUrl: url, cloudinaryPublicId: publicId })}
                 />
               </div>
 
