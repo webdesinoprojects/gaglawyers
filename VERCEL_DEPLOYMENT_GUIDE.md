@@ -108,6 +108,8 @@ Click "Deploy" and wait for the build to complete.
 **Output Directory:** `dist`
 **Install Command:** `npm install`
 
+**IMPORTANT:** A `vercel.json` file has been created in the frontend folder to handle client-side routing. This ensures all routes work correctly with React Router.
+
 ### 3. Add Frontend Environment Variables
 
 In the Vercel project settings → Environment Variables, add:
