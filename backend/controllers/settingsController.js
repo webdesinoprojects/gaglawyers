@@ -47,6 +47,7 @@ const getAllSettings = async (req, res) => {
       data: settings,
     });
   } catch (error) {
+    console.error('Get all settings error:', error);
     res.status(500).json({
       success: false,
       message: 'Server Error',
@@ -75,6 +76,7 @@ const updateSetting = async (req, res) => {
       data: setting,
     });
   } catch (error) {
+    console.error('Update setting error:', error);
     res.status(500).json({
       success: false,
       message: 'Server Error',

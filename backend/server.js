@@ -19,14 +19,9 @@ const cloudinaryRoutes = require('./routes/cloudinaryRoutes');
 
 const app = express();
 
-let dbConnected = false;
-const initDB = async () => {
-  if (!dbConnected) {
-    await connectDB();
-    dbConnected = true;
-  }
-};
-initDB().catch(console.error);
+if (process.env.NODE_ENV !== 'production') {
+  connectDB().catch(console.error);
+}
 
 const allowedOrigins = [
   'http://localhost:5173',

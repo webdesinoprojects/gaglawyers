@@ -34,6 +34,7 @@ const register = async (req, res) => {
       });
     }
   } catch (error) {
+    console.error('Register error:', error);
     res.status(500).json({
       success: false,
       message: 'Server Error',
@@ -106,6 +107,7 @@ const getMe = async (req, res) => {
       data: user,
     });
   } catch (error) {
+    console.error('GetMe error:', error);
     res.status(500).json({
       success: false,
       message: 'Server Error',
