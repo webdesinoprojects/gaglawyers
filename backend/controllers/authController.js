@@ -55,7 +55,16 @@ const login = async (req, res) => {
 
     const user = await User.findOne({ email });
 
-    if (user && (await user.matchPassword(password))) {
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password',
+      });
+    }
+
+    const isMatch = await user.matchPassword(password);
+
+    if (isMatch) {
       if (!user.isActive) {
         return res.status(401).json({
           success: false,
@@ -80,10 +89,11 @@ const login = async (req, res) => {
       });
     }
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server Error',
-      error: error.message,
+      message: 'Login failed - Server Error',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Please contact support',
     });
   }
 };
