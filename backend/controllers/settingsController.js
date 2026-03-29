@@ -6,9 +6,21 @@ const getSetting = async (req, res) => {
     const setting = await SiteSettings.findOne({ settingKey: key });
 
     if (!setting) {
-      return res.status(404).json({
-        success: false,
-        message: 'Setting not found',
+      const defaultValues = {
+        disclaimerEnabled: true,
+        disclaimerText: 'The information provided on this website is for general informational purposes only.',
+        rightClickDisabled: false,
+        copyProtectionEnabled: false,
+        whatsappEnabled: true,
+        whatsappNumber: '+919876543210',
+      };
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          settingKey: key,
+          settingValue: defaultValues[key] || null,
+        },
       });
     }
 
@@ -17,6 +29,7 @@ const getSetting = async (req, res) => {
       data: setting,
     });
   } catch (error) {
+    console.error('Settings error:', error);
     res.status(500).json({
       success: false,
       message: 'Server Error',
