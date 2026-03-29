@@ -1,4 +1,5 @@
 const TeamMember = require('../models/TeamMember');
+const cloudinary = require('../config/cloudinary');
 
 const getAllTeamMembers = async (req, res) => {
   try {
@@ -35,17 +36,27 @@ const createTeamMember = async (req, res) => {
 
 const updateTeamMember = async (req, res) => {
   try {
-    const member = await TeamMember.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const oldMember = await TeamMember.findById(req.params.id);
 
-    if (!member) {
+    if (!oldMember) {
       return res.status(404).json({
         success: false,
         message: 'Team member not found',
       });
     }
+
+    if (req.body.imageUrl && oldMember.imageUrl !== req.body.imageUrl && oldMember.cloudinaryPublicId) {
+      try {
+        await cloudinary.uploader.destroy(oldMember.cloudinaryPublicId);
+      } catch (cloudinaryError) {
+        console.error('Cloudinary deletion error:', cloudinaryError);
+      }
+    }
+
+    const member = await TeamMember.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     res.status(200).json({
       success: true,
@@ -62,7 +73,7 @@ const updateTeamMember = async (req, res) => {
 
 const deleteTeamMember = async (req, res) => {
   try {
-    const member = await TeamMember.findByIdAndDelete(req.params.id);
+    const member = await TeamMember.findById(req.params.id);
 
     if (!member) {
       return res.status(404).json({
@@ -70,6 +81,16 @@ const deleteTeamMember = async (req, res) => {
         message: 'Team member not found',
       });
     }
+
+    if (member.cloudinaryPublicId) {
+      try {
+        await cloudinary.uploader.destroy(member.cloudinaryPublicId);
+      } catch (cloudinaryError) {
+        console.error('Cloudinary deletion error:', cloudinaryError);
+      }
+    }
+
+    await TeamMember.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
       success: true,

@@ -1,4 +1,5 @@
 const Review = require('../models/Review');
+const cloudinary = require('../config/cloudinary');
 
 const getAllReviews = async (req, res) => {
   try {
@@ -42,17 +43,27 @@ const createReview = async (req, res) => {
 
 const updateReview = async (req, res) => {
   try {
-    const review = await Review.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const oldReview = await Review.findById(req.params.id);
 
-    if (!review) {
+    if (!oldReview) {
       return res.status(404).json({
         success: false,
         message: 'Review not found',
       });
     }
+
+    if (req.body.imageUrl && oldReview.imageUrl !== req.body.imageUrl && oldReview.cloudinaryPublicId) {
+      try {
+        await cloudinary.uploader.destroy(oldReview.cloudinaryPublicId);
+      } catch (cloudinaryError) {
+        console.error('Cloudinary deletion error:', cloudinaryError);
+      }
+    }
+
+    const review = await Review.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     res.status(200).json({
       success: true,
@@ -69,7 +80,7 @@ const updateReview = async (req, res) => {
 
 const deleteReview = async (req, res) => {
   try {
-    const review = await Review.findByIdAndDelete(req.params.id);
+    const review = await Review.findById(req.params.id);
 
     if (!review) {
       return res.status(404).json({
@@ -77,6 +88,16 @@ const deleteReview = async (req, res) => {
         message: 'Review not found',
       });
     }
+
+    if (review.cloudinaryPublicId) {
+      try {
+        await cloudinary.uploader.destroy(review.cloudinaryPublicId);
+      } catch (cloudinaryError) {
+        console.error('Cloudinary deletion error:', cloudinaryError);
+      }
+    }
+
+    await Review.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
       success: true,

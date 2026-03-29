@@ -16,6 +16,7 @@ const pageContentSchema = new mongoose.Schema({
     description: { type: String, default: '' },
     keywords: { type: String, default: '' },
     ogImage: { type: String, default: '' },
+    ogImagePublicId: { type: String, default: '' },
     canonical: { type: String, default: '' },
   },
   isPublished: {

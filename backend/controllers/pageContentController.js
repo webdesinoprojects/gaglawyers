@@ -1,4 +1,5 @@
 const PageContent = require('../models/PageContent');
+const cloudinary = require('../config/cloudinary');
 
 const getPageContent = async (req, res) => {
   try {
@@ -29,6 +30,16 @@ const updatePageContent = async (req, res) => {
   try {
     const { pageName } = req.params;
     
+    const oldPage = await PageContent.findOne({ pageName });
+    
+    if (oldPage && req.body.seo?.ogImage && oldPage.seo?.ogImage !== req.body.seo.ogImage && oldPage.seo?.ogImagePublicId) {
+      try {
+        await cloudinary.uploader.destroy(oldPage.seo.ogImagePublicId);
+      } catch (cloudinaryError) {
+        console.error('Cloudinary deletion error:', cloudinaryError);
+      }
+    }
+
     const page = await PageContent.findOneAndUpdate(
       { pageName },
       req.body,

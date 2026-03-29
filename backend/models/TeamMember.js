@@ -19,6 +19,10 @@ const teamMemberSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  cloudinaryPublicId: {
+    type: String,
+    default: '',
+  },
   order: {
     type: Number,
     default: 0,

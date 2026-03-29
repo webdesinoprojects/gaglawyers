@@ -10,6 +10,10 @@ const galleryImageSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  cloudinaryPublicId: {
+    type: String,
+    default: '',
+  },
   category: {
     type: String,
     default: 'general',

@@ -1,4 +1,5 @@
 const Award = require('../models/Award');
+const cloudinary = require('../config/cloudinary');
 
 const getAllAwards = async (req, res) => {
   try {
@@ -35,17 +36,27 @@ const createAward = async (req, res) => {
 
 const updateAward = async (req, res) => {
   try {
-    const award = await Award.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const oldAward = await Award.findById(req.params.id);
 
-    if (!award) {
+    if (!oldAward) {
       return res.status(404).json({
         success: false,
         message: 'Award not found',
       });
     }
+
+    if (req.body.imageUrl && oldAward.imageUrl !== req.body.imageUrl && oldAward.cloudinaryPublicId) {
+      try {
+        await cloudinary.uploader.destroy(oldAward.cloudinaryPublicId);
+      } catch (cloudinaryError) {
+        console.error('Cloudinary deletion error:', cloudinaryError);
+      }
+    }
+
+    const award = await Award.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     res.status(200).json({
       success: true,
@@ -62,7 +73,7 @@ const updateAward = async (req, res) => {
 
 const deleteAward = async (req, res) => {
   try {
-    const award = await Award.findByIdAndDelete(req.params.id);
+    const award = await Award.findById(req.params.id);
 
     if (!award) {
       return res.status(404).json({
@@ -70,6 +81,16 @@ const deleteAward = async (req, res) => {
         message: 'Award not found',
       });
     }
+
+    if (award.cloudinaryPublicId) {
+      try {
+        await cloudinary.uploader.destroy(award.cloudinaryPublicId);
+      } catch (cloudinaryError) {
+        console.error('Cloudinary deletion error:', cloudinaryError);
+      }
+    }
+
+    await Award.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
       success: true,

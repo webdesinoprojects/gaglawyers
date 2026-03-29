@@ -15,7 +15,7 @@ const pageContentRoutes = require('./routes/pageContentRoutes');
 const locationRoutes = require('./routes/locationRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
 const seoRoutes = require('./routes/seoRoutes');
-const uploadRoutes = require('./routes/uploadRoutes');
+const cloudinaryRoutes = require('./routes/cloudinaryRoutes');
 
 const app = express();
 
@@ -36,10 +36,8 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/pages', pageContentRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/settings', settingsRoutes);
-app.use('/api/upload', uploadRoutes);
+app.use('/api/cloudinary', cloudinaryRoutes);
 app.use('/', seoRoutes);
-
-app.use('/uploads', express.static('uploads'));
 
 app.get('/', (req, res) => {
   res.json({ message: 'GAG Lawyers API is running' });

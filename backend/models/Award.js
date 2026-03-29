@@ -23,6 +23,10 @@ const awardSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  cloudinaryPublicId: {
+    type: String,
+    default: '',
+  },
   order: {
     type: Number,
     default: 0,

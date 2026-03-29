@@ -1,4 +1,5 @@
 const BlogPost = require('../models/BlogPost');
+const cloudinary = require('../config/cloudinary');
 
 const getAllPosts = async (req, res) => {
   try {
@@ -81,17 +82,27 @@ const createPost = async (req, res) => {
 
 const updatePost = async (req, res) => {
   try {
-    const post = await BlogPost.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const oldPost = await BlogPost.findById(req.params.id);
 
-    if (!post) {
+    if (!oldPost) {
       return res.status(404).json({
         success: false,
         message: 'Post not found',
       });
     }
+
+    if (req.body.featuredImage && oldPost.featuredImage !== req.body.featuredImage && oldPost.featuredImagePublicId) {
+      try {
+        await cloudinary.uploader.destroy(oldPost.featuredImagePublicId);
+      } catch (cloudinaryError) {
+        console.error('Cloudinary deletion error:', cloudinaryError);
+      }
+    }
+
+    const post = await BlogPost.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     res.status(200).json({
       success: true,
@@ -108,7 +119,7 @@ const updatePost = async (req, res) => {
 
 const deletePost = async (req, res) => {
   try {
-    const post = await BlogPost.findByIdAndDelete(req.params.id);
+    const post = await BlogPost.findById(req.params.id);
 
     if (!post) {
       return res.status(404).json({
@@ -116,6 +127,16 @@ const deletePost = async (req, res) => {
         message: 'Post not found',
       });
     }
+
+    if (post.featuredImagePublicId) {
+      try {
+        await cloudinary.uploader.destroy(post.featuredImagePublicId);
+      } catch (cloudinaryError) {
+        console.error('Cloudinary deletion error:', cloudinaryError);
+      }
+    }
+
+    await BlogPost.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
       success: true,

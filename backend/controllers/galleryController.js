@@ -1,4 +1,5 @@
 const GalleryImage = require('../models/GalleryImage');
+const cloudinary = require('../config/cloudinary');
 
 const getAllImages = async (req, res) => {
   try {
@@ -42,17 +43,27 @@ const createImage = async (req, res) => {
 
 const updateImage = async (req, res) => {
   try {
-    const image = await GalleryImage.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const oldImage = await GalleryImage.findById(req.params.id);
 
-    if (!image) {
+    if (!oldImage) {
       return res.status(404).json({
         success: false,
         message: 'Image not found',
       });
     }
+
+    if (req.body.imageUrl && oldImage.imageUrl !== req.body.imageUrl && oldImage.cloudinaryPublicId) {
+      try {
+        await cloudinary.uploader.destroy(oldImage.cloudinaryPublicId);
+      } catch (cloudinaryError) {
+        console.error('Cloudinary deletion error:', cloudinaryError);
+      }
+    }
+
+    const image = await GalleryImage.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     res.status(200).json({
       success: true,
@@ -69,7 +80,7 @@ const updateImage = async (req, res) => {
 
 const deleteImage = async (req, res) => {
   try {
-    const image = await GalleryImage.findByIdAndDelete(req.params.id);
+    const image = await GalleryImage.findById(req.params.id);
 
     if (!image) {
       return res.status(404).json({
@@ -77,6 +88,16 @@ const deleteImage = async (req, res) => {
         message: 'Image not found',
       });
     }
+
+    if (image.cloudinaryPublicId) {
+      try {
+        await cloudinary.uploader.destroy(image.cloudinaryPublicId);
+      } catch (cloudinaryError) {
+        console.error('Cloudinary deletion error:', cloudinaryError);
+      }
+    }
+
+    await GalleryImage.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
       success: true,
