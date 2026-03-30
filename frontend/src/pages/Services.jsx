@@ -1,97 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import FAQItem from '../components/FAQItem';
 import Button from '../components/Button';
 import { Link } from 'react-router-dom';
 import SEOHead from '../components/SEOHead';
+import API_BASE_URL from '../config/api';
 
 const Services = () => {
   const [activeService, setActiveService] = useState(0);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const services = [
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/services`);
+      const data = await response.json();
+      
+      if (data.success && data.data.length > 0) {
+        setServices(data.data);
+      } else {
+        setServices(getDefaultServices());
+      }
+    } catch (error) {
+      console.error('Error fetching services:', error);
+      setServices(getDefaultServices());
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getDefaultServices = () => [
     {
-      id: 'corporate',
       title: 'Corporate Law',
       iconName: 'Building2',
-      description: 'Our corporate law practice provides comprehensive legal counsel to businesses of all sizes, from startups to established enterprises. We guide clients through complex regulatory landscapes, ensuring compliance and strategic growth.',
-      details: [
-        'Mergers & Acquisitions',
-        'Corporate Governance',
-        'Joint Ventures & Partnerships',
-        'Company Formation & Structuring',
-        'Securities & Capital Markets',
-        'Contract Drafting & Review',
-      ],
+      description: 'Our corporate law practice provides comprehensive legal counsel to businesses of all sizes, from startups to established enterprises.',
     },
     {
-      id: 'civil',
       title: 'Civil Litigation',
       iconName: 'Scale',
-      description: 'With decades of courtroom experience, our litigation team handles complex civil disputes with strategic precision. We represent clients in trial courts, high courts, and the Supreme Court.',
-      details: [
-        'Commercial Disputes',
-        'Contract Disputes',
-        'Tort Claims',
-        'Injunctions & Interim Relief',
-        'Appellate Litigation',
-        'Alternative Dispute Resolution',
-      ],
+      description: 'With decades of courtroom experience, our litigation team handles complex civil disputes with strategic precision.',
     },
     {
-      id: 'realestate',
       title: 'Real Estate Law',
       iconName: 'Home',
-      description: 'Our real estate practice covers the full spectrum of property matters, from high-value transactions to complex disputes. We ensure your interests are protected at every stage.',
-      details: [
-        'Property Transactions',
-        'Title Verification & Due Diligence',
-        'Land Acquisition',
-        'Property Disputes',
-        'Real Estate Financing',
-        'Landlord-Tenant Matters',
-      ],
+      description: 'Our real estate practice covers the full spectrum of property matters, from high-value transactions to complex disputes.',
     },
     {
-      id: 'family',
       title: 'Family Law',
       iconName: 'Users',
-      description: 'We handle sensitive family matters with empathy and discretion, providing compassionate legal support during challenging times while protecting your rights and interests.',
-      details: [
-        'Divorce & Separation',
-        'Child Custody & Support',
-        'Matrimonial Disputes',
-        'Adoption',
-        'Domestic Violence Protection',
-        'Prenuptial Agreements',
-      ],
+      description: 'We handle sensitive family matters with empathy and discretion, providing compassionate legal support during challenging times.',
     },
     {
-      id: 'criminal',
       title: 'Criminal Defense',
       iconName: 'Shield',
-      description: 'Our criminal defense team provides vigorous representation for clients facing criminal charges. We protect your rights and fight for the best possible outcome.',
-      details: [
-        'White Collar Crimes',
-        'Economic Offenses',
-        'Bail Applications',
-        'Trial Defense',
-        'Appeals & Revisions',
-        'Anticipatory Bail',
-      ],
+      description: 'Our criminal defense team provides vigorous representation for clients facing criminal charges.',
     },
     {
-      id: 'ip',
       title: 'Intellectual Property',
       iconName: 'Lightbulb',
-      description: 'Protect your innovations and creative works with our comprehensive IP legal services. We help secure and defend your intellectual property rights.',
-      details: [
-        'Trademark Registration & Protection',
-        'Copyright & Patents',
-        'IP Licensing',
-        'Infringement Actions',
-        'Trade Secrets',
-        'Domain Disputes',
-      ],
+      description: 'Protect your innovations and creative works with our comprehensive IP legal services.',
     },
   ];
 
@@ -118,7 +89,23 @@ const Services = () => {
     },
   ];
 
-  const IconComponent = Icons[services[activeService].iconName] || Icons.Briefcase;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin w-12 h-12 border-4 border-navy border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (services.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="font-sans text-gray-500">No services available</p>
+      </div>
+    );
+  }
+
+  const IconComponent = Icons[services[activeService]?.iconName] || Icons.Briefcase;
 
   return (
     <div>
@@ -182,22 +169,24 @@ const Services = () => {
                   {services[activeService].description}
                 </p>
 
-                <div>
-                  <h3 className="font-serif text-2xl font-semibold text-navy mb-4">
-                    Our Services Include
-                  </h3>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {services[activeService].details.map((detail, index) => (
-                      <li
-                        key={index}
-                        className="font-sans text-gray-700 flex items-start space-x-2"
-                      >
-                        <span className="text-gold mt-1">✓</span>
-                        <span>{detail}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {services[activeService].details && services[activeService].details.length > 0 && (
+                  <div>
+                    <h3 className="font-serif text-2xl font-semibold text-navy mb-4">
+                      Our Services Include
+                    </h3>
+                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {services[activeService].details.map((detail, index) => (
+                        <li
+                          key={index}
+                          className="font-sans text-gray-700 flex items-start space-x-2"
+                        >
+                          <span className="text-gold mt-1">✓</span>
+                          <span>{detail}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 <div className="pt-6 border-t border-gray-100">
                   <Link to="/contact">

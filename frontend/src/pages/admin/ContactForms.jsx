@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Mail, Phone, Calendar, Trash2 } from 'lucide-react';
+import { Mail, Phone, Calendar, Trash2, MessageSquare } from 'lucide-react';
 import API_BASE_URL from '../../config/api';
 
 const ContactForms = () => {

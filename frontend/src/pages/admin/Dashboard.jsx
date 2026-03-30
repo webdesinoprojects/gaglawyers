@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Users, Briefcase, MessageSquare, BookOpen, TrendingUp } from 'lucide-react';
+import { Users, Briefcase, MessageSquare, BookOpen, TrendingUp, Eye, Calendar, ArrowUpRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import API_BASE_URL from '../../config/api';
 
 const AdminDashboard = () => {
@@ -46,73 +47,161 @@ const AdminDashboard = () => {
   };
 
   const statCards = [
-    { title: 'Team Members', value: stats.team, icon: Users, color: 'bg-blue-500' },
-    { title: 'Services', value: stats.services, icon: Briefcase, color: 'bg-green-500' },
-    { title: 'Contact Forms', value: stats.contacts, icon: MessageSquare, color: 'bg-purple-500' },
-    { title: 'Blog Posts', value: stats.blog, icon: BookOpen, color: 'bg-orange-500' },
+    { 
+      title: 'Team Members', 
+      value: stats.team, 
+      icon: Users, 
+      color: 'from-blue-500 to-blue-600',
+      bgColor: 'bg-blue-50',
+      textColor: 'text-blue-600',
+      change: '+2 this month',
+      link: '/admin/team'
+    },
+    { 
+      title: 'Services', 
+      value: stats.services, 
+      icon: Briefcase, 
+      color: 'from-green-500 to-green-600',
+      bgColor: 'bg-green-50',
+      textColor: 'text-green-600',
+      change: 'All active',
+      link: '/admin/services'
+    },
+    { 
+      title: 'Contact Forms', 
+      value: stats.contacts, 
+      icon: MessageSquare, 
+      color: 'from-purple-500 to-purple-600',
+      bgColor: 'bg-purple-50',
+      textColor: 'text-purple-600',
+      change: 'No new inquiries',
+      link: '/admin/contacts'
+    },
+    { 
+      title: 'Blog Posts', 
+      value: stats.blog, 
+      icon: BookOpen, 
+      color: 'from-orange-500 to-orange-600',
+      bgColor: 'bg-orange-50',
+      textColor: 'text-orange-600',
+      change: `${stats.blog} published`,
+      link: '/admin/blog'
+    },
+  ];
+
+  const quickActions = [
+    { title: 'Create Blog Post', description: 'Write and publish new content', link: '/admin/blog', icon: BookOpen, color: 'text-orange-600' },
+    { title: 'Add Team Member', description: 'Add new lawyer to the team', link: '/admin/team', icon: Users, color: 'text-blue-600' },
+    { title: 'Manage Gallery', description: 'Upload and organize images', link: '/admin/gallery', icon: Eye, color: 'text-purple-600' },
+    { title: 'Site Settings', description: 'Configure website settings', link: '/admin/settings', icon: TrendingUp, color: 'text-green-600' },
+  ];
+
+  const recentActivity = [
+    { action: 'Blog post published', item: 'Understanding Corporate Law', time: '2 hours ago', icon: BookOpen },
+    { action: 'Team member added', item: 'Advocate Neha Kapoor', time: '1 day ago', icon: Users },
+    { action: 'Settings updated', item: 'Disclaimer text modified', time: '3 days ago', icon: TrendingUp },
   ];
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="font-serif text-3xl font-bold text-navy mb-2">Dashboard</h1>
-        <p className="font-sans text-gray-600">Welcome to your content management system</p>
+    <div className="space-y-8">
+      {/* Welcome Section */}
+      <div>
+        <h1 className="font-serif text-3xl font-bold text-navy mb-2">Welcome back!</h1>
+        <p className="font-sans text-gray-600">Here's what's happening with your website today.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statCards.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <div key={index} className="bg-white rounded-sm shadow-sm p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-sans text-sm text-gray-600 mb-1">{stat.title}</p>
-                  <p className="font-serif text-3xl font-bold text-navy">{stat.value}</p>
+            <Link
+              key={index}
+              to={stat.link}
+              className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all p-6 border border-gray-100"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className={`w-12 h-12 ${stat.bgColor} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                  <Icon className={stat.textColor} size={24} />
                 </div>
-                <div className={`w-12 h-12 ${stat.color} rounded-full flex items-center justify-center`}>
-                  <Icon className="text-white" size={24} />
-                </div>
+                <ArrowUpRight className="text-gray-400 group-hover:text-navy transition-colors" size={20} />
               </div>
-            </div>
+              <div>
+                <p className="font-sans text-sm text-gray-600 mb-1">{stat.title}</p>
+                <p className="font-serif text-3xl font-bold text-navy mb-2">{stat.value}</p>
+                <p className="font-sans text-xs text-gray-500">{stat.change}</p>
+              </div>
+            </Link>
           );
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-sm shadow-sm p-6">
-          <h3 className="font-serif text-xl font-bold text-navy mb-4">Quick Actions</h3>
-          <div className="space-y-3">
-            <a
-              href="/admin/blog"
-              className="block p-4 bg-grey-light hover:bg-navy/5 rounded-sm transition-colors"
-            >
-              <p className="font-sans font-medium text-navy">Create New Blog Post</p>
-            </a>
-            <a
-              href="/admin/team"
-              className="block p-4 bg-grey-light hover:bg-navy/5 rounded-sm transition-colors"
-            >
-              <p className="font-sans font-medium text-navy">Add Team Member</p>
-            </a>
-            <a
-              href="/admin/settings"
-              className="block p-4 bg-grey-light hover:bg-navy/5 rounded-sm transition-colors"
-            >
-              <p className="font-sans font-medium text-navy">Update Site Settings</p>
-            </a>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Quick Actions */}
+        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <h3 className="font-serif text-xl font-bold text-navy mb-6">Quick Actions</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {quickActions.map((action, index) => {
+              const Icon = action.icon;
+              return (
+                <Link
+                  key={index}
+                  to={action.link}
+                  className="group p-4 border border-gray-200 rounded-lg hover:border-navy hover:shadow-sm transition-all"
+                >
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0">
+                      <Icon className={`${action.color} group-hover:scale-110 transition-transform`} size={24} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-sans font-semibold text-navy mb-1 group-hover:text-gold transition-colors">
+                        {action.title}
+                      </p>
+                      <p className="font-sans text-sm text-gray-600">{action.description}</p>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
 
-        <div className="bg-white rounded-sm shadow-sm p-6">
-          <h3 className="font-serif text-xl font-bold text-navy mb-4">Recent Activity</h3>
+        {/* Recent Activity */}
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <h3 className="font-serif text-xl font-bold text-navy mb-6">Recent Activity</h3>
           <div className="space-y-4">
-            <div className="flex items-start space-x-3 text-sm">
-              <TrendingUp className="text-gold mt-1 flex-shrink-0" size={18} />
-              <div>
-                <p className="font-sans text-gray-700">Website analytics and activity will appear here</p>
-                <p className="font-sans text-gray-500 text-xs mt-1">System ready</p>
-              </div>
-            </div>
+            {recentActivity.map((activity, index) => {
+              const Icon = activity.icon;
+              return (
+                <div key={index} className="flex items-start space-x-3 pb-4 border-b border-gray-100 last:border-0 last:pb-0">
+                  <div className="flex-shrink-0 w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <Icon className="text-gray-600" size={16} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-sans text-sm text-gray-600">{activity.action}</p>
+                    <p className="font-sans text-sm font-medium text-navy truncate">{activity.item}</p>
+                    <div className="flex items-center space-x-1 mt-1">
+                      <Calendar size={12} className="text-gray-400" />
+                      <p className="font-sans text-xs text-gray-500">{activity.time}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* System Status */}
+      <div className="bg-gradient-to-br from-navy to-navy/90 rounded-xl shadow-sm p-6 text-white">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-serif text-xl font-bold mb-2">System Status</h3>
+            <p className="font-sans text-sm text-white/80">All systems operational</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+            <span className="font-sans text-sm">Online</span>
           </div>
         </div>
       </div>

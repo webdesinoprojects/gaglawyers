@@ -5,16 +5,22 @@ import Button from '../components/Button';
 import API_BASE_URL from '../config/api';
 
 const LocationPage = () => {
-  const { slug } = useParams();
+  const { service, city } = useParams();
   const [pageData, setPageData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchLocationPage();
-  }, [slug]);
+    if (service && city) {
+      fetchLocationPage();
+    } else {
+      setLoading(false);
+    }
+  }, [service, city]);
 
   const fetchLocationPage = async () => {
     try {
+      // Construct slug from service and city params
+      const slug = `${service}-${city}`;
       const response = await fetch(`${API_BASE_URL}/api/locations/${slug}`);
       const data = await response.json();
       if (data.success) {

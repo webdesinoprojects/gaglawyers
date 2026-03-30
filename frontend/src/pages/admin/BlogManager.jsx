@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Edit, Trash2, Save, X, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Eye, EyeOff, ChevronLeft, ChevronRight } from 'lucide-react';
 import Button from '../../components/Button';
 import ImageUploader from '../../components/ImageUploader';
+import TagInput from '../../components/TagInput';
 import API_BASE_URL from '../../config/api';
 
 const BlogManager = () => {
   const [posts, setPosts] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
+  const [filter, setFilter] = useState('all');
+  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -16,53 +20,67 @@ const BlogManager = () => {
     featuredImage: '',
     featuredImagePublicId: '',
     category: 'Legal News',
-    tags: '',
+    tags: [],
+    seo: {
+      title: '',
+      description: '',
+      keywords: '',
+    },
     isPublished: false,
   });
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, [filter, pagination.page]);
 
   const fetchPosts = async () => {
+    setLoading(true);
     const token = localStorage.getItem('adminToken');
     
     try {
-      const response = await fetch(`${API_BASE_URL}/api/blog`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const publishedParam = filter === 'all' ? '' : `&published=${filter === 'published'}`;
+      const response = await fetch(
+        `${API_BASE_URL}/api/blog?page=${pagination.page}&limit=10${publishedParam}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const data = await response.json();
       if (data.success) {
         setPosts(data.data);
+        setPagination({
+          page: data.page,
+          pages: data.pages,
+          total: data.total,
+        });
       }
     } catch (error) {
       console.error('Error fetching posts:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-
-    if (name === 'title' && !editingPost) {
-      const slug = value
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-');
-      setFormData(prev => ({ ...prev, slug }));
+    const { name, value, type, checked } = e.target;
+    
+    if (name.startsWith('seo.')) {
+      const seoField = name.split('.')[1];
+      setFormData({
+        ...formData,
+        seo: { ...formData.seo, [seoField]: value },
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: type === 'checkbox' ? checked : value,
+      });
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('adminToken');
-
-    const payload = {
-      ...formData,
-      tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
-      publishedAt: formData.isPublished && !editingPost ? new Date() : undefined,
-    };
 
     try {
       const url = editingPost
@@ -77,7 +95,7 @@ const BlogManager = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
@@ -97,15 +115,17 @@ const BlogManager = () => {
       excerpt: post.excerpt,
       content: post.content,
       featuredImage: post.featuredImage,
+      featuredImagePublicId: post.featuredImagePublicId || '',
       category: post.category,
-      tags: post.tags ? post.tags.join(', ') : '',
+      tags: post.tags || [],
+      seo: post.seo || { title: '', description: '', keywords: '' },
       isPublished: post.isPublished,
     });
     setIsEditing(true);
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this post?')) return;
+    if (!confirm('Are you sure you want to delete this blog post?')) return;
 
     const token = localStorage.getItem('adminToken');
 
@@ -127,13 +147,26 @@ const BlogManager = () => {
       excerpt: '',
       content: '',
       featuredImage: '',
+      featuredImagePublicId: '',
       category: 'Legal News',
-      tags: '',
+      tags: [],
+      seo: { title: '', description: '', keywords: '' },
       isPublished: false,
     });
     setEditingPost(null);
     setIsEditing(false);
   };
+
+  const categories = [
+    'Legal News',
+    'Corporate Law',
+    'Criminal Law',
+    'Family Law',
+    'Real Estate',
+    'Intellectual Property',
+    'Tax Law',
+    'Employment Law',
+  ];
 
   return (
     <div>
@@ -159,11 +192,12 @@ const BlogManager = () => {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Basic Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
-                  Title
+                  Title *
                 </label>
                 <input
                   type="text"
@@ -177,14 +211,14 @@ const BlogManager = () => {
 
               <div>
                 <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
-                  Slug (URL)
+                  Slug (auto-generated if empty)
                 </label>
                 <input
                   type="text"
                   name="slug"
                   value={formData.slug}
                   onChange={handleChange}
-                  required
+                  placeholder="auto-generated-from-title"
                   className="w-full px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans"
                 />
               </div>
@@ -192,13 +226,14 @@ const BlogManager = () => {
 
             <div>
               <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
-                Excerpt (Summary)
+                Excerpt * <span className="text-gray-500">({formData.excerpt.length}/200)</span>
               </label>
               <textarea
                 name="excerpt"
                 value={formData.excerpt}
                 onChange={handleChange}
                 required
+                maxLength={200}
                 rows="2"
                 className="w-full px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans"
               />
@@ -206,7 +241,7 @@ const BlogManager = () => {
 
             <div>
               <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
-                Content (HTML supported)
+                Content *
               </label>
               <textarea
                 name="content"
@@ -215,58 +250,117 @@ const BlogManager = () => {
                 required
                 rows="12"
                 className="w-full px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans font-mono text-sm"
+                placeholder="Write your blog content here. HTML is supported."
               />
             </div>
 
-            <ImageUploader
-              label="Featured Image"
-              currentImage={formData.featuredImage}
-              onImageUploaded={(url, publicId) => setFormData({ ...formData, featuredImage: url, featuredImagePublicId: publicId })}
-            />
+            {/* Featured Image & Category */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-2">
+                <ImageUploader
+                  label="Featured Image"
+                  currentImage={formData.featuredImage}
+                  onImageUploaded={(url, publicId) =>
+                    setFormData({ ...formData, featuredImage: url, featuredImagePublicId: publicId })
+                  }
+                />
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
                   Category
                 </label>
-                <input
-                  type="text"
+                <select
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans"
-                />
-              </div>
-
-              <div>
-                <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
-                  Tags (comma-separated)
-                </label>
-                <input
-                  type="text"
-                  name="tags"
-                  value={formData.tags}
-                  onChange={handleChange}
-                  placeholder="corporate law, compliance, business"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans"
-                />
+                >
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
-            <div className="flex items-center space-x-3">
+            {/* Tags */}
+            <TagInput
+              tags={formData.tags}
+              onChange={(newTags) => setFormData({ ...formData, tags: newTags })}
+              label="Tags"
+              placeholder="Add tags for better discoverability"
+            />
+
+            {/* SEO Section */}
+            <details className="border border-gray-200 rounded-sm">
+              <summary className="px-4 py-3 font-sans font-medium text-navy cursor-pointer hover:bg-grey-light">
+                SEO Settings (Optional)
+              </summary>
+              <div className="p-4 space-y-4 bg-grey-light">
+                <div>
+                  <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
+                    SEO Title <span className="text-gray-500">({formData.seo.title.length}/60)</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="seo.title"
+                    value={formData.seo.title}
+                    onChange={handleChange}
+                    maxLength={60}
+                    placeholder="Leave empty to use post title"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
+                    SEO Description <span className="text-gray-500">({formData.seo.description.length}/160)</span>
+                  </label>
+                  <textarea
+                    name="seo.description"
+                    value={formData.seo.description}
+                    onChange={handleChange}
+                    maxLength={160}
+                    rows="2"
+                    placeholder="Leave empty to use excerpt"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
+                    SEO Keywords (comma-separated)
+                  </label>
+                  <input
+                    type="text"
+                    name="seo.keywords"
+                    value={formData.seo.keywords}
+                    onChange={handleChange}
+                    placeholder="legal advice, corporate law, litigation"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans"
+                  />
+                </div>
+              </div>
+            </details>
+
+            {/* Publish Toggle */}
+            <div className="flex items-center space-x-3 p-4 bg-grey-light rounded-sm">
               <input
                 type="checkbox"
                 id="isPublished"
                 name="isPublished"
                 checked={formData.isPublished}
-                onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
+                onChange={handleChange}
                 className="w-5 h-5 text-navy focus:ring-navy/20 rounded"
               />
-              <label htmlFor="isPublished" className="font-sans text-sm font-medium text-gray-700">
-                Publish immediately
+              <label htmlFor="isPublished" className="font-sans font-medium text-navy cursor-pointer">
+                Publish this post immediately
               </label>
             </div>
 
+            {/* Actions */}
             <div className="flex space-x-3">
               <Button type="submit" variant="primary">
                 <Save className="inline mr-2" size={18} />
@@ -280,53 +374,140 @@ const BlogManager = () => {
         </div>
       )}
 
-      <div className="space-y-4">
-        {posts.map((post) => (
-          <div key={post._id} className="bg-white rounded-sm shadow-sm p-6 hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center space-x-3 mb-2">
-                  <h3 className="font-serif text-xl font-semibold text-navy">{post.title}</h3>
-                  {post.isPublished ? (
-                    <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full flex items-center">
-                      <Eye size={12} className="mr-1" />
-                      Published
-                    </span>
-                  ) : (
-                    <span className="px-2 py-1 bg-gray-200 text-gray-600 text-xs rounded-full flex items-center">
-                      <EyeOff size={12} className="mr-1" />
-                      Draft
-                    </span>
+      {/* Filter Tabs */}
+      <div className="flex space-x-2 mb-6">
+        {['all', 'published', 'drafts'].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => {
+              setFilter(tab);
+              setPagination({ ...pagination, page: 1 });
+            }}
+            className={`px-4 py-2 rounded-sm font-sans font-medium transition-colors ${
+              filter === tab
+                ? 'bg-navy text-white'
+                : 'bg-white text-gray-700 hover:bg-grey-light'
+            }`}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      {/* Posts List */}
+      {loading ? (
+        <div className="text-center py-12">
+          <p className="font-sans text-gray-500">Loading posts...</p>
+        </div>
+      ) : posts.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-sm">
+          <p className="font-sans text-gray-500">No posts found. Create your first post!</p>
+        </div>
+      ) : (
+        <>
+          <div className="space-y-4">
+            {posts.map((post) => (
+              <div key={post._id} className="bg-white rounded-sm shadow-sm p-6 hover:shadow-md transition-shadow">
+                <div className="flex gap-6">
+                  {post.featuredImage && (
+                    <div className="w-32 h-32 flex-shrink-0 bg-grey-light rounded-sm overflow-hidden">
+                      <img
+                        src={post.featuredImage}
+                        alt={post.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   )}
-                </div>
-                <p className="font-sans text-sm text-gray-600 mb-2">{post.excerpt}</p>
-                <div className="flex items-center space-x-4 text-xs text-gray-500">
-                  <span className="font-sans">{post.category}</span>
-                  <span className="font-sans">
-                    {new Date(post.createdAt).toLocaleDateString('en-IN')}
-                  </span>
-                  {post.views > 0 && <span className="font-sans">{post.views} views</span>}
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="font-serif text-xl font-semibold text-navy">
+                            {post.title}
+                          </h3>
+                          {post.isPublished ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-sm">
+                              <Eye size={12} />
+                              Published
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-sm">
+                              <EyeOff size={12} />
+                              Draft
+                            </span>
+                          )}
+                        </div>
+                        
+                        <p className="font-sans text-sm text-gray-600 mb-2 line-clamp-2">
+                          {post.excerpt}
+                        </p>
+                        
+                        <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 font-sans">
+                          <span className="px-2 py-1 bg-grey-light rounded-sm">{post.category}</span>
+                          {post.tags && post.tags.length > 0 && (
+                            <span>{post.tags.slice(0, 3).join(', ')}</span>
+                          )}
+                          <span>{post.views || 0} views</span>
+                          {post.publishedAt && (
+                            <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(post)}
+                          className="px-3 py-2 bg-navy text-white rounded-sm text-sm font-sans hover:bg-navy-dark transition-colors"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(post._id)}
+                          className="px-3 py-2 bg-red-500 text-white rounded-sm text-sm font-sans hover:bg-red-600 transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
+            ))}
+          </div>
 
-              <div className="flex space-x-2 ml-4">
+          {/* Pagination */}
+          {pagination.pages > 1 && (
+            <div className="flex items-center justify-between mt-8 px-4">
+              <p className="font-sans text-sm text-gray-600">
+                Showing {posts.length} of {pagination.total} posts
+              </p>
+              
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => handleEdit(post)}
-                  className="px-3 py-2 bg-navy text-white rounded-sm text-sm font-sans hover:bg-navy-dark transition-colors"
+                  onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
+                  disabled={pagination.page === 1}
+                  className="px-3 py-2 bg-white border border-gray-300 rounded-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-grey-light transition-colors"
                 >
-                  <Edit size={16} />
+                  <ChevronLeft size={18} />
                 </button>
+                
+                <span className="font-sans text-sm text-gray-700">
+                  Page {pagination.page} of {pagination.pages}
+                </span>
+                
                 <button
-                  onClick={() => handleDelete(post._id)}
-                  className="px-3 py-2 bg-red-500 text-white rounded-sm text-sm font-sans hover:bg-red-600 transition-colors"
+                  onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
+                  disabled={pagination.page === pagination.pages}
+                  className="px-3 py-2 bg-white border border-gray-300 rounded-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-grey-light transition-colors"
                 >
-                  <Trash2 size={16} />
+                  <ChevronRight size={18} />
                 </button>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          )}
+        </>
+      )}
     </div>
   );
 };

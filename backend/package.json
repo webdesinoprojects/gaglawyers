@@ -7,6 +7,13 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "seed": "node seed.js",
+    "inspect": "node inspect-database.js",
+    "check": "node detailed-db-check.js",
+    "test-cloudinary": "node test-cloudinary-upload.js",
+    "add-testimonials": "node add-testimonials.js",
+    "fix-admin": "node fix-admin-user.js",
+    "debug-auth": "node debug-auth.js",
+    "check-reviews": "node check-reviews.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

@@ -21,6 +21,15 @@ import AdminDashboard from './pages/admin/Dashboard';
 import ContactForms from './pages/admin/ContactForms';
 import SiteSettings from './pages/admin/SiteSettings';
 import TeamManager from './pages/admin/TeamManager';
+import BlogManager from './pages/admin/BlogManager';
+import ReviewManager from './pages/admin/ReviewManager';
+import AwardManager from './pages/admin/AwardManager';
+import GalleryManager from './pages/admin/GalleryManager';
+import ServiceManager from './pages/admin/ServiceManager';
+import PageContentManager from './pages/admin/PageContentManager';
+import LocationManager from './pages/admin/LocationManager';
+import ComingSoon from './pages/admin/ComingSoon';
+import Affiliation from './pages/Affiliation';
 
 function App() {
   return (
@@ -28,20 +37,7 @@ function App() {
       <DisclaimerModal />
       <ContentProtection />
       <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="about" element={<About />} />
-          <Route path="firm" element={<Firm />} />
-          <Route path="team" element={<Team />} />
-          <Route path="awards" element={<Awards />} />
-          <Route path="gallery" element={<Gallery />} />
-          <Route path="services" element={<Services />} />
-          <Route path="blog" element={<Blog />} />
-          <Route path="blog/:slug" element={<BlogPost />} />
-          <Route path=":service/:city" element={<LocationPage />} />
-          <Route path="contact" element={<Contact />} />
-        </Route>
-
+        {/* Admin routes MUST come before Layout routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
         
         <Route
@@ -53,9 +49,33 @@ function App() {
           }
         >
           <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="contacts" element={<ContactForms />} />
+          <Route path="blog" element={<BlogManager />} />
+          <Route path="pages" element={<PageContentManager />} />
           <Route path="team" element={<TeamManager />} />
+          <Route path="services" element={<ServiceManager />} />
+          <Route path="gallery" element={<GalleryManager />} />
+          <Route path="awards" element={<AwardManager />} />
+          <Route path="reviews" element={<ReviewManager />} />
+          <Route path="locations" element={<LocationManager />} />
+          <Route path="contacts" element={<ContactForms />} />
           <Route path="settings" element={<SiteSettings />} />
+        </Route>
+
+        {/* Public routes */}
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="about" element={<About />} />
+          <Route path="firm" element={<Firm />} />
+          <Route path="team" element={<Team />} />
+          <Route path="awards" element={<Awards />} />
+          <Route path="gallery" element={<Gallery />} />
+          <Route path="services" element={<Services />} />
+          <Route path="blog" element={<Blog />} />
+          <Route path="blog/:slug" element={<BlogPost />} />
+          <Route path="contact" element={<Contact />} />
+          <Route path="affiliation" element={<Affiliation />} />
+          {/* Location pages as catch-all - MUST be last */}
+          <Route path=":service/:city" element={<LocationPage />} />
         </Route>
       </Routes>
     </Router>

@@ -6,14 +6,20 @@ const {
   updateLocationPage,
   toggleLocationPage,
   deleteLocationPage,
+  bulkToggleLocationPages,
+  bulkCreateLocationPages,
+  getLocationStats,
 } = require('../controllers/locationController');
 const { protect, adminOnly } = require('../middleware/auth');
 
 const router = express.Router();
 
 router.get('/', getAllLocationPages);
+router.get('/stats/summary', protect, adminOnly, getLocationStats);
 router.get('/:slug', getLocationPageBySlug);
 router.post('/', protect, adminOnly, createLocationPage);
+router.post('/bulk/create', protect, adminOnly, bulkCreateLocationPages);
+router.post('/bulk/toggle', protect, adminOnly, bulkToggleLocationPages);
 router.put('/:id', protect, adminOnly, updateLocationPage);
 router.patch('/:id/toggle', protect, adminOnly, toggleLocationPage);
 router.delete('/:id', protect, adminOnly, deleteLocationPage);

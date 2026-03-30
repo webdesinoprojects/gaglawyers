@@ -40,6 +40,12 @@ const ImageUploader = ({ onImageUploaded, currentImage = '', label = 'Upload Ima
 
       const data = await response.json();
 
+      if (response.status === 401) {
+        setError('Session expired. Please logout and login again.');
+        console.error('Auth error:', data);
+        return;
+      }
+
       if (data.success) {
         setPreview(data.data.url);
         onImageUploaded(data.data.url, data.data.publicId);

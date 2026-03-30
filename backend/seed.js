@@ -29,6 +29,7 @@ const seedData = async () => {
       email: process.env.ADMIN_EMAIL || 'admin@gaglawyers.com',
       password: process.env.ADMIN_PASSWORD || 'admin123',
       role: 'super-admin',
+      isActive: true,
     });
 
     console.log('Seeding team members...');
