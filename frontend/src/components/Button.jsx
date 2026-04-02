@@ -12,6 +12,8 @@ const Button = ({
   const variants = {
     primary: 'bg-navy text-white hover:bg-navy-dark focus:ring-navy',
     secondary: 'bg-transparent text-white border-2 border-white hover:bg-white hover:text-navy focus:ring-white',
+    /** For light backgrounds (admin cards, SEO Manager, etc.) */
+    outline: 'bg-white text-navy border-2 border-gray-300 hover:bg-gray-50 hover:border-navy/30 focus:ring-navy shadow-sm',
     gold: 'bg-gold text-navy hover:bg-gold/90 focus:ring-gold',
   };
   

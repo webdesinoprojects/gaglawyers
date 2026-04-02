@@ -15,6 +15,7 @@ const pageContentRoutes = require('./routes/pageContentRoutes');
 const locationRoutes = require('./routes/locationRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
 const seoRoutes = require('./routes/seoRoutes');
+const seoManagementRoutes = require('./routes/seoManagementRoutes');
 const cloudinaryRoutes = require('./routes/cloudinaryRoutes');
 
 const app = express();
@@ -40,7 +41,7 @@ const corsOptions = {
   },
   credentials: true,
   optionsSuccessStatus: 200,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
@@ -59,6 +60,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/pages', pageContentRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/seo', seoManagementRoutes);
 app.use('/api/cloudinary', cloudinaryRoutes);
 app.use('/', seoRoutes);
 

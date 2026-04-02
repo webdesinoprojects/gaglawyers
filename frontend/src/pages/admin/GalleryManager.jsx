@@ -6,6 +6,17 @@ import API_BASE_URL from '../../config/api';
 
 const GalleryManager = () => {
   const [images, setImages] = useState([]);
+  const [categories, setCategories] = useState([
+    'office',
+    'events', 
+    'general',
+    'work',
+    'courtroom-advocacy',
+    'client-engagements',
+    'events-conferences',
+    'firm-milestones',
+    'community-outreach'
+  ]); // All available categories
   const [isEditing, setIsEditing] = useState(false);
   const [editingImage, setEditingImage] = useState(null);
   const [formData, setFormData] = useState({
@@ -32,6 +43,13 @@ const GalleryManager = () => {
       const data = await response.json();
       if (data.success) {
         setImages(data.data);
+        
+        // Extract unique categories from existing images
+        const uniqueCategories = [...new Set(data.data.map(img => img.category))].filter(Boolean);
+        
+        // Merge with default categories and remove duplicates
+        const allCategories = [...new Set([...categories, ...uniqueCategories])].sort();
+        setCategories(allCategories);
       }
     } catch (error) {
       console.error('Error fetching gallery:', error);
@@ -169,10 +187,11 @@ const GalleryManager = () => {
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans"
                 >
-                  <option value="office">Office</option>
-                  <option value="events">Events</option>
-                  <option value="work">Work</option>
-                  <option value="general">General</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>

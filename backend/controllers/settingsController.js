@@ -13,6 +13,9 @@ const getSetting = async (req, res) => {
         copyProtectionEnabled: false,
         whatsappEnabled: true,
         whatsappNumber: '+919876543210',
+        phoneNumber: '+919876543210',
+        email: 'contact@gaglawyers.com',
+        address: '123 Lawyers Colony, Connaught Place, New Delhi - 110001',
       };
 
       return res.status(200).json({

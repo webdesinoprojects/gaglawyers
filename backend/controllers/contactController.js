@@ -82,7 +82,70 @@ const getAllContactInquiries = async (req, res) => {
   }
 };
 
+const updateContactStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    
+    if (!status || !['new', 'in-progress', 'resolved'].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid status. Must be: new, in-progress, or resolved',
+      });
+    }
+
+    const inquiry = await ContactInquiry.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true, runValidators: true }
+    );
+
+    if (!inquiry) {
+      return res.status(404).json({
+        success: false,
+        message: 'Inquiry not found',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: inquiry,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message,
+    });
+  }
+};
+
+const deleteContactInquiry = async (req, res) => {
+  try {
+    const inquiry = await ContactInquiry.findByIdAndDelete(req.params.id);
+
+    if (!inquiry) {
+      return res.status(404).json({
+        success: false,
+        message: 'Inquiry not found',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Inquiry deleted successfully',
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   createContactInquiry,
   getAllContactInquiries,
+  updateContactStatus,
+  deleteContactInquiry,
 };

@@ -2,9 +2,11 @@ const BlogPost = require('../models/BlogPost');
 const cloudinary = require('../config/cloudinary');
 const { generateSlug, generateUniqueSlug } = require('../utils/slugify');
 
+const escapeRegExp = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const getAllPosts = async (req, res) => {
   try {
-    const { category, published, page = 1, limit = 10 } = req.query;
+    const { category, published, page = 1, limit = 10, search } = req.query;
     const filter = {};
     
     if (published === 'true') {
@@ -15,6 +17,21 @@ const getAllPosts = async (req, res) => {
     
     if (category) {
       filter.category = category;
+    }
+
+    if (search && String(search).trim()) {
+      const safe = escapeRegExp(search.trim());
+      const re = new RegExp(safe, 'i');
+      filter.$or = [
+        { title: re },
+        { slug: re },
+        { excerpt: re },
+        { category: re },
+        { tags: re },
+        { 'seo.title': re },
+        { 'seo.description': re },
+        { 'seo.keywords': re },
+      ];
     }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);

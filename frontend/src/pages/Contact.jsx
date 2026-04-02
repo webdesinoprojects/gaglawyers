@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, MessageSquare } from 'lucide-react';
 import Button from '../components/Button';
 import SEOHead from '../components/SEOHead';
@@ -12,8 +12,25 @@ const Contact = () => {
     serviceOfInterest: '',
     message: '',
   });
+  const [services, setServices] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/services`);
+      const data = await response.json();
+      if (data.success) {
+        setServices(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching services:', error);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -233,12 +250,11 @@ const Contact = () => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition-colors font-sans bg-white"
                   >
                     <option value="">Select a practice area</option>
-                    <option value="Corporate Law">Corporate Law</option>
-                    <option value="Civil Litigation">Civil Litigation</option>
-                    <option value="Real Estate Law">Real Estate Law</option>
-                    <option value="Family Law">Family Law</option>
-                    <option value="Criminal Defense">Criminal Defense</option>
-                    <option value="Intellectual Property">Intellectual Property</option>
+                    {services.map(service => (
+                      <option key={service._id} value={service.name || service.title}>
+                        {service.name || service.title}
+                      </option>
+                    ))}
                     <option value="Other">Other</option>
                   </select>
                 </div>

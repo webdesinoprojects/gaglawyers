@@ -4,9 +4,18 @@ const cloudinary = require('../config/cloudinary');
 const getAllTeamMembers = async (req, res) => {
   try {
     const teamMembers = await TeamMember.find().sort({ order: 1 });
+    
+    // Calculate team members added this month
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const thisMonthMembers = teamMembers.filter(member => 
+      new Date(member.createdAt) >= startOfMonth
+    ).length;
+    
     res.status(200).json({
       success: true,
       count: teamMembers.length,
+      addedThisMonth: thisMonthMembers,
       data: teamMembers,
     });
   } catch (error) {

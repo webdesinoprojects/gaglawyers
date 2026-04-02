@@ -1,39 +1,69 @@
 const LocationPage = require('../models/LocationPage');
 
+const escapeRegExp = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const getAllLocationPages = async (req, res) => {
   try {
-    const { service, city, active, page = 1, limit = 20 } = req.query;
-    const filter = {};
-    
+    const { service, city, active, page = 1, limit = 20, skip = 0, search, missingMeta } = req.query;
+    const andConditions = [];
+
     if (active === 'true') {
-      filter.isActive = true;
+      andConditions.push({ isActive: true });
     } else if (active === 'false') {
-      filter.isActive = false;
-    }
-    
-    if (service) {
-      filter.service = service;
-    }
-    
-    if (city) {
-      filter.city = new RegExp(city, 'i');
+      andConditions.push({ isActive: false });
     }
 
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    if (service) {
+      andConditions.push({ service });
+    }
+
+    if (city && String(city).trim()) {
+      andConditions.push({ city: new RegExp(escapeRegExp(city.trim()), 'i') });
+    }
+
+    if (search && String(search).trim()) {
+      const safe = escapeRegExp(search.trim());
+      const re = new RegExp(safe, 'i');
+      andConditions.push({
+        $or: [
+          { 'seo.title': re },
+          { 'seo.h1': re },
+          { slug: re },
+          { city: re },
+          { serviceName: re },
+        ],
+      });
+    }
+
+    if (missingMeta === 'true') {
+      andConditions.push({
+        $or: [
+          { 'seo.description': { $exists: false } },
+          { 'seo.description': '' },
+          { 'seo.description': null },
+        ],
+      });
+    }
+
+    const filter = andConditions.length > 0 ? { $and: andConditions } : {};
+
+    const skipCount = parseInt(skip) || ((parseInt(page) - 1) * parseInt(limit));
     const total = await LocationPage.countDocuments(filter);
 
     const pages = await LocationPage.find(filter)
-      .populate('service', 'title')
       .sort({ createdAt: -1 })
-      .skip(skip)
+      .skip(skipCount)
       .limit(parseInt(limit));
       
     res.status(200).json({
       success: true,
       count: pages.length,
-      total,
-      pages: Math.ceil(total / parseInt(limit)),
-      currentPage: parseInt(page),
+      pagination: {
+        total,
+        pages: Math.ceil(total / parseInt(limit)),
+        currentPage: parseInt(page),
+        limit: parseInt(limit)
+      },
       data: pages,
     });
   } catch (error) {

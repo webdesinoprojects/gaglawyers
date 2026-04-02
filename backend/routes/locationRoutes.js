@@ -16,7 +16,8 @@ const router = express.Router();
 
 router.get('/', getAllLocationPages);
 router.get('/stats/summary', protect, adminOnly, getLocationStats);
-router.get('/:slug', getLocationPageBySlug);
+router.get('/slug/:slug', getLocationPageBySlug);
+router.get('/:id', getLocationPageBySlug); // Keep for backward compatibility
 router.post('/', protect, adminOnly, createLocationPage);
 router.post('/bulk/create', protect, adminOnly, bulkCreateLocationPages);
 router.post('/bulk/toggle', protect, adminOnly, bulkToggleLocationPages);

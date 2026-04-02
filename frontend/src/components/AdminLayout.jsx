@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -16,16 +16,23 @@ import {
   Briefcase,
   MessageSquare,
   ChevronRight,
-  Bell,
   Search,
   User,
+  Loader2,
 } from 'lucide-react';
+import API_BASE_URL from '../config/api';
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [user, setUser] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const searchInputRef = useRef(null);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -38,10 +45,129 @@ const AdminLayout = () => {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchInputRef.current && !searchInputRef.current.contains(event.target)) {
+        setShowSearchResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    const debounceTimer = setTimeout(() => {
+      performSearch(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
+
+  const performSearch = async (query) => {
+    setIsSearching(true);
+    const token = localStorage.getItem('adminToken');
+    const results = [];
+
+    try {
+      const [servicesRes, teamRes, blogRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/services`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(`${API_BASE_URL}/api/team`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(`${API_BASE_URL}/api/blog`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      const servicesData = await servicesRes.json();
+      const teamData = await teamRes.json();
+      const blogData = await blogRes.json();
+
+      const lowerQuery = query.toLowerCase();
+
+      if (servicesData.success && servicesData.data) {
+        servicesData.data
+          .filter(item => 
+            item.name?.toLowerCase().includes(lowerQuery) ||
+            item.title?.toLowerCase().includes(lowerQuery) ||
+            item.shortDescription?.toLowerCase().includes(lowerQuery)
+          )
+          .slice(0, 5)
+          .forEach(item => {
+            results.push({
+              type: 'Service',
+              icon: Briefcase,
+              title: item.name || item.title,
+              subtitle: item.category,
+              path: '/admin/services',
+            });
+          });
+      }
+
+      if (teamData.success && teamData.data) {
+        teamData.data
+          .filter(item => 
+            item.name?.toLowerCase().includes(lowerQuery) ||
+            item.position?.toLowerCase().includes(lowerQuery)
+          )
+          .slice(0, 5)
+          .forEach(item => {
+            results.push({
+              type: 'Team Member',
+              icon: Users,
+              title: item.name,
+              subtitle: item.position,
+              path: '/admin/team',
+            });
+          });
+      }
+
+      if (blogData.success && blogData.data) {
+        blogData.data
+          .filter(item => 
+            item.title?.toLowerCase().includes(lowerQuery) ||
+            item.excerpt?.toLowerCase().includes(lowerQuery)
+          )
+          .slice(0, 5)
+          .forEach(item => {
+            results.push({
+              type: 'Blog Post',
+              icon: BookOpen,
+              title: item.title,
+              subtitle: item.author,
+              path: '/admin/blog',
+            });
+          });
+      }
+
+      setSearchResults(results);
+      setShowSearchResults(true);
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminUser');
     navigate('/admin/login');
+  };
+
+  const handleSearchResultClick = (path) => {
+    navigate(path);
+    setSearchQuery('');
+    setShowSearchResults(false);
   };
 
   const menuSections = [
@@ -67,6 +193,7 @@ const AdminLayout = () => {
       items: [
         { name: 'Page Content', path: '/admin/pages', icon: FileText },
         { name: 'Location Pages', path: '/admin/locations', icon: MapPin },
+        { name: 'SEO Manager', path: '/admin/seo', icon: Search },
       ],
     },
     {
@@ -199,25 +326,75 @@ const AdminLayout = () => {
         <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
           <div className="flex items-center justify-between h-16 px-6">
             {/* Search Bar */}
-            <div className="flex-1 max-w-xl">
+            <div className="flex-1 max-w-xl" ref={searchInputRef}>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                {isSearching ? (
+                  <Loader2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-navy animate-spin" size={20} />
+                ) : (
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                )}
                 <input
                   type="text"
-                  placeholder="Search..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg font-sans text-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy"
+                  placeholder="Search services, team, blog posts..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => searchResults.length > 0 && setShowSearchResults(true)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg font-sans text-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition-all"
                 />
+                
+                {/* Search Results Dropdown */}
+                {showSearchResults && searchResults.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl max-h-96 overflow-y-auto z-50">
+                    <div className="p-3 border-b border-gray-100">
+                      <p className="font-sans text-xs font-semibold text-gray-500 uppercase">
+                        Search Results ({searchResults.length})
+                      </p>
+                    </div>
+                    {searchResults.map((result, index) => {
+                      const Icon = result.icon;
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => handleSearchResultClick(result.path)}
+                          className="w-full flex items-center gap-4 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 text-left"
+                        >
+                          <div className="w-10 h-10 bg-navy/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Icon size={20} className="text-navy" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-sans text-sm font-medium text-navy truncate">
+                              {result.title}
+                            </p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs font-sans font-medium">
+                                {result.type}
+                              </span>
+                              {result.subtitle && (
+                                <span className="font-sans text-xs text-gray-500 truncate">
+                                  {result.subtitle}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* No Results */}
+                {showSearchResults && searchQuery.trim().length >= 2 && searchResults.length === 0 && !isSearching && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl p-8 text-center z-50">
+                    <Search size={40} className="text-gray-300 mx-auto mb-3" />
+                    <p className="font-sans text-sm text-gray-600 mb-1">No results found</p>
+                    <p className="font-sans text-xs text-gray-400">Try searching with different keywords</p>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Right Actions */}
             <div className="flex items-center space-x-4">
-              {/* Notifications */}
-              <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <Bell size={20} className="text-gray-600" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-
               {/* User Menu */}
               {user && (
                 <div className="flex items-center space-x-3 pl-4 border-l border-gray-200">

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Edit, Trash2, Save, X, Eye, EyeOff, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Eye, EyeOff, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import Button from '../../components/Button';
 import ImageUploader from '../../components/ImageUploader';
 import TagInput from '../../components/TagInput';
@@ -12,6 +12,8 @@ const BlogManager = () => {
   const [filter, setFilter] = useState('all');
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
   const [loading, setLoading] = useState(false);
+  const [searchDraft, setSearchDraft] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -30,17 +32,34 @@ const BlogManager = () => {
   });
 
   useEffect(() => {
+    const t = setTimeout(() => {
+      const next = searchDraft.trim();
+      setDebouncedSearch((prev) => {
+        if (prev !== next) {
+          setPagination((p) => ({ ...p, page: 1 }));
+        }
+        return next;
+      });
+    }, 400);
+    return () => clearTimeout(t);
+  }, [searchDraft]);
+
+  useEffect(() => {
     fetchPosts();
-  }, [filter, pagination.page]);
+  }, [filter, pagination.page, debouncedSearch]);
 
   const fetchPosts = async () => {
     setLoading(true);
     const token = localStorage.getItem('adminToken');
     
     try {
-      const publishedParam = filter === 'all' ? '' : `&published=${filter === 'published'}`;
+      const publishedParam =
+        filter === 'all' ? '' : `&published=${filter === 'published'}`;
+      const searchParam = debouncedSearch
+        ? `&search=${encodeURIComponent(debouncedSearch)}`
+        : '';
       const response = await fetch(
-        `${API_BASE_URL}/api/blog?page=${pagination.page}&limit=10${publishedParam}`,
+        `${API_BASE_URL}/api/blog?page=${pagination.page}&limit=10${publishedParam}${searchParam}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -366,7 +385,7 @@ const BlogManager = () => {
                 <Save className="inline mr-2" size={18} />
                 {editingPost ? 'Update Post' : 'Create Post'}
               </Button>
-              <Button type="button" variant="secondary" onClick={resetForm}>
+              <Button type="button" variant="outline" onClick={resetForm}>
                 Cancel
               </Button>
             </div>
@@ -374,24 +393,38 @@ const BlogManager = () => {
         </div>
       )}
 
-      {/* Filter Tabs */}
-      <div className="flex space-x-2 mb-6">
-        {['all', 'published', 'drafts'].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => {
-              setFilter(tab);
-              setPagination({ ...pagination, page: 1 });
-            }}
-            className={`px-4 py-2 rounded-sm font-sans font-medium transition-colors ${
-              filter === tab
-                ? 'bg-navy text-white'
-                : 'bg-white text-gray-700 hover:bg-grey-light'
-            }`}
-          >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-          </button>
-        ))}
+      {/* Search + filter tabs */}
+      <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+          <input
+            type="search"
+            value={searchDraft}
+            onChange={(e) => setSearchDraft(e.target.value)}
+            placeholder="Search title, slug, category, tags, SEO..."
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans text-sm"
+            aria-label="Search blog posts"
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {['all', 'published', 'drafts'].map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => {
+                setFilter(tab);
+                setPagination((prev) => ({ ...prev, page: 1 }));
+              }}
+              className={`px-4 py-2 rounded-sm font-sans font-medium transition-colors ${
+                filter === tab
+                  ? 'bg-navy text-white'
+                  : 'bg-white text-gray-700 border border-gray-200 hover:bg-grey-light'
+              }`}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Posts List */}
@@ -401,7 +434,11 @@ const BlogManager = () => {
         </div>
       ) : posts.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-sm">
-          <p className="font-sans text-gray-500">No posts found. Create your first post!</p>
+          <p className="font-sans text-gray-500">
+            {debouncedSearch
+              ? 'No posts match your search.'
+              : 'No posts found. Create your first post!'}
+          </p>
         </div>
       ) : (
         <>

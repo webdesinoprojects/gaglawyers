@@ -6,6 +6,7 @@ import API_BASE_URL from '../../config/api';
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
     team: 0,
+    teamAddedThisMonth: 0,
     services: 0,
     contacts: 0,
     blog: 0,
@@ -19,11 +20,14 @@ const AdminDashboard = () => {
     const token = localStorage.getItem('adminToken');
     
     try {
-      const [teamRes, servicesRes, blogRes] = await Promise.all([
+      const [teamRes, servicesRes, contactsRes, blogRes] = await Promise.all([
         fetch(`${API_BASE_URL}/api/team`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
         fetch(`${API_BASE_URL}/api/services`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(`${API_BASE_URL}/api/contact`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
         fetch(`${API_BASE_URL}/api/blog`, {
@@ -33,12 +37,14 @@ const AdminDashboard = () => {
 
       const teamData = await teamRes.json();
       const servicesData = await servicesRes.json();
+      const contactsData = await contactsRes.json();
       const blogData = await blogRes.json();
 
       setStats({
         team: teamData.count || 0,
+        teamAddedThisMonth: teamData.addedThisMonth || 0,
         services: servicesData.count || 0,
-        contacts: 0,
+        contacts: contactsData.count || 0,
         blog: blogData.count || 0,
       });
     } catch (error) {
@@ -54,7 +60,7 @@ const AdminDashboard = () => {
       color: 'from-blue-500 to-blue-600',
       bgColor: 'bg-blue-50',
       textColor: 'text-blue-600',
-      change: '+2 this month',
+      change: stats.teamAddedThisMonth > 0 ? `+${stats.teamAddedThisMonth} this month` : 'No new members',
       link: '/admin/team'
     },
     { 
@@ -74,7 +80,7 @@ const AdminDashboard = () => {
       color: 'from-purple-500 to-purple-600',
       bgColor: 'bg-purple-50',
       textColor: 'text-purple-600',
-      change: 'No new inquiries',
+      change: stats.contacts > 0 ? `${stats.contacts} ${stats.contacts === 1 ? 'inquiry' : 'inquiries'}` : 'No new inquiries',
       link: '/admin/contacts'
     },
     { 

@@ -9,14 +9,37 @@ const LocationManager = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
   const [selectedPages, setSelectedPages] = useState([]);
-  const [showBulkCreate, setShowBulkCreate] = useState(false);
-  const [bulkCities, setBulkCities] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingPageId, setEditingPageId] = useState(null);
+  const [formData, setFormData] = useState({
+    service: '',
+    city: '',
+    slug: '',
+    heading: '',
+    intro: '',
+    sections: [
+      { title: 'Why Choose Our Services', content: 'We provide comprehensive legal solutions tailored to your specific needs. Our experienced team of advocates delivers expert guidance and representation.' },
+      { title: 'Our Approach', content: 'We understand that every legal matter is unique. Our approach combines deep legal expertise with practical insight, ensuring you receive advice that is not only legally sound but also commercially viable.' },
+      { title: 'Contact Our Legal Team', content: 'If you need legal assistance, our team is ready to help. We offer initial consultations to understand your situation and provide clear guidance on the best path forward.' }
+    ],
+    images: [
+      { url: '', alt: '', caption: '' },
+      { url: '', alt: '', caption: '' },
+      { url: '', alt: '', caption: '' }
+    ],
+    seoTitle: '',
+    seoDescription: '',
+    seoKeywords: '',
+    isActive: true,
+  });
   
   const [filters, setFilters] = useState({
     service: '',
-    city: '',
     active: '',
   });
+  const [searchDraft, setSearchDraft] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   
   const [pagination, setPagination] = useState({
     page: 1,
@@ -31,8 +54,21 @@ const LocationManager = () => {
   }, []);
 
   useEffect(() => {
+    const t = setTimeout(() => {
+      const next = searchDraft.trim();
+      setDebouncedSearch((prev) => {
+        if (prev !== next) {
+          setPagination((p) => ({ ...p, page: 1 }));
+        }
+        return next;
+      });
+    }, 400);
+    return () => clearTimeout(t);
+  }, [searchDraft]);
+
+  useEffect(() => {
     fetchPages();
-  }, [pagination.page, pagination.limit, filters]);
+  }, [pagination.page, pagination.limit, filters.service, filters.active, debouncedSearch]);
 
   const fetchServices = async () => {
     try {
@@ -64,25 +100,27 @@ const LocationManager = () => {
   const fetchPages = async () => {
     setLoading(true);
     const token = localStorage.getItem('adminToken');
-    
-    const queryParams = new URLSearchParams({
-      page: pagination.page,
-      limit: pagination.limit,
-      ...filters,
-    });
+
+    const params = new URLSearchParams();
+    params.set('page', String(pagination.page));
+    params.set('limit', String(pagination.limit));
+    if (filters.service) params.set('service', filters.service);
+    if (filters.active) params.set('active', filters.active);
+    if (debouncedSearch) params.set('search', debouncedSearch);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/locations?${queryParams}`, {
+      const response = await fetch(`${API_BASE_URL}/api/locations?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
-      
+
       if (data.success) {
         setPages(data.data);
+        const pg = data.pagination || {};
         setPagination(prev => ({
           ...prev,
-          total: data.total,
-          pages: data.pages,
+          total: pg.total ?? 0,
+          pages: pg.pages ?? 1,
         }));
       }
     } catch (error) {
@@ -144,80 +182,327 @@ const LocationManager = () => {
     }
   };
 
-  const handleBulkCreate = async () => {
-    if (!filters.service) {
-      alert('Please select a service first');
-      return;
-    }
-
-    const cities = bulkCities.split('\n').map(c => c.trim()).filter(Boolean);
-    
-    if (cities.length === 0) {
-      alert('Please enter at least one city');
+  const handleCreatePage = async () => {
+    if (!formData.service || !formData.city) {
+      alert('Please fill in service and city');
       return;
     }
 
     const token = localStorage.getItem('adminToken');
-    const selectedService = services.find(s => s._id === filters.service);
+    const selectedService = services.find(s => s._id === formData.service);
 
     if (!selectedService) {
       alert('Service not found');
       return;
     }
 
-    const pagesToCreate = cities.map(city => {
-      const slug = `${selectedService.title.toLowerCase().replace(/\s+/g, '-')}-${city.toLowerCase().replace(/\s+/g, '-')}`;
-      
-      return {
-        service: selectedService._id,
-        serviceName: selectedService.title,
-        city,
-        slug,
-        content: {
-          heading: `${selectedService.title} in ${city}`,
-          intro: `Expert ${selectedService.title.toLowerCase()} services in ${city}. ${selectedService.description}`,
-          sections: [
-            {
-              title: 'Our Services',
-              content: `We provide comprehensive ${selectedService.title.toLowerCase()} services to clients in ${city} and surrounding areas.`,
-            },
-          ],
-        },
-        seo: {
-          title: `${selectedService.title} in ${city} | GAG Lawyers`,
-          description: `Expert ${selectedService.title.toLowerCase()} services in ${city}. Contact GAG Lawyers for professional legal assistance.`,
-          keywords: `${selectedService.title.toLowerCase()}, lawyers in ${city.toLowerCase()}, legal services ${city.toLowerCase()}`,
-          h1: `${selectedService.title} in ${city}`,
-        },
-        isActive: true,
-      };
-    });
+    // Use slug from formData if provided, otherwise generate it
+    const slug = formData.slug || `${(selectedService.name || selectedService.title).toLowerCase().replace(/\s+/g, '-').replace(/[()&]/g, '')}-${formData.city.toLowerCase().replace(/\s+/g, '-')}`;
+    
+    const pageData = {
+      service: selectedService._id,
+      serviceName: selectedService.name || selectedService.title,
+      city: formData.city,
+      slug,
+      content: {
+        heading: formData.heading || `${selectedService.name || selectedService.title} in ${formData.city}`,
+        intro: formData.intro || `Expert ${(selectedService.name || selectedService.title).toLowerCase()} services in ${formData.city}.`,
+        sections: formData.sections.filter(s => s.title && s.content),
+      },
+      seo: {
+        title: formData.seoTitle || `${selectedService.name || selectedService.title} in ${formData.city} | GAG Lawyers`,
+        description: formData.seoDescription || `Expert ${(selectedService.name || selectedService.title).toLowerCase()} services in ${formData.city}. Contact GAG Lawyers for professional legal assistance.`,
+        keywords: formData.seoKeywords || `${(selectedService.name || selectedService.title).toLowerCase()}, lawyers in ${formData.city.toLowerCase()}, legal services ${formData.city.toLowerCase()}`,
+        h1: `${selectedService.name || selectedService.title} in ${formData.city}`,
+      },
+      isActive: formData.isActive,
+    };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/locations/bulk/create`, {
+      const response = await fetch(`${API_BASE_URL}/api/locations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ pages: pagesToCreate }),
+        body: JSON.stringify(pageData),
       });
 
       const data = await response.json();
       
       if (data.success) {
-        alert(`${data.count} pages created successfully`);
-        setBulkCities('');
-        setShowBulkCreate(false);
+        alert('Page created successfully');
+        setShowCreateModal(false);
+        setFormData({
+          service: '',
+          city: '',
+          slug: '',
+          heading: '',
+          intro: '',
+          sections: [
+            { title: 'Why Choose Our Services', content: 'We provide comprehensive legal solutions tailored to your specific needs. Our experienced team of advocates delivers expert guidance and representation.' },
+            { title: 'Our Approach', content: 'We understand that every legal matter is unique. Our approach combines deep legal expertise with practical insight, ensuring you receive advice that is not only legally sound but also commercially viable.' },
+            { title: 'Contact Our Legal Team', content: 'If you need legal assistance, our team is ready to help. We offer initial consultations to understand your situation and provide clear guidance on the best path forward.' }
+          ],
+          images: [
+            { url: '', alt: '', caption: '' },
+            { url: '', alt: '', caption: '' },
+            { url: '', alt: '', caption: '' }
+          ],
+          seoTitle: '',
+          seoDescription: '',
+          seoKeywords: '',
+          isActive: true,
+        });
         fetchPages();
         fetchStats();
       } else {
-        alert(data.message);
+        alert(data.message || 'Error creating page');
       }
     } catch (error) {
-      console.error('Error bulk creating:', error);
-      alert('Error creating pages');
+      console.error('Error creating page:', error);
+      alert('Error creating page');
     }
+  };
+
+  const handleEditPage = (page) => {
+    setEditingPageId(page._id);
+    setFormData({
+      service: page.service?._id || page.service,
+      city: page.city,
+      slug: page.slug || '',
+      heading: page.content?.heading || '',
+      intro: page.content?.intro || '',
+      sections: page.content?.sections || [
+        { title: 'Why Choose Our Services', content: '' },
+        { title: 'Our Approach', content: '' },
+        { title: 'Contact Our Legal Team', content: '' }
+      ],
+      images: page.images || [
+        { url: '', alt: '', caption: '' },
+        { url: '', alt: '', caption: '' },
+        { url: '', alt: '', caption: '' }
+      ],
+      seoTitle: page.seo?.title || '',
+      seoDescription: page.seo?.description || '',
+      seoKeywords: page.seo?.keywords || '',
+      isActive: page.isActive,
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdatePage = async () => {
+    if (!formData.service || !formData.city) {
+      alert('Please fill in service and city');
+      return;
+    }
+
+    const token = localStorage.getItem('adminToken');
+    const selectedService = services.find(s => s._id === formData.service);
+
+    if (!selectedService) {
+      alert('Service not found');
+      return;
+    }
+
+    // Use slug from formData if provided, otherwise generate it
+    const slug = formData.slug || `${(selectedService.name || selectedService.title).toLowerCase().replace(/\s+/g, '-').replace(/[()&]/g, '')}-${formData.city.toLowerCase().replace(/\s+/g, '-')}`;
+    
+    const pageData = {
+      service: selectedService._id,
+      serviceName: selectedService.name || selectedService.title,
+      city: formData.city,
+      slug,
+      content: {
+        heading: formData.heading,
+        intro: formData.intro,
+        sections: formData.sections.filter(s => s.title && s.content),
+      },
+      images: formData.images,
+      seo: {
+        title: formData.seoTitle,
+        description: formData.seoDescription,
+        keywords: formData.seoKeywords,
+        h1: `${selectedService.name || selectedService.title} in ${formData.city}`,
+      },
+      isActive: formData.isActive,
+    };
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/locations/${editingPageId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(pageData),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('Page updated successfully');
+        setShowEditModal(false);
+        setEditingPageId(null);
+        setFormData({
+          service: '',
+          city: '',
+          heading: '',
+          intro: '',
+          sections: [
+            { title: 'Why Choose Our Services', content: 'We provide comprehensive legal solutions tailored to your specific needs. Our experienced team of advocates delivers expert guidance and representation.' },
+            { title: 'Our Approach', content: 'We understand that every legal matter is unique. Our approach combines deep legal expertise with practical insight, ensuring you receive advice that is not only legally sound but also commercially viable.' },
+            { title: 'Contact Our Legal Team', content: 'If you need legal assistance, our team is ready to help. We offer initial consultations to understand your situation and provide clear guidance on the best path forward.' }
+          ],
+          images: [
+            { url: '', alt: '', caption: '' },
+            { url: '', alt: '', caption: '' },
+            { url: '', alt: '', caption: '' }
+          ],
+          seoTitle: '',
+          seoDescription: '',
+          seoKeywords: '',
+          isActive: true,
+        });
+        fetchPages();
+        fetchStats();
+      } else {
+        alert(data.message || 'Error updating page');
+      }
+    } catch (error) {
+      console.error('Error updating page:', error);
+      alert('Error updating page');
+    }
+  };
+
+  const addSection = () => {
+    setFormData(prev => ({
+      ...prev,
+      sections: [...prev.sections, { title: '', content: '' }],
+    }));
+  };
+
+  const removeSection = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      sections: prev.sections.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updateSection = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      sections: prev.sections.map((section, i) => 
+        i === index ? { ...section, [field]: value } : section
+      ),
+    }));
+  };
+
+  const updateImage = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.map((image, i) => 
+        i === index ? { ...image, [field]: value } : image
+      ),
+    }));
+  };
+
+  const handleImageUpload = async (index, file) => {
+    if (!file) return;
+
+    const token = localStorage.getItem('adminToken');
+    const formDataUpload = new FormData();
+    formDataUpload.append('image', file);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/cloudinary/upload`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formDataUpload,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        updateImage(index, 'url', data.data.url);
+        updateImage(index, 'publicId', data.data.publicId);
+        alert('Image uploaded successfully');
+      } else {
+        alert('Error uploading image: ' + data.message);
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Error uploading image');
+    }
+  };
+
+  const handleRemoveImage = (index) => {
+    updateImage(index, 'url', '');
+    updateImage(index, 'publicId', '');
+    updateImage(index, 'alt', '');
+    updateImage(index, 'caption', '');
+  };
+
+  const handleServiceCityChange = (field, value) => {
+    setFormData(prev => {
+      const updated = { ...prev, [field]: value };
+      
+      // Auto-populate content when both service and city are selected
+      if (updated.service && updated.city) {
+        const selectedService = services.find(s => s._id === updated.service);
+        if (selectedService) {
+          const serviceName = selectedService.name || selectedService.title;
+          const city = updated.city;
+          
+          // Auto-generate slug
+          const slug = `${serviceName.toLowerCase().replace(/\s+/g, '-').replace(/[()&]/g, '')}-${city.toLowerCase().replace(/\s+/g, '-')}`;
+          updated.slug = slug;
+          
+          // Auto-populate heading
+          if (!prev.heading || prev.heading === '') {
+            updated.heading = `${serviceName} in ${city}`;
+          }
+          
+          // Auto-populate intro
+          if (!prev.intro || prev.intro === '') {
+            updated.intro = `GAG Lawyers - Grover & Grover Advocates provides expert ${serviceName.toLowerCase()} services in ${city}. Our experienced team of advocates delivers comprehensive legal solutions tailored to your specific needs.`;
+          }
+          
+          // Auto-populate sections with service and city context
+          updated.sections = [
+            { 
+              title: `Why Choose Our ${serviceName} Services in ${city}`, 
+              content: `When it comes to ${serviceName.toLowerCase()} in ${city}, GAG Lawyers stands out for our commitment to excellence, client-focused approach, and proven track record. Our legal team has extensive experience handling complex cases and providing strategic counsel.` 
+            },
+            { 
+              title: 'Our Approach', 
+              content: `We understand that every legal matter is unique. Our approach combines deep legal expertise with practical insight, ensuring you receive advice that is not only legally sound but also commercially viable and personally relevant. We work in close partnership with our clients throughout the entire process.` 
+            },
+            { 
+              title: `Contact Our ${city} Legal Team`, 
+              content: `If you need ${serviceName.toLowerCase()} assistance in ${city}, our team is ready to help. We offer initial consultations to understand your situation and provide clear guidance on the best path forward. Contact us today to discuss your legal needs.` 
+            }
+          ];
+          
+          // Auto-populate SEO fields
+          if (!prev.seoTitle || prev.seoTitle === '') {
+            updated.seoTitle = `${serviceName} in ${city} | GAG Lawyers - Expert Legal Services`;
+          }
+          
+          if (!prev.seoDescription || prev.seoDescription === '') {
+            updated.seoDescription = `Looking for ${serviceName.toLowerCase()} in ${city}? GAG Lawyers offers professional legal services with 25+ years of experience. Contact us for expert consultation.`;
+          }
+          
+          if (!prev.seoKeywords || prev.seoKeywords === '') {
+            updated.seoKeywords = `${serviceName.toLowerCase()}, ${city}, lawyers, advocates, legal services, ${serviceName.toLowerCase()} ${city}`;
+          }
+        }
+      }
+      
+      return updated;
+    });
   };
 
   const handleDelete = async (id) => {
@@ -319,17 +604,19 @@ const LocationManager = () => {
               >
                 <option value="">All Services</option>
                 {services.map(service => (
-                  <option key={service._id} value={service._id}>{service.title}</option>
+                  <option key={service._id} value={service._id}>{service.name || service.title}</option>
                 ))}
               </select>
             </div>
-            <div>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
               <input
                 type="text"
-                placeholder="Search by city..."
-                value={filters.city}
-                onChange={(e) => handleFilterChange('city', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans text-sm"
+                placeholder="Search city, slug, service name, SEO title..."
+                value={searchDraft}
+                onChange={(e) => setSearchDraft(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans text-sm"
+                aria-label="Search location pages"
               />
             </div>
             <div>
@@ -345,21 +632,22 @@ const LocationManager = () => {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="primary" size="sm" onClick={() => setShowBulkCreate(true)}>
+            <Button variant="primary" size="sm" onClick={() => setShowCreateModal(true)}>
               <Plus className="inline mr-1" size={16} />
-              Bulk Create
+              Create Page
             </Button>
-            <Button variant="secondary" size="sm" onClick={fetchPages}>
-              <RefreshCw className="inline mr-1" size={16} />
+            <Button variant="outline" size="sm" onClick={fetchPages} className="inline-flex items-center gap-1">
+              <RefreshCw className="inline" size={16} />
               Refresh
             </Button>
-            <Button 
-              variant="secondary" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => window.open(`${API_BASE_URL}/sitemap.xml`, '_blank')}
               title="View current sitemap"
+              className="inline-flex items-center gap-1"
             >
-              <MapPin className="inline mr-1" size={16} />
+              <MapPin className="inline" size={16} />
               Sitemap
             </Button>
           </div>
@@ -367,59 +655,643 @@ const LocationManager = () => {
       </div>
 
       {/* Bulk Create Modal */}
-      {showBulkCreate && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <h2 className="font-serif text-2xl font-bold text-navy mb-4">Bulk Create Location Pages</h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
-                    Select Service <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={filters.service}
-                    onChange={(e) => setFilters(prev => ({ ...prev, service: e.target.value }))}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans"
-                  >
-                    <option value="">Choose a service...</option>
-                    {services.map(service => (
-                      <option key={service._id} value={service._id}>{service.title}</option>
-                    ))}
-                  </select>
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-navy to-navy/90 px-8 py-6 flex items-center justify-between">
+              <div>
+                <h2 className="font-serif text-2xl font-bold text-white">Create Location Page</h2>
+                <p className="text-white/80 text-sm mt-1 font-sans">Add a new location-specific service page</p>
+              </div>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="text-white/80 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+                aria-label="Close"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-8 overflow-y-auto max-h-[calc(90vh-180px)]">
+              <div className="space-y-6">
+                {/* Basic Information */}
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block font-sans text-sm font-semibold text-gray-800 mb-3">
+                      Service <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={formData.service}
+                        onChange={(e) => handleServiceCityChange('service', e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-navy/30 focus:border-navy transition-all font-sans text-gray-700 appearance-none bg-white cursor-pointer hover:border-gray-300"
+                      >
+                        <option value="">Select service...</option>
+                        {services.map(service => (
+                          <option key={service._id} value={service._id}>
+                            {service.name || service.title}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block font-sans text-sm font-semibold text-gray-800 mb-3">
+                      City/Location <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.city}
+                      onChange={(e) => handleServiceCityChange('city', e.target.value)}
+                      placeholder="e.g., Mumbai, Delhi, Bangalore"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-navy/30 focus:border-navy transition-all font-sans text-gray-700"
+                    />
+                  </div>
                 </div>
 
+                {/* Slug Field */}
                 <div>
-                  <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
-                    Cities (one per line) <span className="text-red-500">*</span>
+                  <label className="block font-sans text-sm font-semibold text-gray-800 mb-3">
+                    Page Slug <span className="text-gray-500 text-xs font-normal">(Auto-generated, editable)</span>
                   </label>
-                  <textarea
-                    value={bulkCities}
-                    onChange={(e) => setBulkCities(e.target.value)}
-                    placeholder="Mumbai&#10;Delhi&#10;Bangalore&#10;Chennai&#10;Kolkata"
-                    rows="10"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans"
+                  <input
+                    type="text"
+                    value={formData.slug}
+                    onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                    placeholder="e.g., service-name-city-name"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-navy/30 focus:border-navy transition-all font-mono text-sm text-gray-700"
                   />
                   <p className="mt-2 text-xs text-gray-500 font-sans">
-                    {bulkCities.split('\n').filter(c => c.trim()).length} cities entered
+                    URL: {formData.slug ? `/${formData.slug}` : '/your-page-slug'}
                   </p>
                 </div>
 
-                <div className="bg-blue-50 border border-blue-200 rounded-sm p-4">
-                  <p className="text-sm text-blue-800 font-sans">
-                    <strong>Note:</strong> Pages will be auto-generated with SEO-optimized content based on the service and city. You can edit individual pages later if needed.
-                  </p>
+                {/* Content Section */}
+                <div className="border-t pt-6">
+                  <h3 className="font-serif text-lg font-bold text-gray-800 mb-4">Page Content</h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-2">
+                        Main Heading
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.heading}
+                        onChange={(e) => setFormData(prev => ({ ...prev, heading: e.target.value }))}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-navy/30 focus:border-navy transition-all font-sans text-gray-700"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-2">
+                        Introduction
+                      </label>
+                      <textarea
+                        value={formData.intro}
+                        onChange={(e) => setFormData(prev => ({ ...prev, intro: e.target.value }))}
+                        rows="3"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-navy/30 focus:border-navy transition-all font-sans text-gray-700 resize-none"
+                      />
+                    </div>
+
+                    {/* Image Upload */}
+                    <div>
+                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-3">
+                        Images (Upload to Cloudinary)
+                      </label>
+                      <div className="space-y-3">
+                        {formData.images.map((image, index) => (
+                          <div key={index} className="p-4 bg-gray-50 rounded-lg border-2 border-gray-300">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center">
+                                <svg className="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <span className="text-sm font-semibold text-gray-600">Image {index + 1}</span>
+                              </div>
+                              {image.url && (
+                                <button
+                                  onClick={() => handleRemoveImage(index)}
+                                  className="text-xs text-red-500 hover:text-red-700 font-medium"
+                                >
+                                  Remove
+                                </button>
+                              )}
+                            </div>
+                            
+                            {image.url ? (
+                              <div className="space-y-3">
+                                <div className="relative rounded-lg overflow-hidden bg-gray-200">
+                                  <img 
+                                    src={image.url} 
+                                    alt={image.alt || `Image ${index + 1}`}
+                                    className="w-full h-48 object-cover"
+                                  />
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                  <input
+                                    type="text"
+                                    value={image.alt}
+                                    onChange={(e) => updateImage(index, 'alt', e.target.value)}
+                                    placeholder="Alt text"
+                                    className="px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={image.caption}
+                                    onChange={(e) => updateImage(index, 'caption', e.target.value)}
+                                    placeholder="Caption"
+                                    className="px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm"
+                                  />
+                                </div>
+                              </div>
+                            ) : (
+                              <div>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => {
+                                    const file = e.target.files[0];
+                                    if (file) handleImageUpload(index, file);
+                                  }}
+                                  className="hidden"
+                                  id={`image-upload-${index}`}
+                                />
+                                <label
+                                  htmlFor={`image-upload-${index}`}
+                                  className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-navy hover:bg-gray-100 transition-colors"
+                                >
+                                  <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                                  <span className="text-sm text-gray-600 font-medium">Click to upload image</span>
+                                  <span className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP up to 10MB</span>
+                                </label>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Content Sections */}
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <label className="block font-sans text-sm font-semibold text-gray-800">
+                          Content Sections
+                        </label>
+                        <button
+                          onClick={addSection}
+                          className="text-sm text-navy hover:text-navy/80 font-sans font-medium"
+                        >
+                          + Add Section
+                        </button>
+                      </div>
+                      
+                      {formData.sections.map((section, index) => (
+                        <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-sm font-semibold text-gray-600">Section {index + 1}</span>
+                            {formData.sections.length > 1 && (
+                              <button
+                                onClick={() => removeSection(index)}
+                                className="text-red-500 hover:text-red-700 text-sm"
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </div>
+                          <input
+                            type="text"
+                            value={section.title}
+                            onChange={(e) => updateSection(index, 'title', e.target.value)}
+                            placeholder="Section title"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 font-sans text-sm"
+                          />
+                          <textarea
+                            value={section.content}
+                            onChange={(e) => updateSection(index, 'content', e.target.value)}
+                            placeholder="Section content"
+                            rows="3"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm resize-none"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* SEO Section */}
+                <div className="border-t pt-6">
+                  <h3 className="font-serif text-lg font-bold text-gray-800 mb-4">SEO Settings</h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-2">
+                        Meta Title
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.seoTitle}
+                        onChange={(e) => setFormData(prev => ({ ...prev, seoTitle: e.target.value }))}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-navy/30 focus:border-navy transition-all font-sans text-gray-700"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-2">
+                        Meta Description
+                      </label>
+                      <textarea
+                        value={formData.seoDescription}
+                        onChange={(e) => setFormData(prev => ({ ...prev, seoDescription: e.target.value }))}
+                        rows="2"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-navy/30 focus:border-navy transition-all font-sans text-gray-700 resize-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-2">
+                        Keywords
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.seoKeywords}
+                        onChange={(e) => setFormData(prev => ({ ...prev, seoKeywords: e.target.value }))}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-navy/30 focus:border-navy transition-all font-sans text-gray-700"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status */}
+                <div className="flex items-center space-x-3 pt-4">
+                  <input
+                    type="checkbox"
+                    id="isActive"
+                    checked={formData.isActive}
+                    onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                    className="w-5 h-5 text-navy border-gray-300 rounded focus:ring-navy"
+                  />
+                  <label htmlFor="isActive" className="font-sans text-sm font-medium text-gray-700 cursor-pointer">
+                    Publish page immediately (make it active)
+                  </label>
                 </div>
               </div>
+            </div>
 
-              <div className="flex justify-end space-x-3 mt-6">
-                <Button variant="secondary" onClick={() => setShowBulkCreate(false)}>
+            {/* Footer */}
+            <div className="bg-gray-50 px-8 py-5 flex items-center justify-between border-t border-gray-200">
+              <p className="text-sm text-gray-600 font-sans">
+                {formData.service && formData.city 
+                  ? 'Ready to create page'
+                  : 'Fill in required fields to continue'}
+              </p>
+              <div className="flex space-x-3">
+                <Button variant="secondary" onClick={() => setShowCreateModal(false)}>
                   Cancel
                 </Button>
-                <Button variant="primary" onClick={handleBulkCreate}>
+                <Button 
+                  variant="primary" 
+                  onClick={handleCreatePage}
+                  disabled={!formData.service || !formData.city}
+                >
                   <Plus className="inline mr-2" size={18} />
-                  Create Pages
+                  Create Page
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal - Same as Create but for editing */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-navy to-navy/90 px-8 py-6 flex items-center justify-between">
+              <div>
+                <h2 className="font-serif text-2xl font-bold text-white">Edit Location Page</h2>
+                <p className="text-white/80 text-sm mt-1 font-sans">Update location-specific service page</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingPageId(null);
+                }}
+                className="text-white/80 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+                aria-label="Close"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Content - Same form as create */}
+            <div className="p-8 overflow-y-auto max-h-[calc(90vh-180px)]">
+              <div className="space-y-6">
+                {/* Basic Information */}
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block font-sans text-sm font-semibold text-gray-800 mb-3">
+                      Service <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={formData.service}
+                        onChange={(e) => handleServiceCityChange('service', e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-navy/30 focus:border-navy transition-all font-sans text-gray-700 appearance-none bg-white cursor-pointer hover:border-gray-300"
+                      >
+                        <option value="">Select service...</option>
+                        {services.map(service => (
+                          <option key={service._id} value={service._id}>
+                            {service.name || service.title}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block font-sans text-sm font-semibold text-gray-800 mb-3">
+                      City/Location <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.city}
+                      onChange={(e) => handleServiceCityChange('city', e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-navy/30 focus:border-navy transition-all font-sans text-gray-700"
+                    />
+                  </div>
+                </div>
+
+                {/* Slug Field */}
+                <div>
+                  <label className="block font-sans text-sm font-semibold text-gray-800 mb-3">
+                    Page Slug <span className="text-gray-500 text-xs font-normal">(Auto-generated, editable)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.slug}
+                    onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                    placeholder="e.g., service-name-city-name"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-navy/30 focus:border-navy transition-all font-mono text-sm text-gray-700"
+                  />
+                  <p className="mt-2 text-xs text-gray-500 font-sans">
+                    URL: {formData.slug ? `/${formData.slug}` : '/your-page-slug'}
+                  </p>
+                </div>
+
+                {/* Content Section */}
+                <div className="border-t pt-6">
+                  <h3 className="font-serif text-lg font-bold text-gray-800 mb-4">Page Content</h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-2">
+                        Main Heading
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.heading}
+                        onChange={(e) => setFormData(prev => ({ ...prev, heading: e.target.value }))}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-navy/30 focus:border-navy transition-all font-sans text-gray-700"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-2">
+                        Introduction
+                      </label>
+                      <textarea
+                        value={formData.intro}
+                        onChange={(e) => setFormData(prev => ({ ...prev, intro: e.target.value }))}
+                        rows="3"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-navy/30 focus:border-navy transition-all font-sans text-gray-700 resize-none"
+                      />
+                    </div>
+
+                    {/* Image Upload */}
+                    <div>
+                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-3">
+                        Images (Upload to Cloudinary)
+                      </label>
+                      <div className="space-y-3">
+                        {formData.images.map((image, index) => (
+                          <div key={index} className="p-4 bg-gray-50 rounded-lg border-2 border-gray-300">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center">
+                                <svg className="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <span className="text-sm font-semibold text-gray-600">Image {index + 1}</span>
+                              </div>
+                              {image.url && (
+                                <button
+                                  onClick={() => handleRemoveImage(index)}
+                                  className="text-xs text-red-500 hover:text-red-700 font-medium"
+                                >
+                                  Remove
+                                </button>
+                              )}
+                            </div>
+                            
+                            {image.url ? (
+                              <div className="space-y-3">
+                                <div className="relative rounded-lg overflow-hidden bg-gray-200">
+                                  <img 
+                                    src={image.url} 
+                                    alt={image.alt || `Image ${index + 1}`}
+                                    className="w-full h-48 object-cover"
+                                  />
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                  <input
+                                    type="text"
+                                    value={image.alt}
+                                    onChange={(e) => updateImage(index, 'alt', e.target.value)}
+                                    placeholder="Alt text"
+                                    className="px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={image.caption}
+                                    onChange={(e) => updateImage(index, 'caption', e.target.value)}
+                                    placeholder="Caption"
+                                    className="px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm"
+                                  />
+                                </div>
+                              </div>
+                            ) : (
+                              <div>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => {
+                                    const file = e.target.files[0];
+                                    if (file) handleImageUpload(index, file);
+                                  }}
+                                  className="hidden"
+                                  id={`image-upload-edit-${index}`}
+                                />
+                                <label
+                                  htmlFor={`image-upload-edit-${index}`}
+                                  className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-navy hover:bg-gray-100 transition-colors"
+                                >
+                                  <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                                  <span className="text-sm text-gray-600 font-medium">Click to upload image</span>
+                                  <span className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP up to 10MB</span>
+                                </label>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Content Sections */}
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <label className="block font-sans text-sm font-semibold text-gray-800">
+                          Content Sections
+                        </label>
+                        <button
+                          onClick={addSection}
+                          className="text-sm text-navy hover:text-navy/80 font-sans font-medium"
+                        >
+                          + Add Section
+                        </button>
+                      </div>
+                      
+                      {formData.sections.map((section, index) => (
+                        <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-sm font-semibold text-gray-600">Section {index + 1}</span>
+                            {formData.sections.length > 1 && (
+                              <button
+                                onClick={() => removeSection(index)}
+                                className="text-red-500 hover:text-red-700 text-sm"
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </div>
+                          <input
+                            type="text"
+                            value={section.title}
+                            onChange={(e) => updateSection(index, 'title', e.target.value)}
+                            placeholder="Section title"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 font-sans text-sm"
+                          />
+                          <textarea
+                            value={section.content}
+                            onChange={(e) => updateSection(index, 'content', e.target.value)}
+                            placeholder="Section content"
+                            rows="3"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm resize-none"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* SEO Section */}
+                <div className="border-t pt-6">
+                  <h3 className="font-serif text-lg font-bold text-gray-800 mb-4">SEO Settings</h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-2">
+                        Meta Title
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.seoTitle}
+                        onChange={(e) => setFormData(prev => ({ ...prev, seoTitle: e.target.value }))}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-navy/30 focus:border-navy transition-all font-sans text-gray-700"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-2">
+                        Meta Description
+                      </label>
+                      <textarea
+                        value={formData.seoDescription}
+                        onChange={(e) => setFormData(prev => ({ ...prev, seoDescription: e.target.value }))}
+                        rows="2"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-navy/30 focus:border-navy transition-all font-sans text-gray-700 resize-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-2">
+                        Keywords
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.seoKeywords}
+                        onChange={(e) => setFormData(prev => ({ ...prev, seoKeywords: e.target.value }))}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-navy/30 focus:border-navy transition-all font-sans text-gray-700"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status */}
+                <div className="flex items-center space-x-3 pt-4">
+                  <input
+                    type="checkbox"
+                    id="isActiveEdit"
+                    checked={formData.isActive}
+                    onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                    className="w-5 h-5 text-navy border-gray-300 rounded focus:ring-navy"
+                  />
+                  <label htmlFor="isActiveEdit" className="font-sans text-sm font-medium text-gray-700 cursor-pointer">
+                    Page is active (published)
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="bg-gray-50 px-8 py-5 flex items-center justify-between border-t border-gray-200">
+              <p className="text-sm text-gray-600 font-sans">
+                {formData.service && formData.city 
+                  ? 'Ready to update page'
+                  : 'Fill in required fields to continue'}
+              </p>
+              <div className="flex space-x-3">
+                <Button variant="secondary" onClick={() => {
+                  setShowEditModal(false);
+                  setEditingPageId(null);
+                }}>
+                  Cancel
+                </Button>
+                <Button 
+                  variant="primary" 
+                  onClick={handleUpdatePage}
+                  disabled={!formData.service || !formData.city}
+                >
+                  <Edit className="inline mr-2" size={18} />
+                  Update Page
                 </Button>
               </div>
             </div>
@@ -483,9 +1355,9 @@ const LocationManager = () => {
                   <td colSpan="7" className="px-4 py-12 text-center">
                     <MapPin className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                     <p className="font-sans text-gray-500">No location pages found</p>
-                    <Button variant="primary" size="sm" className="mt-4" onClick={() => setShowBulkCreate(true)}>
+                    <Button variant="primary" size="sm" className="mt-4" onClick={() => setShowCreateModal(true)}>
                       <Plus className="inline mr-1" size={16} />
-                      Create Pages
+                      Create Page
                     </Button>
                   </td>
                 </tr>
@@ -534,6 +1406,13 @@ const LocationManager = () => {
                           title="View page"
                         >
                           <Eye size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleEditPage(page)}
+                          className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-sm transition-colors"
+                          title="Edit page"
+                        >
+                          <Edit size={16} />
                         </button>
                         <button
                           onClick={() => handleDelete(page._id)}

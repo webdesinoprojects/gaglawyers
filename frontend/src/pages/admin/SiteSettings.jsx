@@ -73,9 +73,14 @@ const SiteSettings = () => {
       });
 
       await Promise.all(updates);
-      setMessage('Settings saved successfully!');
+      setMessage('✓ Settings saved successfully! Changes will take effect immediately.');
+      
+      // Auto-dismiss success message after 5 seconds
+      setTimeout(() => {
+        setMessage('');
+      }, 5000);
     } catch (error) {
-      setMessage('Error saving settings');
+      setMessage('✗ Error saving settings. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -89,8 +94,31 @@ const SiteSettings = () => {
       </div>
 
       {message && (
-        <div className={`mb-6 p-4 rounded-sm ${message.includes('success') ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
-          <p className="font-sans text-sm">{message}</p>
+        <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 animate-slideDown ${
+          message.includes('✓') 
+            ? 'bg-green-50 text-green-800 border-2 border-green-200' 
+            : 'bg-red-50 text-red-800 border-2 border-red-200'
+        }`}>
+          <div className="flex-shrink-0">
+            {message.includes('✓') ? (
+              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            )}
+          </div>
+          <p className="font-sans text-sm font-medium flex-1">{message}</p>
+          <button
+            onClick={() => setMessage('')}
+            className="flex-shrink-0 text-gray-500 hover:text-gray-700"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
       )}
 

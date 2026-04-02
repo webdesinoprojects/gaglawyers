@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import Button from './Button';
+import API_BASE_URL from '../config/api';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
+  const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
+  const [services, setServices] = useState([]);
   const location = useLocation();
 
   useEffect(() => {
@@ -17,12 +20,29 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/services`);
+      const data = await response.json();
+      if (data.success) {
+        setServices(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching services:', error);
+    }
+  };
+
   const navLinks = [
     { name: 'Home', path: '/' },
     { 
       name: 'About', 
       path: '/about',
       hasDropdown: true,
+      dropdownType: 'about',
       submenu: [
         { name: 'The Firm', path: '/about' },
         { name: 'Our Team', path: '/team' },
@@ -31,7 +51,16 @@ const Navbar = () => {
         { name: 'Image Gallery', path: '/gallery' },
       ]
     },
-    { name: 'Services', path: '/services' },
+    { 
+      name: 'Services', 
+      path: '/services',
+      hasDropdown: true,
+      dropdownType: 'services',
+      submenu: services.map(service => ({
+        name: service.name || service.title,
+        path: `/services/${service.slug}`
+      }))
+    },
     { name: 'Blog', path: '/blog' },
     { name: 'Contact', path: '/contact' },
   ];
@@ -46,24 +75,33 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          <Link to="/" className="flex items-center space-x-2">
-            <span className="font-serif text-2xl lg:text-3xl font-bold text-white">
-              GAG
-            </span>
-            <span className="font-serif text-2xl lg:text-3xl font-light text-gold">
-              Lawyers
-            </span>
+          <Link to="/" className="flex items-center gap-3">
+            {/* Logo Image */}
+            <img 
+              src="/logo.png" 
+              alt="GAG Lawyers" 
+              className="h-12 w-auto"
+            />
+            {/* Text Logo - Always show alongside image */}
+            <div className="flex items-center gap-2">
+              <span className="font-serif text-2xl lg:text-3xl font-bold text-white">
+                GAG
+              </span>
+              <span className="font-serif text-2xl lg:text-3xl font-light text-gold">
+                Lawyers
+              </span>
+            </div>
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
               link.hasDropdown ? (
                 <div
                   key={link.name}
                   className="relative group"
-                  onMouseEnter={() => setAboutDropdownOpen(true)}
-                  onMouseLeave={() => setAboutDropdownOpen(false)}
+                  onMouseEnter={() => link.dropdownType === 'about' ? setAboutDropdownOpen(true) : setServicesDropdownOpen(true)}
+                  onMouseLeave={() => link.dropdownType === 'about' ? setAboutDropdownOpen(false) : setServicesDropdownOpen(false)}
                 >
                   <button
                     className={`font-sans text-sm font-medium transition-colors duration-200 flex items-center gap-1 ${
@@ -73,28 +111,44 @@ const Navbar = () => {
                     }`}
                   >
                     {link.name}
-                    <ChevronDown size={16} className={`transition-transform duration-200 ${aboutDropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown size={16} className={`transition-transform duration-200 ${
+                      (link.dropdownType === 'about' && aboutDropdownOpen) || (link.dropdownType === 'services' && servicesDropdownOpen) ? 'rotate-180' : ''
+                    }`} />
                   </button>
                   
                   {/* Dropdown Menu */}
                   <div
-                    className={`absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden transition-all duration-200 ${
-                      aboutDropdownOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
+                    className={`absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden transition-all duration-200 ${
+                      link.dropdownType === 'services' ? 'w-80 max-h-96 overflow-y-auto' : 'w-56'
+                    } ${
+                      (link.dropdownType === 'about' && aboutDropdownOpen) || (link.dropdownType === 'services' && servicesDropdownOpen)
+                        ? 'opacity-100 visible translate-y-0' 
+                        : 'opacity-0 invisible -translate-y-2'
                     }`}
+                    style={link.dropdownType === 'services' ? {
+                      scrollbarWidth: 'thin',
+                      scrollbarColor: '#C5A572 #f3f4f6'
+                    } : {}}
                   >
-                    {link.submenu.map((sublink, index) => (
-                      <Link
-                        key={sublink.path}
-                        to={sublink.path}
-                        className={`block px-4 py-3 font-sans text-sm transition-colors ${
-                          location.pathname === sublink.path
-                            ? 'bg-gold/10 text-gold font-medium'
-                            : 'text-gray-700 hover:bg-grey-light hover:text-navy'
-                        } ${index !== link.submenu.length - 1 ? 'border-b border-gray-100' : ''}`}
-                      >
-                        {sublink.name}
-                      </Link>
-                    ))}
+                    {link.submenu.length > 0 ? (
+                      link.submenu.map((sublink, index) => (
+                        <Link
+                          key={sublink.path}
+                          to={sublink.path}
+                          className={`block px-4 py-3 font-sans text-sm transition-colors ${
+                            location.pathname === sublink.path
+                              ? 'bg-gold/10 text-gold font-medium'
+                              : 'text-gray-700 hover:bg-grey-light hover:text-navy'
+                          } ${index !== link.submenu.length - 1 ? 'border-b border-gray-100' : ''}`}
+                        >
+                          {sublink.name}
+                        </Link>
+                      ))
+                    ) : (
+                      <div className="px-4 py-3 text-sm text-gray-500 font-sans">
+                        Loading services...
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (
@@ -112,9 +166,9 @@ const Navbar = () => {
               )
             ))}
             <Link to="/contact">
-              <Button variant="gold" size="sm">
+              <button className="px-5 py-2.5 bg-gold text-navy font-sans text-sm font-semibold rounded-md transition-all duration-200 hover:brightness-110 hover:scale-105">
                 Get Consultation
-              </Button>
+              </button>
             </Link>
           </div>
 
@@ -136,28 +190,36 @@ const Navbar = () => {
               link.hasDropdown ? (
                 <div key={link.name}>
                   <button
-                    onClick={() => setAboutDropdownOpen(!aboutDropdownOpen)}
+                    onClick={() => link.dropdownType === 'about' ? setAboutDropdownOpen(!aboutDropdownOpen) : setServicesDropdownOpen(!servicesDropdownOpen)}
                     className="w-full flex items-center justify-between py-2 font-sans text-base font-medium text-white hover:text-gold transition-colors"
                   >
                     {link.name}
-                    <ChevronDown size={16} className={`transition-transform duration-200 ${aboutDropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown size={16} className={`transition-transform duration-200 ${
+                      (link.dropdownType === 'about' && aboutDropdownOpen) || (link.dropdownType === 'services' && servicesDropdownOpen) ? 'rotate-180' : ''
+                    }`} />
                   </button>
-                  {aboutDropdownOpen && (
-                    <div className="pl-4 space-y-1">
-                      {link.submenu.map((sublink) => (
-                        <Link
-                          key={sublink.path}
-                          to={sublink.path}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className={`block py-2 font-sans text-sm transition-colors ${
-                            location.pathname === sublink.path
-                              ? 'text-gold font-medium'
-                              : 'text-gray-300 hover:text-gold'
-                          }`}
-                        >
-                          {sublink.name}
-                        </Link>
-                      ))}
+                  {((link.dropdownType === 'about' && aboutDropdownOpen) || (link.dropdownType === 'services' && servicesDropdownOpen)) && (
+                    <div className={`pl-4 space-y-1 ${link.dropdownType === 'services' ? 'max-h-64 overflow-y-auto' : ''}`}>
+                      {link.submenu.length > 0 ? (
+                        link.submenu.map((sublink) => (
+                          <Link
+                            key={sublink.path}
+                            to={sublink.path}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={`block py-2 font-sans text-sm transition-colors ${
+                              location.pathname === sublink.path
+                                ? 'text-gold font-medium'
+                                : 'text-gray-300 hover:text-gold'
+                            }`}
+                          >
+                            {sublink.name}
+                          </Link>
+                        ))
+                      ) : (
+                        <div className="py-2 text-sm text-gray-400 font-sans">
+                          Loading services...
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
