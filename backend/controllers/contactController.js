@@ -68,12 +68,17 @@ const createContactInquiry = async (req, res) => {
 const getAllContactInquiries = async (req, res) => {
   try {
     const inquiries = await ContactInquiry.find().sort({ createdAt: -1 });
+    
+    console.log('✅ Retrieved contact inquiries:', inquiries.length);
+    
     res.status(200).json({
       success: true,
       count: inquiries.length,
       data: inquiries,
+      message: inquiries.length > 0 ? `Found ${inquiries.length} inquiries` : 'No inquiries found'
     });
   } catch (error) {
+    console.error('❌ Error retrieving inquiries:', error);
     res.status(500).json({
       success: false,
       message: 'Server Error',

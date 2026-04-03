@@ -7,26 +7,40 @@ const protect = async (req, res, next) => {
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
       token = req.headers.authorization.split(' ')[1];
+      console.log('🔑 Token received (first 20 chars):', token.substring(0, 20));
+      
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log('✅ Token verified, user ID:', decoded.id);
+      
       req.user = await User.findById(decoded.id).select('-password');
       
-      if (!req.user || !req.user.isActive) {
+      if (!req.user) {
+        console.log('❌ User not found in database');
         return res.status(401).json({
           success: false,
-          message: 'Not authorized, user not found or inactive',
+          message: 'Not authorized, user not found',
         });
       }
       
+      if (!req.user.isActive) {
+        console.log('❌ User is inactive');
+        return res.status(401).json({
+          success: false,
+          message: 'Not authorized, user is inactive',
+        });
+      }
+      
+      console.log('✅ User authenticated:', req.user.email);
       next();
     } catch (error) {
+      console.log('❌ Token verification failed:', error.message);
       return res.status(401).json({
         success: false,
-        message: 'Not authorized, token failed',
+        message: 'Not authorized, token failed - ' + error.message,
       });
     }
-  }
-
-  if (!token) {
+  } else {
+    console.log('❌ No Bearer token found in authorization header');
     return res.status(401).json({
       success: false,
       message: 'Not authorized, no token',

@@ -24,17 +24,51 @@ const ContactForms = () => {
   const fetchSubmissions = async () => {
     const token = localStorage.getItem('adminToken');
     
+    if (!token) {
+      console.error('❌ No token found in localStorage');
+      showNotification('Authentication required - Please login again', 'error');
+      setLoading(false);
+      return;
+    }
+    
+    console.log('🔑 Token found:', token.substring(0, 20) + '...');
+    
     try {
+      console.log('📡 Fetching from:', `${API_BASE_URL}/api/contact`);
+      
       const response = await fetch(`${API_BASE_URL}/api/contact`, {
-        headers: { Authorization: `Bearer ${token}` },
+        method: 'GET',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
       });
+      
+      console.log('📊 Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('❌ API Error Response:', errorData);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
       const data = await response.json();
-      if (data.success) {
-        setSubmissions(data.data || []);
+      console.log('✅ API Response:', data);
+      
+      if (data.success && data.data) {
+        setSubmissions(Array.isArray(data.data) ? data.data : []);
+        console.log('✅ Loaded submissions:', data.data.length);
+      } else {
+        console.warn('⚠️ API response unsuccessful:', data);
+        setSubmissions([]);
+        if (data.message) {
+          showNotification(`API Error: ${data.message}`, 'error');
+        }
       }
     } catch (error) {
-      console.error('Error fetching submissions:', error);
-      showNotification('Failed to load submissions', 'error');
+      console.error('❌ Error fetching submissions:', error);
+      setSubmissions([]);
+      showNotification(`Failed to load submissions: ${error.message}`, 'error');
     } finally {
       setLoading(false);
     }
