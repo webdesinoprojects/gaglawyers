@@ -582,7 +582,7 @@ export const services = [
   {
     id: 21,
     name: "Motor Accident & MACT Cases",
-    slug: "motor-accident-mact",
+    slug: "motor-accident-claims",
     category: "civil",
     shortDescription: "Representation in motor accident claims and Motor Accidents Claims Tribunal.",
     longDescription: "We handle motor accident injury claims, disability assessments, and MACT proceedings. Our expertise includes calculating fair compensation, negotiating with insurers, and representing claimants before tribunals.",
@@ -611,7 +611,7 @@ export const services = [
   {
     id: 22,
     name: "Property Law & Real Estate Disputes",
-    slug: "property-real-estate",
+    slug: "property-real-estate-disputes",
     category: "property",
     shortDescription: "Expert handling of property disputes and real estate legal matters.",
     longDescription: "We provide comprehensive property law services including real estate disputes, title issues, registration matters, and possession disputes. Our team handles residential, commercial, and agricultural property matters.",

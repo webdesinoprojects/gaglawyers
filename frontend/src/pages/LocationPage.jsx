@@ -4,7 +4,6 @@ import { MapPin, Phone, Mail, ArrowRight, CheckCircle, ChevronRight } from 'luci
 import SEOHead from '../components/SEOHead';
 import Button from '../components/Button';
 import API_BASE_URL from '../config/api';
-import { getServiceBySlug } from '../data/services';
 
 // List of supported cities - can be expanded
 const SUPPORTED_CITIES = [
@@ -33,18 +32,36 @@ const LocationPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (service && city) {
-      const foundService = getServiceBySlug(service);
-      if (foundService) {
-        setServiceData(foundService);
-        setCityName(getCityName(city));
-      } else {
+    const fetchService = async () => {
+      try {
+        if (service && city) {
+          // Fetch services from API
+          const response = await fetch(`${API_BASE_URL}/api/services`);
+          const data = await response.json();
+          
+          if (data.success && data.data) {
+            const foundService = data.data.find(s => s.slug === service);
+            if (foundService) {
+              setServiceData(foundService);
+              setCityName(getCityName(city));
+            } else {
+              navigate('/');
+            }
+          } else {
+            navigate('/');
+          }
+        } else {
+          navigate('/');
+        }
+      } catch (error) {
+        console.error('Error fetching service:', error);
         navigate('/');
+      } finally {
+        setLoading(false);
       }
-    } else {
-      navigate('/');
-    }
-    setLoading(false);
+    };
+
+    fetchService();
   }, [service, city, navigate]);
 
   if (loading || !serviceData) {
