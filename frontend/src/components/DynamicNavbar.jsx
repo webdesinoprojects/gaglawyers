@@ -5,11 +5,23 @@ import Button from './Button';
 import TopBar from './TopBar';
 import API_BASE_URL from '../config/api';
 
+const HOME_ANCHOR_LINKS = [
+  { label: 'Practice areas', hash: 'practice-areas' },
+  { label: 'About the firm', hash: 'about' },
+  { label: 'Our team', hash: 'team' },
+  { label: 'Testimonials', hash: 'testimonials' },
+  { label: 'Experience', hash: 'experience' },
+  { label: 'Articles', hash: 'articles' },
+  { label: 'Awards', hash: 'awards' },
+  { label: 'Consultation', hash: 'consultation' },
+];
+
 const DynamicNavbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
+  const [homePageNavOpen, setHomePageNavOpen] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
   const [services, setServices] = useState([]);
   const [globalSettings, setGlobalSettings] = useState(null);
@@ -212,11 +224,58 @@ const DynamicNavbar = () => {
                 </Link>
               )
             ))}
-            <Link to="/contact">
-              <button className="px-5 py-2.5 bg-gold text-navy font-sans text-sm font-semibold rounded-md transition-all duration-200 hover:brightness-110 hover:scale-105">
-                Get Consultation
-              </button>
-            </Link>
+            {location.pathname === '/' && (
+              <div
+                className="relative"
+                onMouseEnter={() => setHomePageNavOpen(true)}
+                onMouseLeave={() => setHomePageNavOpen(false)}
+              >
+                <button
+                  type="button"
+                  className={`font-sans text-sm font-medium transition-colors duration-200 flex items-center gap-1 ${
+                    homePageNavOpen ? 'text-gold' : 'text-white hover:text-gold'
+                  }`}
+                >
+                  On this page
+                  <ChevronDown
+                    size={16}
+                    className={`transition-transform duration-200 ${homePageNavOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                <div
+                  className={`absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-100 py-1 transition-all duration-200 ${
+                    homePageNavOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
+                  }`}
+                >
+                  {HOME_ANCHOR_LINKS.map((item) => (
+                    <a
+                      key={item.hash}
+                      href={`/#${item.hash}`}
+                      className="block px-3 py-2.5 font-sans text-xs text-gray-700 hover:bg-gray-100 hover:text-navy rounded-md mx-1"
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+            {location.pathname === '/' ? (
+              <a
+                href="/#consultation"
+                className="px-5 py-2.5 bg-gold text-navy font-sans text-sm font-semibold rounded-md transition-all duration-200 hover:brightness-110 hover:scale-105 inline-block text-center"
+              >
+                Book consultation
+              </a>
+            ) : (
+              <Link to="/contact">
+                <button
+                  type="button"
+                  className="px-5 py-2.5 bg-gold text-navy font-sans text-sm font-semibold rounded-md transition-all duration-200 hover:brightness-110 hover:scale-105"
+                >
+                  Get Consultation
+                </button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -233,6 +292,25 @@ const DynamicNavbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-navy border-t border-white/10">
           <div className="px-4 pt-2 pb-4 space-y-1">
+            {location.pathname === '/' && (
+              <div className="border-b border-white/10 pb-2 mb-2">
+                <p className="py-2 font-sans text-xs font-semibold uppercase tracking-wider text-gold/90">
+                  On this page
+                </p>
+                <div className="space-y-0.5">
+                  {HOME_ANCHOR_LINKS.map((item) => (
+                    <a
+                      key={item.hash}
+                      href={`/#${item.hash}`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block py-1.5 font-sans text-sm text-gray-300 hover:text-gold"
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
             {navLinks.map((link) => (
               link.hasDropdown ? (
                 <div key={link.label}>
@@ -287,11 +365,19 @@ const DynamicNavbar = () => {
                 </Link>
               )
             ))}
-            <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)}>
-              <Button variant="gold" size="sm" className="w-full mt-2">
-                Get Consultation
-              </Button>
-            </Link>
+            {location.pathname === '/' ? (
+              <a href="/#consultation" onClick={() => setIsMobileMenuOpen(false)} className="block mt-2">
+                <Button variant="gold" size="sm" className="w-full">
+                  Book consultation
+                </Button>
+              </a>
+            ) : (
+              <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button variant="gold" size="sm" className="w-full mt-2">
+                  Get Consultation
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       )}

@@ -12,7 +12,7 @@ const API_BASE = 'http://localhost:5000';
     const createRes = await axios.post(`${API_BASE}/api/contact`, {
       name: 'Test User',
       email: 'test@example.com',
-      phone: '9876543210',
+      phone: '9996263370',
       serviceOfInterest: 'Corporate Law',
       message: 'Test message'
     });

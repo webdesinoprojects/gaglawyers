@@ -113,7 +113,7 @@ const ConsultationForm = ({ serviceName }) => {
               value={formData.phone}
               onChange={handleChange}
               required
-              placeholder="+91 98765 43210"
+              placeholder="Your mobile number (with country code)"
               className="w-full px-4 py-3 rounded-lg border-2 border-white/20 bg-white/10 text-white placeholder-white/50 font-sans focus:outline-none focus:border-[#c9a84c] transition-colors"
             />
           </div>
@@ -169,8 +169,8 @@ const ConsultationForm = ({ serviceName }) => {
             <Phone size={20} className="text-[#c9a84c] flex-shrink-0 mt-1" />
             <div>
               <p className="font-sans text-sm font-semibold text-gray-900 mb-1">Phone</p>
-              <a href="tel:+919876543210" className="font-sans text-sm text-gray-600 hover:text-[#c9a84c]">
-                +91 98765 43210
+              <a href="tel:+919996263370" className="font-sans text-sm text-gray-600 hover:text-[#c9a84c]">
+                +91 99962 63370
               </a>
             </div>
           </div>

@@ -284,7 +284,7 @@ const TermsOfService = () => {
                       <strong>Email:</strong> <a href="mailto:legal@gaglawyers.com" className="text-gold hover:underline">legal@gaglawyers.com</a>
                     </p>
                     <p className="font-sans text-gray-700">
-                      <strong>Phone:</strong> <a href="tel:+919876543210" className="text-gold hover:underline">+91 98765 43210</a>
+                      <strong>Phone:</strong> <a href="tel:+919996263370" className="text-gold hover:underline">+91 99962 63370</a>
                     </p>
                     <p className="font-sans text-gray-700">
                       <strong>Address:</strong> GAG Lawyers - Grover & Grover Advocates, New Delhi, India

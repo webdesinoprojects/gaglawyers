@@ -247,12 +247,12 @@ const seedData = async () => {
       },
       {
         settingKey: 'whatsappNumber',
-        settingValue: '+919876543210',
+        settingValue: '+919996263370',
         description: 'WhatsApp contact number',
       },
       {
         settingKey: 'phoneNumber',
-        settingValue: '+919876543210',
+        settingValue: '+919996263370',
         description: 'Phone contact number',
       },
       {

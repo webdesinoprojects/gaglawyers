@@ -2,14 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Save } from 'lucide-react';
 import Button from '../../components/Button';
 import API_BASE_URL from '../../config/api';
+import { invalidatePublicWidgetSettingsCache } from '../../utils/widgetSettingsCache';
 
 const SiteSettings = () => {
   const [settings, setSettings] = useState({
     disclaimerEnabled: true,
     disclaimerText: 'The information provided on this website is for general informational purposes only. It does not constitute legal advice and should not be relied upon as such. No attorney-client relationship is created by use of this website or its content.\n\nFor specific legal advice regarding your individual situation, please consult directly with a qualified attorney at our firm. Past results do not guarantee future outcomes.',
     whatsappEnabled: true,
-    whatsappNumber: '+919876543210',
-    phoneNumber: '+919876543210',
+    whatsappNumber: '+919996263370',
+    phoneNumber: '+919996263370',
     email: 'contact@gaglawyers.com',
     address: '123 Lawyers Colony, Connaught Place, New Delhi - 110001',
     copyProtectionEnabled: false,
@@ -73,6 +74,7 @@ const SiteSettings = () => {
       });
 
       await Promise.all(updates);
+      invalidatePublicWidgetSettingsCache();
       setMessage('✓ Settings saved successfully! Changes will take effect immediately.');
       
       // Auto-dismiss success message after 5 seconds
@@ -234,7 +236,7 @@ const SiteSettings = () => {
                 value={settings.whatsappNumber}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy font-sans"
-                placeholder="+919876543210"
+                placeholder="International format, e.g. +91…"
               />
             </div>
           </div>

@@ -305,7 +305,9 @@ const LocationPage = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-8 text-sm">
             <div className="flex items-center gap-3">
               <Phone size={20} className="text-gold" />
-              <span className="font-sans">+91 98765 43210</span>
+              <a href="tel:+919996263370" className="font-sans text-white hover:text-gold transition-colors">
+                +91 99962 63370
+              </a>
             </div>
             <div className="hidden md:block w-px h-6 bg-white/20"></div>
             <div className="flex items-center gap-3">

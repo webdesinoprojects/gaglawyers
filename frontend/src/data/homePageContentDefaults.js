@@ -11,10 +11,10 @@ export const DEFAULT_CAROUSEL_SLIDES = [
     headingAccent: 'Excellence in Practice.',
     description:
       "India's premier law firm delivering strategic legal counsel across corporate, litigation, and regulatory matters for over two decades.",
-    ctaPrimaryText: 'Schedule a Consultation',
-    ctaPrimaryLink: '/contact',
+    ctaPrimaryText: 'Book a Consultation',
+    ctaPrimaryLink: '/#book-appointment',
     ctaSecondaryText: 'Our Practice Areas',
-    ctaSecondaryLink: '/services',
+    ctaSecondaryLink: '/#practice-areas',
   },
   {
     image: 'https://images.unsplash.com/photo-1505664194779-8beaceb93744?w=1920&q=80',
@@ -23,10 +23,10 @@ export const DEFAULT_CAROUSEL_SLIDES = [
     headingAccent: 'Legal Partners.',
     description:
       'Comprehensive legal solutions tailored to your unique needs. From corporate law to civil litigation, we stand by your side.',
-    ctaPrimaryText: 'Get Legal Advice',
-    ctaPrimaryLink: '/contact',
+    ctaPrimaryText: 'Book a Consultation',
+    ctaPrimaryLink: '/#book-appointment',
     ctaSecondaryText: 'View Services',
-    ctaSecondaryLink: '/services',
+    ctaSecondaryLink: '/#practice-areas',
   },
   {
     image: 'https://images.unsplash.com/photo-1479142506502-19b3a3b7ff33?w=1920&q=80',
@@ -35,8 +35,8 @@ export const DEFAULT_CAROUSEL_SLIDES = [
     headingAccent: 'Legal Excellence.',
     description:
       'With over 5000 cases won and a 98% success rate, we bring unmatched expertise and dedication to every case.',
-    ctaPrimaryText: 'Consult Our Experts',
-    ctaPrimaryLink: '/contact',
+    ctaPrimaryText: 'Book a Consultation',
+    ctaPrimaryLink: '/#book-appointment',
     ctaSecondaryText: 'Our Achievements',
     ctaSecondaryLink: '/awards',
   },
@@ -131,13 +131,49 @@ export const DEFAULT_TESTIMONIALS_INTRO = {
   eyebrow: 'Client Success Stories',
 };
 
+export const DEFAULT_WHO_WE_ARE = {
+  eyebrow: 'Who We Are',
+  title: 'A Firm Built on Integrity & Results',
+  intro:
+    'GAG Lawyers — Grover & Grover Advocates — is a full-service law firm with a decades-long record of representing clients in complex disputes, regulatory matters, and high-stakes litigation.',
+  mission:
+    'Our mission is to deliver precise, ethical, and business-aware legal counsel while keeping clients informed and empowered at every stage.',
+};
+
+export const DEFAULT_OUR_VALUES = {
+  eyebrow: 'Our Values',
+  title: 'What Guides Us Every Day',
+  subtitle: 'Principles that shape how we advise, represent, and partner with clients.',
+  cards: [
+    { title: 'Integrity', body: 'Transparent advice and steadfast ethical standards in every matter.' },
+    { title: 'Excellence', body: 'Rigorous preparation, clear strategy, and disciplined execution.' },
+    { title: 'Respect', body: 'We listen first—then advocate with clarity and empathy.' },
+    { title: 'Accountability', body: 'Measurable progress, honest timelines, and regular communication.' },
+  ],
+};
+
+export const DEFAULT_AWARDS_HOME = {
+  eyebrow: 'Recognition',
+  title: 'Awards & Recognition',
+  subtitle: 'Highlights from our journey—honouring excellence in advocacy and client service.',
+  viewAllText: 'View all awards',
+};
+
+export const DEFAULT_CONSULTATION_CTA = {
+  eyebrow: 'Free Consultation',
+  title: 'Get a Free Consultation Today',
+  subtitle: 'Share your legal issue and preferred time to talk. Our team will respond promptly.',
+  submitLabel: 'Submit request',
+  submittingLabel: 'Sending…',
+};
+
 export const DEFAULT_CONSULTATION_FORM = {
   title: 'Book Your Consultation',
   subtitle: 'We will contact you within 24 hours',
   placeholders: {
     name: 'Your name',
     email: 'your@email.com',
-    phone: '+91 ...',
+    phone: 'Your mobile number (with country code)',
     service: 'Select a service',
     description: 'Your legal matter (optional)',
   },
@@ -154,7 +190,7 @@ export const DEFAULT_CTA_BAND = {
     'Our experienced legal team is here to provide you with expert guidance and representation. Schedule a consultation to discuss your case and explore your legal options.',
   primaryCtaText: 'Schedule Consultation',
   primaryCtaLink: '/contact',
-  phoneDisplay: '+919876543210',
+  phoneDisplay: '+919996263370',
   secondaryCtaText: 'Call Now',
   sidebarTitle: 'What to Expect',
   checklist: [
@@ -211,6 +247,10 @@ export function getDefaultHomeSectionsForAdmin() {
     testimonialsScroll: { ...DEFAULT_TESTIMONIALS_SCROLL_HINT },
     whyChoose: JSON.parse(JSON.stringify(DEFAULT_WHY_CHOOSE)),
     howWeWork: JSON.parse(JSON.stringify(DEFAULT_HOW_WE_WORK)),
+    whoWeAre: JSON.parse(JSON.stringify(DEFAULT_WHO_WE_ARE)),
+    ourValues: JSON.parse(JSON.stringify(DEFAULT_OUR_VALUES)),
+    awardsHome: JSON.parse(JSON.stringify(DEFAULT_AWARDS_HOME)),
+    consultationCta: JSON.parse(JSON.stringify(DEFAULT_CONSULTATION_CTA)),
     teamSection: { ...DEFAULT_TEAM_SECTION },
     blogSection: { ...DEFAULT_BLOG_SECTION },
     consultationForm: JSON.parse(JSON.stringify(DEFAULT_CONSULTATION_FORM)),
@@ -254,6 +294,15 @@ export function mergeHomeSections(sections) {
       ...s.howWeWork,
       steps: s.howWeWork?.steps?.length > 0 ? s.howWeWork.steps : DEFAULT_HOW_WE_WORK.steps,
     },
+    whoWeAre: { ...DEFAULT_WHO_WE_ARE, ...(s.whoWeAre || {}) },
+    ourValues: {
+      ...DEFAULT_OUR_VALUES,
+      ...s.ourValues,
+      cards:
+        s.ourValues?.cards?.length > 0 ? s.ourValues.cards : DEFAULT_OUR_VALUES.cards,
+    },
+    awardsHome: { ...DEFAULT_AWARDS_HOME, ...(s.awardsHome || {}) },
+    consultationCta: { ...DEFAULT_CONSULTATION_CTA, ...(s.consultationCta || {}) },
     teamSection: { ...DEFAULT_TEAM_SECTION, ...s.teamSection },
     blogSection: { ...DEFAULT_BLOG_SECTION, ...s.blogSection },
     consultationForm: {

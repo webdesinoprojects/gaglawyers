@@ -41,7 +41,7 @@ const SEOHead = ({
       alternateName: 'Grover & Grover Advocates',
       description: description,
       url: window.location.origin,
-      telephone: '+919876543210',
+      telephone: '+919996263370',
       email: 'contact@gaglawyers.com',
       address: {
         '@type': 'PostalAddress',

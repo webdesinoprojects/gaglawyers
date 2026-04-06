@@ -127,7 +127,12 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-sans font-semibold text-navy mb-1">Phone</h3>
-                    <p className="font-sans text-gray-600">+91 98765 43210</p>
+                    <a
+                      href="tel:+919996263370"
+                      className="font-sans text-gray-600 hover:text-gold transition-colors"
+                    >
+                      +91 99962 63370
+                    </a>
                     <p className="font-sans text-sm text-gray-500">WhatsApp Available</p>
                   </div>
                 </div>
@@ -229,7 +234,7 @@ const Contact = () => {
                       onChange={handleChange}
                       required
                       className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition-colors font-sans"
-                      placeholder="+91 98765 43210"
+                      placeholder="Your mobile number (with country code)"
                     />
                   </div>
                 </div>

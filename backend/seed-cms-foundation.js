@@ -21,8 +21,8 @@ const seedCMSFoundation = async () => {
         siteDescription: 'Delivering excellence in legal services with integrity and precision.',
         contact: {
           phone: {
-            primary: '+91 98765 43210',
-            displayText: '+91 98765 43210',
+            primary: '+91 99962 63370',
+            displayText: '+91 99962 63370',
             availability: 'Mon-Fri, 9am-6pm',
           },
           email: {

@@ -4,9 +4,10 @@ import { useLocation } from 'react-router-dom';
 import API_BASE_URL from '../config/api';
 import { useGuidedChatbot } from '../hooks/useGuidedChatbot';
 import GuidedChatbotPanel from './chatbot/GuidedChatbotPanel';
-
-const WIDGET_SETTINGS_CACHE_KEY = 'gag-widget-settings-v1';
-let widgetSettingsCache = null;
+import {
+  SETTINGS_REV_KEY,
+  WIDGET_SETTINGS_CACHE_KEY,
+} from '../utils/widgetSettingsCache';
 
 const FloatingWidgets = () => {
   const location = useLocation();
@@ -21,17 +22,60 @@ const FloatingWidgets = () => {
   // Don't show widgets in admin panel
   const isAdminPanel = location.pathname.startsWith('/admin');
 
+  const fetchWidgetSettingsFromApi = async () => {
+    const [whatsappEnabledRes, whatsappNumberRes, phoneNumberRes] = await Promise.all([
+      fetch(`${API_BASE_URL}/api/settings/whatsappEnabled`),
+      fetch(`${API_BASE_URL}/api/settings/whatsappNumber`),
+      fetch(`${API_BASE_URL}/api/settings/phoneNumber`),
+    ]);
+
+    const whatsappEnabledData = await whatsappEnabledRes.json();
+    const whatsappNumberData = await whatsappNumberRes.json();
+    const phoneNumberData = await phoneNumberRes.json();
+
+    const nextSettings = {
+      whatsappEnabled: whatsappEnabledData.success ? whatsappEnabledData.data.settingValue : false,
+      whatsappNumber: whatsappNumberData.success ? whatsappNumberData.data.settingValue : '',
+      phoneNumber: phoneNumberData.success ? phoneNumberData.data.settingValue : '',
+    };
+
+    try {
+      sessionStorage.setItem(WIDGET_SETTINGS_CACHE_KEY, JSON.stringify(nextSettings));
+    } catch {
+      /* ignore */
+    }
+    return nextSettings;
+  };
+
+  const applyCachedOrFetch = async (preferFresh) => {
+    if (!preferFresh) {
+      try {
+        const cached = sessionStorage.getItem(WIDGET_SETTINGS_CACHE_KEY);
+        if (cached) {
+          return JSON.parse(cached);
+        }
+      } catch {
+        /* ignore invalid cache */
+      }
+    }
+    try {
+      return await fetchWidgetSettingsFromApi();
+    } catch (error) {
+      console.error('Error fetching widget settings:', error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     let isMounted = true;
     let visibilityTimer;
 
     if (!isAdminPanel) {
-      fetchSettings().then((nextSettings) => {
+      applyCachedOrFetch(false).then((nextSettings) => {
         if (isMounted && nextSettings) {
           setSettings(nextSettings);
         }
       });
-      // Show widgets after a small delay for better UX
       visibilityTimer = setTimeout(() => {
         if (isMounted) {
           setIsVisible(true);
@@ -47,44 +91,29 @@ const FloatingWidgets = () => {
     };
   }, [isAdminPanel]);
 
-  const fetchSettings = async () => {
-    if (widgetSettingsCache) {
-      return widgetSettingsCache;
-    }
+  /** Same-tab admin save + other-tab settings updates */
+  useEffect(() => {
+    const refresh = () => {
+      applyCachedOrFetch(true).then((next) => {
+        if (next) setSettings(next);
+      });
+    };
 
-    const cachedSettings = sessionStorage.getItem(WIDGET_SETTINGS_CACHE_KEY);
-    if (cachedSettings) {
-      const parsedSettings = JSON.parse(cachedSettings);
-      widgetSettingsCache = parsedSettings;
-      return parsedSettings;
-    }
+    const onInvalidate = () => refresh();
 
-    try {
-      const [whatsappEnabledRes, whatsappNumberRes, phoneNumberRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/settings/whatsappEnabled`),
-        fetch(`${API_BASE_URL}/api/settings/whatsappNumber`),
-        fetch(`${API_BASE_URL}/api/settings/phoneNumber`)
-      ]);
+    const onStorage = (e) => {
+      if (e.key === SETTINGS_REV_KEY) {
+        refresh();
+      }
+    };
 
-      const whatsappEnabledData = await whatsappEnabledRes.json();
-      const whatsappNumberData = await whatsappNumberRes.json();
-      const phoneNumberData = await phoneNumberRes.json();
-
-      const nextSettings = {
-        whatsappEnabled: whatsappEnabledData.success ? whatsappEnabledData.data.settingValue : false,
-        whatsappNumber: whatsappNumberData.success ? whatsappNumberData.data.settingValue : '',
-        phoneNumber: phoneNumberData.success ? phoneNumberData.data.settingValue : ''
-      };
-
-      widgetSettingsCache = nextSettings;
-      sessionStorage.setItem(WIDGET_SETTINGS_CACHE_KEY, JSON.stringify(nextSettings));
-
-      return nextSettings;
-    } catch (error) {
-      console.error('Error fetching widget settings:', error);
-      return null;
-    }
-  };
+    window.addEventListener('gag:widget-settings-invalidate', onInvalidate);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener('gag:widget-settings-invalidate', onInvalidate);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
 
   const handleWhatsAppClick = useCallback(() => {
     if (settings.whatsappNumber) {

@@ -17,7 +17,7 @@ const addPhoneSetting = async () => {
       // Add phoneNumber setting
       await SiteSettings.create({
         settingKey: 'phoneNumber',
-        settingValue: '+919876543210',
+        settingValue: '+919996263370',
         description: 'Phone contact number'
       });
       console.log('✓ phoneNumber setting added successfully');

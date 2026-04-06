@@ -6,7 +6,7 @@ const sampleContacts = [
   {
     name: 'Rajesh Kumar',
     email: 'rajesh.kumar@email.com',
-    phone: '+91-98765-43210',
+    phone: '+91-99962-63370',
     serviceOfInterest: 'Bail & Anticipatory Bail Cases',
     message: 'I need urgent legal assistance for an anticipatory bail application. The matter is related to a cheque bounce case. Please contact me as soon as possible.',
     status: 'new'

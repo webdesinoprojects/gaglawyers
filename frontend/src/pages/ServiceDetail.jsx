@@ -592,10 +592,10 @@ const ServiceDetail = () => {
                   Available 24/7 for urgent cases and immediate legal assistance.
                 </p>
                 <a
-                  href="tel:+919876543210"
+                  href="tel:+919996263370"
                   className="block bg-white text-red-600 font-sans font-bold py-3 px-6 rounded-lg hover:bg-red-50 transition-all text-center"
                 >
-                  Call Emergency: +91 98765 43210
+                  Call Emergency: +91 99962 63370
                 </a>
                 <p className="font-sans text-xs mt-4 text-white/80">
                   Note: This firm handles both complainant representation and false case defence for accused parties under 498A.

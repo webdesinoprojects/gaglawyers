@@ -13,7 +13,7 @@
  * - next?: string (node id)
  * - href?: string (internal route — navigates via React Router)
  * - external?: boolean
- * - tel?: string (e.g. +919996263370)
+ * - tel?: string (e.g. +91…)
  * - whatsapp?: true (uses parent handler)
  * - scrollHomeForm?: true (scroll to #book-consultation on /)
  * - restart?: true (clears stack and goes to welcome)
@@ -191,7 +191,7 @@ export const chatbotNodes = {
   contact_direct: {
     id: 'contact_direct',
     message:
-      'You can email contact@gaglawyers.com or call +91-9996263370 (replace with your published numbers if different on the site).\n\nWhatsApp may also be available from the buttons on this page.',
+      'You can email contact@gaglawyers.com or call +91 99962 63370.\n\nWhatsApp may also be available from the buttons on this page.',
     options: [
       { id: 'cd_call', label: 'Call', tel: '+919996263370', next: 'after_deep_link' },
       { id: 'cd_wa', label: 'WhatsApp', whatsapp: true, next: 'after_deep_link' },

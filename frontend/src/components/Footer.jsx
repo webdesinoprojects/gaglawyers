@@ -92,6 +92,26 @@ const sortFooterLocations = (items) => {
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const [locations, setLocations] = useState([]);
+  const [practiceServices, setPracticeServices] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadServices = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/services`);
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data) && !cancelled) {
+          setPracticeServices(data.data.slice(0, 10));
+        }
+      } catch {
+        /* optional */
+      }
+    };
+    loadServices();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -191,21 +211,21 @@ const Footer = () => {
           <p className="font-sans text-base lg:text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
             Get professional legal counsel tailored to your specific needs.
           </p>
-          <Link to="/contact">
-            <button className="px-8 py-3 bg-gold text-navy font-sans text-sm font-semibold rounded-md transition-all duration-200 hover:brightness-110 hover:scale-105 inline-flex items-center gap-2">
+          <a href="/#consultation">
+            <span className="px-8 py-3 bg-gold text-navy font-sans text-sm font-semibold rounded-md transition-all duration-200 hover:brightness-110 hover:scale-105 inline-flex items-center gap-2 cursor-pointer">
               Schedule Consultation
               <ArrowRight size={18} />
-            </button>
-          </Link>
+            </span>
+          </a>
         </div>
       </section>
 
       {/* Main Footer */}
       <footer className="bg-navy text-white">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
             {/* Brand Section */}
-            <div className="space-y-6">
+            <div className="space-y-6 sm:col-span-2 lg:col-span-1">
               <Link to="/" className="flex items-center gap-3">
                 {/* Logo Image */}
                 <img 
@@ -223,8 +243,11 @@ const Footer = () => {
                   </span>
                 </div>
               </Link>
+              <p className="font-sans text-xs uppercase tracking-widest text-gold/90 font-semibold">
+                Grover & Grover · Advocates and Solicitors
+              </p>
               <p className="font-sans text-sm text-gray-300 leading-relaxed max-w-[300px]">
-                Grover & Grover Advocates - Delivering excellence in legal services with integrity and precision.
+                Delivering excellence in legal services with integrity and precision.
               </p>
               
               {/* Trust Indicators */}
@@ -269,6 +292,39 @@ const Footer = () => {
                     Contact
                   </Link>
                 </li>
+                <li>
+                  <a
+                    href="/#consultation"
+                    className="text-gray-300 hover:text-gold transition-all duration-200 hover:translate-x-1 inline-block"
+                  >
+                    Book consultation
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Practice areas */}
+            <div>
+              <h4 className="font-serif text-lg font-semibold mb-6 text-white">Practice Areas</h4>
+              <ul className="space-y-2.5 font-sans text-sm">
+                <li>
+                  <Link
+                    to="/services"
+                    className="text-gray-300 hover:text-gold transition-all duration-200 hover:translate-x-1 inline-block font-medium"
+                  >
+                    View all services
+                  </Link>
+                </li>
+                {practiceServices.map((s) => (
+                  <li key={s._id}>
+                    <Link
+                      to={`/services/${s.slug}`}
+                      className="text-gray-300 hover:text-gold transition-all duration-200 hover:translate-x-1 inline-block line-clamp-2"
+                    >
+                      {s.name || s.title}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -279,8 +335,8 @@ const Footer = () => {
                 <li className="flex items-start gap-3">
                   <Phone size={20} className="mt-0.5 flex-shrink-0 text-gold" />
                   <div>
-                    <a href="tel:+919876543210" className="text-white text-base font-semibold hover:text-gold transition-colors">
-                      +91 98765 43210
+                    <a href="tel:+919996263370" className="text-white text-base font-semibold hover:text-gold transition-colors">
+                      +91 99962 63370
                     </a>
                     <p className="text-gray-400 text-xs mt-0.5">Mon-Fri, 9am-6pm</p>
                   </div>
@@ -293,7 +349,17 @@ const Footer = () => {
                 </li>
                 <li className="flex items-start gap-3">
                   <MapPin size={20} className="mt-0.5 flex-shrink-0 text-gold" />
-                  <span className="text-gray-300">New Delhi, India</span>
+                  <div>
+                    <span className="text-gray-300 block">New Delhi, India</span>
+                    <a
+                      href="https://maps.google.com/?q=New+Delhi+India"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gold/90 text-xs font-sans hover:underline mt-1 inline-block"
+                    >
+                      Open in Maps
+                    </a>
+                  </div>
                 </li>
               </ul>
               
