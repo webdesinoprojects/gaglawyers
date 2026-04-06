@@ -1,44 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import AnimatedStatValue from './AnimatedStatValue';
+import { DEFAULT_CAROUSEL_SLIDES, DEFAULT_CAROUSEL_TRUST_STRIP } from '../data/homePageContentDefaults';
 
-const HeroCarousel = ({ aside = null }) => {
+function normalizeSlides(rawSlides) {
+  const list = Array.isArray(rawSlides) && rawSlides.length > 0 ? rawSlides : DEFAULT_CAROUSEL_SLIDES;
+  return list.map((s, i) => ({
+    id: s.id ?? i + 1,
+    image: s.image || '',
+    tagline: s.tagline || '',
+    heading: s.heading || '',
+    headingAccent: s.headingAccent || '',
+    description: s.description || '',
+    ctaPrimary: {
+      text: s.ctaPrimary?.text ?? s.ctaPrimaryText ?? 'Learn more',
+      link: s.ctaPrimary?.link ?? s.ctaPrimaryLink ?? '/contact',
+    },
+    ctaSecondary: {
+      text: s.ctaSecondary?.text ?? s.ctaSecondaryText ?? 'Services',
+      link: s.ctaSecondary?.link ?? s.ctaSecondaryLink ?? '/services',
+    },
+  }));
+}
+
+const HeroCarousel = ({ aside = null, slides: slidesProp = null, trustStrip: trustStripProp = null }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-  const slides = [
-    {
-      id: 1,
-      image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1920&q=80',
-      tagline: 'Grover and Grover Advocates and Solicitors',
-      heading: 'Precision in Law.',
-      headingAccent: 'Excellence in Practice.',
-      description: "India's premier law firm delivering strategic legal counsel across corporate, litigation, and regulatory matters for over two decades.",
-      ctaPrimary: { text: 'Schedule a Consultation', link: '/contact' },
-      ctaSecondary: { text: 'Our Practice Areas', link: '/services' }
-    },
-    {
-      id: 2,
-      image: 'https://images.unsplash.com/photo-1505664194779-8beaceb93744?w=1920&q=80',
-      tagline: 'Expert Legal Representation',
-      heading: 'Your Trusted',
-      headingAccent: 'Legal Partners.',
-      description: 'Comprehensive legal solutions tailored to your unique needs. From corporate law to civil litigation, we stand by your side.',
-      ctaPrimary: { text: 'Get Legal Advice', link: '/contact' },
-      ctaSecondary: { text: 'View Services', link: '/services' }
-    },
-    {
-      id: 3,
-      image: 'https://images.unsplash.com/photo-1479142506502-19b3a3b7ff33?w=1920&q=80',
-      tagline: 'Proven Track Record',
-      heading: '20+ Years of',
-      headingAccent: 'Legal Excellence.',
-      description: 'With over 5000 cases won and a 98% success rate, we bring unmatched expertise and dedication to every case.',
-      ctaPrimary: { text: 'Consult Our Experts', link: '/contact' },
-      ctaSecondary: { text: 'Our Achievements', link: '/awards' }
-    }
-  ];
+  const slides = useMemo(() => normalizeSlides(slidesProp), [slidesProp]);
+
+  const trustStrip = useMemo(() => {
+    if (Array.isArray(trustStripProp) && trustStripProp.length > 0) return trustStripProp;
+    return DEFAULT_CAROUSEL_TRUST_STRIP;
+  }, [trustStripProp]);
+
+  useEffect(() => {
+    setCurrentSlide(0);
+  }, [slides.length, slidesProp]);
 
   useEffect(() => {
     if (!isAutoPlaying) return;
@@ -72,7 +71,6 @@ const HeroCarousel = ({ aside = null }) => {
 
   return (
     <div className="relative w-full h-[calc(100dvh-8rem)] min-h-[560px] max-h-[800px] overflow-hidden">
-      {/* Slide backgrounds only (cross-fade) */}
       {slides.map((s, index) => (
         <div
           key={s.id}
@@ -83,7 +81,7 @@ const HeroCarousel = ({ aside = null }) => {
           <div className="absolute inset-0">
             <img
               src={s.image}
-              alt={s.heading}
+              alt=""
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-navy/70" />
@@ -92,7 +90,6 @@ const HeroCarousel = ({ aside = null }) => {
         </div>
       ))}
 
-      {/* Hero copy + book form: single layer so the form is not duplicated per slide */}
       <div className="relative z-20 h-full flex items-center py-10 lg:py-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div
@@ -148,7 +145,6 @@ const HeroCarousel = ({ aside = null }) => {
         </div>
       </div>
 
-      {/* Navigation Arrows */}
       <button
         type="button"
         onClick={prevSlide}
@@ -167,7 +163,6 @@ const HeroCarousel = ({ aside = null }) => {
         <ChevronRight size={24} strokeWidth={2.5} />
       </button>
 
-      {/* Slide Indicators */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3">
         {slides.map((_, index) => (
           <button
@@ -184,30 +179,20 @@ const HeroCarousel = ({ aside = null }) => {
         ))}
       </div>
 
-      {/* Trust Indicators - Overlay on carousel */}
       <div className="absolute bottom-20 left-0 right-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-center lg:justify-start gap-8 lg:gap-12 py-6 px-8 bg-navy/40 backdrop-blur-md rounded-xl border border-white/10 max-w-fit">
-            <div className="text-center lg:text-left">
-              <p className="font-serif text-3xl lg:text-4xl font-bold text-white tabular-nums">
-                <AnimatedStatValue value="20+" duration={1600} />
-              </p>
-              <p className="font-sans text-xs lg:text-sm text-gray-300 mt-1">Years Experience</p>
-            </div>
-            <div className="w-px h-12 bg-white/30 hidden sm:block"></div>
-            <div className="text-center lg:text-left">
-              <p className="font-serif text-3xl lg:text-4xl font-bold text-white tabular-nums">
-                <AnimatedStatValue value="5000+" duration={2000} />
-              </p>
-              <p className="font-sans text-xs lg:text-sm text-gray-300 mt-1">Cases Won</p>
-            </div>
-            <div className="w-px h-12 bg-white/30 hidden sm:block"></div>
-            <div className="text-center lg:text-left">
-              <p className="font-serif text-3xl lg:text-4xl font-bold text-white tabular-nums">
-                <AnimatedStatValue value="98%" duration={1400} />
-              </p>
-              <p className="font-sans text-xs lg:text-sm text-gray-300 mt-1">Success Rate</p>
-            </div>
+            {trustStrip.map((item, idx) => (
+              <React.Fragment key={`${item.label}-${idx}`}>
+                {idx > 0 && <div className="w-px h-12 bg-white/30 hidden sm:block" />}
+                <div className="text-center lg:text-left">
+                  <p className="font-serif text-3xl lg:text-4xl font-bold text-white tabular-nums">
+                    <AnimatedStatValue value={item.value} duration={1600 + idx * 200} />
+                  </p>
+                  <p className="font-sans text-xs lg:text-sm text-gray-300 mt-1">{item.label}</p>
+                </div>
+              </React.Fragment>
+            ))}
           </div>
         </div>
       </div>

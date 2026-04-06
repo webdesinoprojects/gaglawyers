@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Edit, Trash2, MapPin, Eye, EyeOff, Search, Filter, Download, Upload, RefreshCw, BarChart3 } from 'lucide-react';
 import Button from '../../components/Button';
 import API_BASE_URL from '../../config/api';
+import { buildLocationPageSlug } from '../../utils/slugs';
 
 const LocationManager = () => {
   const [pages, setPages] = useState([]);
@@ -196,8 +197,7 @@ const LocationManager = () => {
       return;
     }
 
-    // Use slug from formData if provided, otherwise generate it
-    const slug = formData.slug || `${(selectedService.name || selectedService.title).toLowerCase().replace(/\s+/g, '-').replace(/[()&]/g, '')}-${formData.city.toLowerCase().replace(/\s+/g, '-')}`;
+    const slug = formData.slug || buildLocationPageSlug(selectedService.slug, formData.city);
     
     const pageData = {
       service: selectedService._id,
@@ -305,8 +305,7 @@ const LocationManager = () => {
       return;
     }
 
-    // Use slug from formData if provided, otherwise generate it
-    const slug = formData.slug || `${(selectedService.name || selectedService.title).toLowerCase().replace(/\s+/g, '-').replace(/[()&]/g, '')}-${formData.city.toLowerCase().replace(/\s+/g, '-')}`;
+    const slug = formData.slug || buildLocationPageSlug(selectedService.slug, formData.city);
     
     const pageData = {
       service: selectedService._id,
@@ -456,9 +455,7 @@ const LocationManager = () => {
           const serviceName = selectedService.name || selectedService.title;
           const city = updated.city;
           
-          // Auto-generate slug
-          const slug = `${serviceName.toLowerCase().replace(/\s+/g, '-').replace(/[()&]/g, '')}-${city.toLowerCase().replace(/\s+/g, '-')}`;
-          updated.slug = slug;
+          updated.slug = buildLocationPageSlug(selectedService.slug, city);
           
           // Auto-populate heading
           if (!prev.heading || prev.heading === '') {

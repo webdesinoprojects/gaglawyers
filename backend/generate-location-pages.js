@@ -5,21 +5,11 @@ const Service = require('./models/Service');
 const LocationPage = require('./models/LocationPage');
 const fs = require('fs');
 const path = require('path');
+const { buildLocationPageSlug, generateSlug } = require('./utils/slugify');
 
 // Read services and locations from JSON files
 const servicesFile = path.join(__dirname, 'services.json');
 const locationsFile = path.join(__dirname, 'locations.json');
-
-// Helper function to create slug
-const createSlug = (serviceName, city) => {
-  const serviceSlug = serviceName.toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-  const citySlug = city.toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-  return `${serviceSlug}-${citySlug}`;
-};
 
 // Generate content for location page
 const generateContent = (serviceName, city) => {
@@ -88,20 +78,23 @@ const generateLocationPages = async () => {
     const serviceMap = new Map();
     
     for (const serviceName of servicesData) {
-      let service = await Service.findOne({ title: serviceName });
+      let service = await Service.findOne({ $or: [{ title: serviceName }, { name: serviceName }] });
       
       if (!service) {
         service = await Service.create({
+          name: serviceName,
           title: serviceName,
-          description: `Professional ${serviceName.toLowerCase()} services by GAG Lawyers - Grover & Grover Advocates.`,
-          iconName: 'Scale',
+          slug: generateSlug(serviceName),
+          category: 'litigation',
+          shortDescription: `Professional ${serviceName.toLowerCase()} services by GAG Lawyers - Grover & Grover Advocates.`,
+          longDescription: `Professional ${serviceName.toLowerCase()} services by GAG Lawyers - Grover & Grover Advocates.`,
         });
         console.log(`   ✓ Created service: ${serviceName}`);
       } else {
         console.log(`   ✓ Found service: ${serviceName}`);
       }
       
-      serviceMap.set(serviceName, service._id);
+      serviceMap.set(serviceName, service);
     }
 
     console.log(`\n✅ ${serviceMap.size} services ready\n`);
@@ -132,10 +125,11 @@ const generateLocationPages = async () => {
     const locationPages = [];
 
     for (const serviceName of servicesData) {
-      const serviceId = serviceMap.get(serviceName);
+      const serviceDoc = serviceMap.get(serviceName);
+      const serviceId = serviceDoc._id;
       
       for (const city of locationsData) {
-        const slug = createSlug(serviceName, city);
+        const slug = buildLocationPageSlug(serviceDoc.slug, city);
         
         // Check if already exists
         const exists = await LocationPage.findOne({ slug });

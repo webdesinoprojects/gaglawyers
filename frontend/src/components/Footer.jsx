@@ -51,8 +51,12 @@ const CITY_ALIASES = {
 const normalizeCity = (value = '') => value.toString().trim().toLowerCase();
 const FOOTER_LOCATION_LIMIT = 200;
 const FOOTER_FETCH_LIMIT = 1000;
-const FOOTER_LOCATIONS_CACHE_KEY = 'gag-footer-locations-v3';
+/** Bump when API slug shape changes (e.g. `*-lawyer-in-*`) so clients refetch. */
+const FOOTER_LOCATIONS_CACHE_KEY = 'gag-footer-locations-v4';
 let footerLocationsCache = null;
+
+const isStaleFooterSlug = (slug) =>
+  typeof slug === 'string' && slug.length > 0 && !slug.includes('-lawyer-in-');
 
 const getCityPriority = (cityName) => {
   const normalized = normalizeCity(cityName);
@@ -93,24 +97,37 @@ const Footer = () => {
     let isMounted = true;
 
     const fetchLocations = async () => {
-      if (footerLocationsCache) {
+      if (
+        footerLocationsCache &&
+        footerLocationsCache.length > 0 &&
+        !footerLocationsCache.some((row) => isStaleFooterSlug(row?.slug))
+      ) {
         if (isMounted) {
           setLocations(footerLocationsCache);
         }
         return;
+      }
+      if (footerLocationsCache?.some((row) => isStaleFooterSlug(row?.slug))) {
+        footerLocationsCache = null;
       }
 
       try {
         const cachedLocations = sessionStorage.getItem(FOOTER_LOCATIONS_CACHE_KEY);
         if (cachedLocations) {
           const parsedLocations = JSON.parse(cachedLocations);
-          if (Array.isArray(parsedLocations) && parsedLocations.length > 0) {
+          const stale =
+            !Array.isArray(parsedLocations) ||
+            parsedLocations.length === 0 ||
+            parsedLocations.some((row) => isStaleFooterSlug(row?.slug));
+          if (!stale) {
             footerLocationsCache = parsedLocations;
             if (isMounted) {
               setLocations(parsedLocations);
             }
             return;
           }
+          sessionStorage.removeItem(FOOTER_LOCATIONS_CACHE_KEY);
+          footerLocationsCache = null;
         }
       } catch (error) {
         sessionStorage.removeItem(FOOTER_LOCATIONS_CACHE_KEY);

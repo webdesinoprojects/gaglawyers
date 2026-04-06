@@ -2,7 +2,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const LocationPage = require('./models/LocationPage');
 const Service = require('./models/Service');
-const { generateSlug } = require('./utils/slugify');
+const { generateSlug, buildLocationPageSlug } = require('./utils/slugify');
 
 const connectDB = async () => {
   try {
@@ -99,7 +99,7 @@ const fixEverything = async () => {
         console.log(`   ✓ Exists: ${serviceName}`);
       }
       
-      serviceMap.set(serviceName, service._id);
+      serviceMap.set(serviceName, service);
     }
     
     const finalServiceCount = await Service.countDocuments();
@@ -135,12 +135,13 @@ const fixEverything = async () => {
 
     for (let i = 0; i < EXACT_25_SERVICES.length; i++) {
       const serviceName = EXACT_25_SERVICES[i];
-      const serviceId = serviceMap.get(serviceName);
+      const serviceDoc = serviceMap.get(serviceName);
+      const serviceId = serviceDoc._id;
       
       console.log(`   [${i + 1}/${EXACT_25_SERVICES.length}] ${serviceName}`);
       
       for (const city of uniqueLocations) {
-        const slug = generateSlug(`${serviceName}-${city}`);
+        const slug = buildLocationPageSlug(serviceDoc.slug, city);
         
         locationPages.push({
           service: serviceId,

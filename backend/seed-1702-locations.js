@@ -2,7 +2,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const LocationPage = require('./models/LocationPage');
 const Service = require('./models/Service');
-const { generateSlug } = require('./utils/slugify');
+const { generateSlug, buildLocationPageSlug } = require('./utils/slugify');
 
 const connectDB = async () => {
   try {
@@ -159,7 +159,7 @@ const seedLocationPages = async () => {
 
       // Generate location pages
       for (const city of locations) {
-        const baseSlug = generateSlug(`${serviceName}-${city}`);
+        const baseSlug = buildLocationPageSlug(service.slug, city);
         
         // Skip if slug already exists
         if (existingSlugs.has(baseSlug)) {

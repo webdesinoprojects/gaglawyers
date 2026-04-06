@@ -7,6 +7,9 @@ import SEOHead from '../components/SEOHead';
 import HeroCarousel from '../components/HeroCarousel';
 import AnimatedStatValue from '../components/AnimatedStatValue';
 import API_BASE_URL from '../config/api';
+import { mergeHomeSections } from '../data/homePageContentDefaults';
+
+const SECTION_ICONS = { Shield, Users, Award, TrendingUp, Scale, FileText, CheckCircle };
 
 const Home = () => {
   const [services, setServices] = useState([]);
@@ -116,9 +119,10 @@ const Home = () => {
       const data = await response.json();
 
       if (response.ok) {
+        const formCopy = mergeHomeSections(pageContent?.sections).consultationForm;
         setSubmitStatus({
           type: 'success',
-          message: 'Thank you! Your appointment request has been submitted. We will contact you within 24 hours.'
+          message: formCopy.successMessage || 'Thank you! Your appointment request has been submitted.',
         });
         // Reset form
         setAppointmentForm({
@@ -148,29 +152,19 @@ const Home = () => {
     }
   };
 
-  const hero = pageContent?.sections?.hero || {
-    heading: 'Excellence in Legal Advisory & Advocacy',
-    subheading: 'Grover & Grover Advocates delivers sophisticated legal solutions with integrity, precision, and unwavering commitment to your success.',
-    ctaPrimary: 'Schedule Consultation',
-    ctaSecondary: 'Our Services',
-  };
+  const home = mergeHomeSections(pageContent?.sections);
 
-  const stats = pageContent?.sections?.stats || {
-    casesRepresented: '5000+',
-    criminalMatters: '700+',
-    familyMatters: '500+',
-    civilMatters: '900+',
-  };
-
-  const practiceAreasSection = pageContent?.sections?.practiceAreas || {
+  const practiceAreasSection = home.practiceAreas || {
     heading: 'Practice Areas',
     subheading: 'Comprehensive legal expertise across multiple domains',
   };
 
-  const testimonialsSection = pageContent?.sections?.testimonials || {
+  const testimonialsSection = home.testimonials || {
     heading: 'What Our Clients Say',
     subheading: 'Trusted by leading businesses and individuals across India',
   };
+
+  const cf = home.consultationForm;
 
   const bookAppointmentAside = (
     <div
@@ -183,10 +177,10 @@ const Home = () => {
             <Calendar className="text-gold" size={26} />
           </div>
           <h2 className="font-serif text-xl lg:text-2xl font-bold text-navy mb-1">
-            Book Your Consultation
+            {cf.title}
           </h2>
           <p className="font-sans text-sm text-gray-600">
-            We will contact you within 24 hours
+            {cf.subtitle}
           </p>
         </div>
 
@@ -212,7 +206,7 @@ const Home = () => {
               onChange={handleAppointmentChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm text-gray-900 focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
-              placeholder="Your name"
+              placeholder={cf.placeholders?.name || 'Your name'}
             />
           </div>
           <div>
@@ -224,7 +218,7 @@ const Home = () => {
               onChange={handleAppointmentChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
-              placeholder="your@email.com"
+              placeholder={cf.placeholders?.email || 'your@email.com'}
             />
           </div>
           <div>
@@ -236,7 +230,7 @@ const Home = () => {
               onChange={handleAppointmentChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
-              placeholder="+91 ..."
+              placeholder={cf.placeholders?.phone || '+91 ...'}
             />
           </div>
           <div>
@@ -248,7 +242,7 @@ const Home = () => {
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
             >
-              <option value="">Select a service</option>
+              <option value="">{cf.placeholders?.service || 'Select a service'}</option>
               {services.map((service) => (
                 <option key={service._id} value={service.name || service.title}>
                   {service.name || service.title}
@@ -264,7 +258,7 @@ const Home = () => {
               onChange={handleAppointmentChange}
               rows={2}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm resize-none focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
-              placeholder="Your legal matter (optional)"
+              placeholder={cf.placeholders?.description || 'Your legal matter (optional)'}
             />
           </div>
           <button
@@ -272,7 +266,7 @@ const Home = () => {
             disabled={isSubmitting}
             className="w-full px-4 py-3 bg-gold text-navy font-sans text-sm font-semibold rounded-lg transition-all hover:brightness-110 flex items-center justify-center gap-2 disabled:opacity-50"
           >
-            {isSubmitting ? 'Submitting...' : 'Book appointment'}
+            {isSubmitting ? cf.submittingLabel || 'Submitting...' : cf.submitLabel || 'Book appointment'}
             {!isSubmitting && <ArrowRight size={16} />}
           </button>
         </form>
@@ -289,7 +283,11 @@ const Home = () => {
       />
       
       {/* Hero + book appointment (form stays on the right on large screens) */}
-      <HeroCarousel aside={bookAppointmentAside} />
+      <HeroCarousel
+        aside={bookAppointmentAside}
+        slides={pageContent?.sections?.carousel?.slides}
+        trustStrip={pageContent?.sections?.carousel?.trustStrip}
+      />
 
       {/* Stats / Authority Strip Section */}
       <section className="bg-gradient-to-b from-navy to-[#0a1628] py-16 border-t border-white/10">
@@ -297,37 +295,37 @@ const Home = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
               <p className="font-serif text-3xl lg:text-4xl font-semibold text-white mb-2 tabular-nums">
-                <AnimatedStatValue value={stats.casesRepresented} duration={1900} />
+                <AnimatedStatValue value={home.stats.casesRepresented} duration={1900} />
               </p>
               <p className="font-sans text-sm text-gray-400">
-                Cases Represented
+                {home.stats.casesRepresentedLabel}
               </p>
             </div>
             
             <div className="text-center border-l border-white/10">
               <p className="font-serif text-3xl lg:text-4xl font-semibold text-white mb-2 tabular-nums">
-                <AnimatedStatValue value={stats.criminalMatters} duration={1900} />
+                <AnimatedStatValue value={home.stats.criminalMatters} duration={1900} />
               </p>
               <p className="font-sans text-sm text-gray-400">
-                Criminal Matters
+                {home.stats.criminalMattersLabel}
               </p>
             </div>
             
             <div className="text-center border-l border-white/10">
               <p className="font-serif text-3xl lg:text-4xl font-semibold text-white mb-2 tabular-nums">
-                <AnimatedStatValue value={stats.familyMatters} duration={1900} />
+                <AnimatedStatValue value={home.stats.familyMatters} duration={1900} />
               </p>
               <p className="font-sans text-sm text-gray-400">
-                Family Dispute Matters
+                {home.stats.familyMattersLabel}
               </p>
             </div>
             
             <div className="text-center border-l border-white/10">
               <p className="font-serif text-3xl lg:text-4xl font-semibold text-white mb-2 tabular-nums">
-                <AnimatedStatValue value={stats.civilMatters} duration={1900} />
+                <AnimatedStatValue value={home.stats.civilMatters} duration={1900} />
               </p>
               <p className="font-sans text-sm text-gray-400">
-                Civil Matters
+                {home.stats.civilMattersLabel}
               </p>
             </div>
           </div>
@@ -346,56 +344,32 @@ const Home = () => {
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-1.5 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-6">
-              Why GAG Lawyers
+              {home.whyChoose.eyebrow}
             </span>
             <h2 className="font-serif text-3xl lg:text-4xl font-bold text-white mb-4">
-              Your Trusted Legal Partner
+              {home.whyChoose.title}
             </h2>
             <p className="font-sans text-lg text-gray-300 max-w-2xl mx-auto">
-              We combine decades of experience with innovative legal strategies to deliver exceptional results
+              {home.whyChoose.subtitle}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-8 border border-white/10 hover:bg-white/10 transition-all duration-300 group">
-              <div className="w-14 h-14 bg-gold/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Shield className="w-7 h-7 text-gold" />
-              </div>
-              <h3 className="font-serif text-xl font-bold text-white mb-3">Proven Track Record</h3>
-              <p className="font-sans text-sm text-gray-300 leading-relaxed">
-                Over 5000+ successful cases with a 98% success rate across diverse legal matters
-              </p>
-            </div>
-
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-8 border border-white/10 hover:bg-white/10 transition-all duration-300 group">
-              <div className="w-14 h-14 bg-gold/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Users className="w-7 h-7 text-gold" />
-              </div>
-              <h3 className="font-serif text-xl font-bold text-white mb-3">Expert Team</h3>
-              <p className="font-sans text-sm text-gray-300 leading-relaxed">
-                Highly qualified advocates with specialized expertise in multiple practice areas
-              </p>
-            </div>
-
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-8 border border-white/10 hover:bg-white/10 transition-all duration-300 group">
-              <div className="w-14 h-14 bg-gold/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Award className="w-7 h-7 text-gold" />
-              </div>
-              <h3 className="font-serif text-xl font-bold text-white mb-3">Client-Focused</h3>
-              <p className="font-sans text-sm text-gray-300 leading-relaxed">
-                Personalized attention and tailored legal strategies for every client's unique needs
-              </p>
-            </div>
-
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-8 border border-white/10 hover:bg-white/10 transition-all duration-300 group">
-              <div className="w-14 h-14 bg-gold/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <TrendingUp className="w-7 h-7 text-gold" />
-              </div>
-              <h3 className="font-serif text-xl font-bold text-white mb-3">Results-Driven</h3>
-              <p className="font-sans text-sm text-gray-300 leading-relaxed">
-                Strategic approach focused on achieving the best possible outcomes for our clients
-              </p>
-            </div>
+            {(home.whyChoose.cards || []).map((card, idx) => {
+              const IconComp = SECTION_ICONS[card.icon] || Shield;
+              return (
+                <div
+                  key={`${card.title}-${idx}`}
+                  className="bg-white/5 backdrop-blur-sm rounded-xl p-8 border border-white/10 hover:bg-white/10 transition-all duration-300 group"
+                >
+                  <div className="w-14 h-14 bg-gold/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <IconComp className="w-7 h-7 text-gold" />
+                  </div>
+                  <h3 className="font-serif text-xl font-bold text-white mb-3">{card.title}</h3>
+                  <p className="font-sans text-sm text-gray-300 leading-relaxed">{card.body}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -405,67 +379,44 @@ const Home = () => {
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-1.5 bg-navy/10 text-navy text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-6">
-              Our Process
+              {home.howWeWork.eyebrow}
             </span>
             <h2 className="font-serif text-3xl lg:text-4xl font-bold text-navy mb-4">
-              How We Work With You
+              {home.howWeWork.title}
             </h2>
             <p className="font-sans text-lg text-gray-600 max-w-2xl mx-auto">
-              A transparent, systematic approach to delivering exceptional legal services
+              {home.howWeWork.subtitle}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
-            {/* Connecting Line */}
             <div className="hidden lg:block absolute top-16 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent"></div>
 
-            <div className="relative">
-              <div className="bg-gradient-to-br from-navy to-navy/90 rounded-xl p-8 text-white h-full">
-                <div className="w-12 h-12 bg-gold rounded-full flex items-center justify-center font-serif text-xl font-bold text-navy mb-6">
-                  1
+            {(home.howWeWork.steps || []).map((step) => {
+              const v = (step.variant || 'light').toLowerCase();
+              const box =
+                v === 'navy'
+                  ? 'bg-gradient-to-br from-navy to-navy/90 rounded-xl p-8 text-white h-full'
+                  : v === 'gold'
+                    ? 'bg-gradient-to-br from-gold to-gold/90 rounded-xl p-8 text-navy h-full'
+                    : 'bg-grey-light rounded-xl p-8 border-2 border-gray-200 h-full';
+              const numCircle =
+                v === 'gold'
+                  ? 'w-12 h-12 bg-navy rounded-full flex items-center justify-center font-serif text-xl font-bold text-white mb-6'
+                  : 'w-12 h-12 bg-gold rounded-full flex items-center justify-center font-serif text-xl font-bold text-navy mb-6';
+              const titleCls = v === 'navy' ? 'text-white' : v === 'gold' ? 'text-navy' : 'text-navy';
+              const bodyCls =
+                v === 'navy' ? 'text-gray-300' : v === 'gold' ? 'text-navy/80' : 'text-gray-600';
+              return (
+                <div key={step.number + step.title} className="relative">
+                  <div className={box}>
+                    <div className={numCircle}>{step.number}</div>
+                    <h3 className={`font-serif text-xl font-bold mb-3 ${titleCls}`}>{step.title}</h3>
+                    <p className={`font-sans text-sm leading-relaxed ${bodyCls}`}>{step.body}</p>
+                  </div>
                 </div>
-                <h3 className="font-serif text-xl font-bold mb-3">Initial Consultation</h3>
-                <p className="font-sans text-sm text-gray-300 leading-relaxed">
-                  We listen to your concerns and understand your legal needs in detail
-                </p>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="bg-grey-light rounded-xl p-8 border-2 border-gray-200 h-full">
-                <div className="w-12 h-12 bg-gold rounded-full flex items-center justify-center font-serif text-xl font-bold text-navy mb-6">
-                  2
-                </div>
-                <h3 className="font-serif text-xl font-bold text-navy mb-3">Case Analysis</h3>
-                <p className="font-sans text-sm text-gray-600 leading-relaxed">
-                  Thorough review of your case with detailed legal research and strategy development
-                </p>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="bg-grey-light rounded-xl p-8 border-2 border-gray-200 h-full">
-                <div className="w-12 h-12 bg-gold rounded-full flex items-center justify-center font-serif text-xl font-bold text-navy mb-6">
-                  3
-                </div>
-                <h3 className="font-serif text-xl font-bold text-navy mb-3">Action Plan</h3>
-                <p className="font-sans text-sm text-gray-600 leading-relaxed">
-                  Clear roadmap with timelines, milestones, and transparent cost structure
-                </p>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="bg-gradient-to-br from-gold to-gold/90 rounded-xl p-8 text-navy h-full">
-                <div className="w-12 h-12 bg-navy rounded-full flex items-center justify-center font-serif text-xl font-bold text-white mb-6">
-                  4
-                </div>
-                <h3 className="font-serif text-xl font-bold mb-3">Execution & Results</h3>
-                <p className="font-sans text-sm text-navy/80 leading-relaxed">
-                  Dedicated representation with regular updates until successful resolution
-                </p>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -502,7 +453,7 @@ const Home = () => {
           <div className="text-center mt-10">
             <Link to="/services">
               <button className="px-8 py-3 bg-navy text-white font-sans text-sm font-semibold rounded-md transition-all duration-200 hover:bg-navy/90 hover:scale-105">
-                View All Services
+                {home.practiceCta?.viewAllServicesText || 'View All Services'}
               </button>
             </Link>
           </div>
@@ -515,13 +466,13 @@ const Home = () => {
           <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <span className="inline-block px-4 py-1.5 bg-gold/10 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
-                Our Team
+                {home.teamSection.eyebrow}
               </span>
               <h2 className="font-serif text-3xl lg:text-4xl font-bold text-navy mb-4">
-                Meet the Legal Minds Behind Our Success
+                {home.teamSection.title}
               </h2>
               <p className="font-sans text-lg text-gray-600 max-w-2xl mx-auto">
-                Led by experienced advocates with decades of combined expertise in diverse legal domains
+                {home.teamSection.subtitle}
               </p>
             </div>
 
@@ -539,7 +490,7 @@ const Home = () => {
                   </div>
                   <div className="flex-1 text-center md:text-left">
                     <div className="inline-block px-3 py-1 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-3">
-                      Founder
+                      {home.teamSection.founderBadge}
                     </div>
                     <h3 className="font-serif text-3xl font-bold text-navy mb-2">
                       {teamMembers[0].name}
@@ -552,10 +503,10 @@ const Home = () => {
                     </p>
                     <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                       <span className="px-3 py-1 bg-navy/10 text-navy text-xs font-sans font-medium rounded-full">
-                        20+ Years Experience
+                        {home.teamSection.badgeA}
                       </span>
                       <span className="px-3 py-1 bg-navy/10 text-navy text-xs font-sans font-medium rounded-full">
-                        Supreme Court Advocate
+                        {home.teamSection.badgeB}
                       </span>
                     </div>
                   </div>
@@ -595,7 +546,7 @@ const Home = () => {
             <div className="text-center">
               <Link to="/team">
                 <button className="inline-flex items-center gap-2 px-8 py-4 bg-navy text-white font-sans text-base font-semibold rounded-lg hover:bg-navy/90 transition-all hover:scale-105 shadow-lg">
-                  Know More About Our Team
+                  {home.teamSection.ctaText}
                   <ArrowRight size={20} />
                 </button>
               </Link>
@@ -611,20 +562,20 @@ const Home = () => {
             <div className="flex items-end justify-between mb-12">
               <div>
                 <span className="inline-block px-4 py-1.5 bg-navy/10 text-navy text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
-                  Legal Insights
+                  {home.blogSection.eyebrow}
                 </span>
                 <h2 className="font-serif text-3xl lg:text-4xl font-bold text-navy mb-3">
-                  Latest from Our Blog
+                  {home.blogSection.title}
                 </h2>
                 <p className="font-sans text-lg text-gray-600 max-w-2xl">
-                  Stay informed with expert legal insights, case studies, and industry updates
+                  {home.blogSection.subtitle}
                 </p>
               </div>
               <Link 
                 to="/blog"
                 className="hidden md:inline-flex items-center gap-2 px-6 py-3 bg-navy text-white font-sans font-semibold rounded-lg hover:bg-navy/90 transition-all"
               >
-                View All Articles
+                {home.blogSection.viewAllText}
                 <ArrowRight size={18} />
               </Link>
             </div>
@@ -679,7 +630,7 @@ const Home = () => {
                 to="/blog"
                 className="inline-flex items-center gap-2 px-8 py-3 bg-navy text-white font-sans font-semibold rounded-lg hover:bg-navy/90 transition-all"
               >
-                View All Articles
+                {home.blogSection.viewAllText}
                 <ArrowRight size={18} />
               </Link>
             </div>
@@ -696,7 +647,7 @@ const Home = () => {
           <div className="text-center mb-12 lg:mb-16">
             <div className="inline-block mb-4">
               <span className="font-sans text-sm font-semibold text-gold uppercase tracking-wider bg-gold/10 px-4 py-2 rounded-full">
-                Client Success Stories
+                {home.testimonialsIntro.eyebrow}
               </span>
             </div>
             <h2 className="font-serif text-4xl lg:text-5xl font-bold text-navy mb-4">
@@ -761,7 +712,7 @@ const Home = () => {
               <div className="text-center mt-8">
                 <p className="font-sans text-sm text-gray-500 flex items-center justify-center gap-2">
                   <span className="inline-block w-8 h-0.5 bg-gray-300 rounded"></span>
-                  Scroll horizontally to see more
+                  {home.testimonialsScroll.hint}
                   <span className="inline-block w-8 h-0.5 bg-gray-300 rounded"></span>
                 </p>
               </div>
@@ -788,62 +739,49 @@ const Home = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <span className="inline-block px-4 py-1.5 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-6">
-                Get Started Today
+                {home.ctaBand.eyebrow}
               </span>
               <h2 className="font-serif text-3xl lg:text-5xl font-bold text-white mb-6 leading-tight">
-                Ready to Discuss Your Legal Matter?
+                {home.ctaBand.title}
               </h2>
               <p className="font-sans text-lg text-gray-300 leading-relaxed mb-8">
-                Our experienced legal team is here to provide you with expert guidance and representation. Schedule a consultation to discuss your case and explore your legal options.
+                {home.ctaBand.subtitle}
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/contact">
-                  <button className="px-8 py-4 bg-gold text-navy font-sans font-bold rounded-lg hover:brightness-110 transition-all hover:scale-105 flex items-center justify-center gap-2">
-                    Schedule Consultation
+                <Link to={home.ctaBand.primaryCtaLink || '/contact'}>
+                  <button type="button" className="px-8 py-4 bg-gold text-navy font-sans font-bold rounded-lg hover:brightness-110 transition-all hover:scale-105 flex items-center justify-center gap-2">
+                    {home.ctaBand.primaryCtaText}
                     <ArrowRight size={20} />
                   </button>
                 </Link>
-                <a href="tel:+919876543210">
-                  <button className="px-8 py-4 bg-white/10 text-white font-sans font-semibold rounded-lg border-2 border-white/20 hover:bg-white/20 transition-all flex items-center justify-center gap-2">
+                <a
+                  href={`tel:${String(home.ctaBand.phoneDisplay || '').replace(/[^\d+]/g, '')}`}
+                  className={!home.ctaBand.phoneDisplay ? 'pointer-events-none opacity-50' : ''}
+                >
+                  <button type="button" className="px-8 py-4 bg-white/10 text-white font-sans font-semibold rounded-lg border-2 border-white/20 hover:bg-white/20 transition-all flex items-center justify-center gap-2">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
-                    Call Now
+                    {home.ctaBand.secondaryCtaText}
                   </button>
                 </a>
               </div>
             </div>
 
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
-              <h3 className="font-serif text-2xl font-bold text-white mb-6">What to Expect</h3>
+              <h3 className="font-serif text-2xl font-bold text-white mb-6">{home.ctaBand.sidebarTitle}</h3>
               <div className="space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-gold/20 rounded-full flex items-center justify-center flex-shrink-0">
-                    <CheckCircle className="w-5 h-5 text-gold" />
+                {(home.ctaBand.checklist || []).map((item, idx) => (
+                  <div key={idx} className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-gold/20 rounded-full flex items-center justify-center flex-shrink-0">
+                      <CheckCircle className="w-5 h-5 text-gold" />
+                    </div>
+                    <div>
+                      <h4 className="font-sans font-semibold text-white mb-1">{item.title}</h4>
+                      <p className="font-sans text-sm text-gray-300">{item.body}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-sans font-semibold text-white mb-1">Expert Legal Advice</h4>
-                    <p className="font-sans text-sm text-gray-300">Get clarity on your legal options</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-gold/20 rounded-full flex items-center justify-center flex-shrink-0">
-                    <CheckCircle className="w-5 h-5 text-gold" />
-                  </div>
-                  <div>
-                    <h4 className="font-sans font-semibold text-white mb-1">Transparent Pricing</h4>
-                    <p className="font-sans text-sm text-gray-300">Clear fee structure with no hidden costs</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-gold/20 rounded-full flex items-center justify-center flex-shrink-0">
-                    <CheckCircle className="w-5 h-5 text-gold" />
-                  </div>
-                  <div>
-                    <h4 className="font-sans font-semibold text-white mb-1">Dedicated Support</h4>
-                    <p className="font-sans text-sm text-gray-300">Regular updates throughout your case</p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>

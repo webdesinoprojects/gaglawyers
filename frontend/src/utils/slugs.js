@@ -17,6 +17,14 @@ export const generateSlug = (text) => {
     .replace(/^-+|-+$/g, ''); // Remove leading/trailing dashes
 };
 
+/** Matches backend: {service-slug}-lawyer-in-{city-slug} */
+export const buildLocationPageSlug = (serviceSlug, cityDisplayName) => {
+  const s = generateSlug(serviceSlug || '');
+  const c = generateSlug(cityDisplayName || '');
+  if (!s || !c) return '';
+  return `${s}-lawyer-in-${c}`;
+};
+
 /**
  * Convert slug back to readable text
  * @param {string} slug - URL slug

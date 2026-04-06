@@ -10,6 +10,14 @@ const generateSlug = (text) => {
     .replace(/-+$/, '');
 };
 
+/** Canonical location page URL: {service-slug}-lawyer-in-{city-slug} (all lowercase). */
+const buildLocationPageSlug = (serviceSlug, cityDisplayName) => {
+  const s = generateSlug(serviceSlug || '');
+  const c = generateSlug(cityDisplayName || '');
+  if (!s || !c) return '';
+  return `${s}-lawyer-in-${c}`;
+};
+
 const generateUniqueSlug = async (Model, baseSlug, excludeId = null) => {
   let slug = baseSlug;
   let counter = 1;
@@ -30,4 +38,4 @@ const generateUniqueSlug = async (Model, baseSlug, excludeId = null) => {
   }
 };
 
-module.exports = { generateSlug, generateUniqueSlug };
+module.exports = { generateSlug, generateUniqueSlug, buildLocationPageSlug };
