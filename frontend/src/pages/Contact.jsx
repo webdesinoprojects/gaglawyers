@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, MessageSquare } from 'lucide-react';
-import Button from '../components/Button';
+import { Mail, Phone, MapPin, ChevronDown } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import API_BASE_URL from '../config/api';
+import { OFFICE_ADDRESS_LINES } from '../constants/officeAddress';
+
+const PANEL = '#112240';
+
+const MAP_EMBED_SRC =
+  'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6998.3752460208125!2d77.13081933769948!3d28.71393836202312!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d010b75f3e47d%3A0x4e92383cc436853f!2sGAG%20Lawyers%20-%20Grover%20%26%20Grover%2C%20Advocates%20%7C%20Best%20Divorce%20Lawyer%20in%20Delhi%2C%20Property%20Lawyer%20in%20Delhi%2C%20Civil%20%26%20Criminal%20Lawyers!5e0!3m2!1sen!2sin!4v1775508641842!5m2!1sen!2sin';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -74,225 +79,269 @@ const Contact = () => {
     }
   };
 
+  const inputClass =
+    'w-full rounded-md bg-[#0B1526] px-4 py-3 font-sans text-white placeholder:text-gray-500 border border-white/15 transition-colors duration-200 focus:border-[#C9A84C] focus:outline-none focus:ring-1 focus:ring-[#C9A84C]/40';
+
+  const labelClass = 'mb-2 block font-sans text-xs font-medium uppercase tracking-wider text-[#8FA3B8]';
+
   return (
-    <div>
-      <SEOHead 
+    <div className="min-h-screen bg-[#0B1526]">
+      <SEOHead
         title="Contact Us - GAG Lawyers | Legal Consultation"
         description="Get in touch with our legal experts. Schedule a consultation for corporate law, litigation, real estate, and family law matters."
         keywords="contact lawyers, legal consultation, lawyers in delhi, law firm contact"
       />
-      <section className="bg-navy text-white py-16 lg:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="font-serif text-4xl lg:text-5xl font-bold mb-4">
+
+      <section className="bg-[#0B1526] text-white">
+        {/* Header banner — flows into main contact area */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10 md:pt-14 md:pb-12 lg:pt-16 lg:pb-14 text-center">
+          <h1 className="font-serif text-4xl md:text-5xl lg:text-[2.75rem] font-bold text-white tracking-tight">
             Get In Touch
           </h1>
-          <p className="font-sans text-lg lg:text-xl text-gray-300 max-w-3xl mx-auto">
-            Let's discuss how we can help you with your legal needs
+          <p className="mt-4 font-sans text-lg md:text-xl text-[#B8B5A8] max-w-2xl mx-auto leading-relaxed">
+            Let&apos;s discuss how we can help you with your legal needs
           </p>
+          <div className="mt-6 flex justify-center" aria-hidden>
+            <div className="h-px w-[60px] bg-[#C9A84C]" />
+          </div>
         </div>
-      </section>
 
-      <section className="bg-grey-light py-16 lg:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-            <div className="space-y-8">
-              <div>
-                <h2 className="font-serif text-3xl font-bold text-navy mb-6">
+        {/* Main two-column block */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 lg:pb-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-0">
+            {/* LEFT — Contact + map */}
+            <div className="lg:pr-10 xl:pr-14 lg:border-r lg:border-[#C9A84C]/35">
+              <div className="rounded-lg border border-white/10 bg-[#0B1526]/80 p-6 md:p-8 lg:p-10">
+                <h2 className="font-serif text-2xl md:text-3xl font-bold text-white relative inline-block">
                   Contact Information
+                  <span
+                    className="absolute -bottom-2 left-0 h-0.5 w-12 rounded-full bg-[#C9A84C]"
+                    aria-hidden
+                  />
                 </h2>
-                <p className="font-sans text-gray-600 leading-relaxed mb-8">
-                  Reach out to us through any of the following channels. Our team is ready to assist you with your legal matters.
+                <p className="mt-8 font-sans text-sm md:text-[0.9375rem] text-[#9CA8B8] leading-relaxed max-w-lg">
+                  Reach out through any of the following channels. Our team is ready to assist you with
+                  your legal matters.
                 </p>
-              </div>
 
-              <div className="space-y-6">
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 flex items-center justify-center rounded-full bg-navy/5 flex-shrink-0">
-                    <Mail className="w-6 h-6 text-navy" />
-                  </div>
-                  <div>
-                    <h3 className="font-sans font-semibold text-navy mb-1">Email</h3>
-                    <a
-                      href="mailto:contact@gaglawyers.com"
-                      className="font-sans text-gray-600 hover:text-gold transition-colors"
-                    >
-                      contact@gaglawyers.com
-                    </a>
+                <ul className="mt-10 space-y-0 divide-y divide-white/10">
+                  <li className="flex gap-4 pb-8 pt-0 first:pt-0">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-[#C9A84C]/35 bg-[#C9A84C]/10">
+                      <Mail className="h-5 w-5 text-[#C9A84C]" strokeWidth={2} />
+                    </div>
+                    <div className="min-w-0 flex-1 pt-0.5">
+                      <p className="font-sans text-[0.6875rem] font-semibold uppercase tracking-[0.28em] text-[#C9A84C]">
+                        Email
+                      </p>
+                      <a
+                        href="mailto:contact@gaglawyers.com"
+                        className="mt-1.5 block font-sans text-base text-white hover:text-[#C9A84C] transition-colors break-all"
+                      >
+                        contact@gaglawyers.com
+                      </a>
+                    </div>
+                  </li>
+
+                  <li className="flex flex-wrap items-start gap-4 pb-8 pt-8">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-[#C9A84C]/35 bg-[#C9A84C]/10">
+                      <Phone className="h-5 w-5 text-[#C9A84C]" strokeWidth={2} />
+                    </div>
+                    <div className="min-w-0 flex-1 pt-0.5">
+                      <p className="font-sans text-[0.6875rem] font-semibold uppercase tracking-[0.28em] text-[#C9A84C]">
+                        Phone
+                      </p>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                        <a
+                          href="tel:+919996263370"
+                          className="font-sans text-base text-white hover:text-[#C9A84C] transition-colors"
+                        >
+                          +91 99962 63370
+                        </a>
+                        <span className="inline-flex items-center rounded-full bg-[#1A3D2E] px-2.5 py-0.5 font-sans text-[0.625rem] font-semibold uppercase tracking-wide text-[#6EE7B7] ring-1 ring-[#22C55E]/40">
+                          WhatsApp Available
+                        </span>
+                      </div>
+                    </div>
+                  </li>
+
+                  <li className="flex gap-4 pb-0 pt-8">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-[#C9A84C]/35 bg-[#C9A84C]/10">
+                      <MapPin className="h-5 w-5 text-[#C9A84C]" strokeWidth={2} />
+                    </div>
+                    <div className="min-w-0 flex-1 pt-0.5">
+                      <p className="font-sans text-[0.6875rem] font-semibold uppercase tracking-[0.28em] text-[#C9A84C]">
+                        Office Address
+                      </p>
+                      <p className="mt-1.5 font-sans text-base text-white/95 leading-relaxed">
+                        {OFFICE_ADDRESS_LINES.map((line, i) => (
+                          <React.Fragment key={line}>
+                            {i > 0 && <br />}
+                            {line}
+                          </React.Fragment>
+                        ))}
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+
+                <div className="mt-10 pt-2">
+                  <p className="font-sans text-[0.6875rem] font-semibold uppercase tracking-[0.28em] text-[#C9A84C] mb-3">
+                    Find us
+                  </p>
+                  <div className="overflow-hidden rounded-[8px] border border-[#C9A84C]/90 ring-1 ring-[#C9A84C]/25 shadow-lg shadow-black/30">
+                    <iframe
+                      title="GAG Lawyers office on Google Maps"
+                      src={MAP_EMBED_SRC}
+                      className="w-full border-0 block h-[220px] sm:h-[280px] md:h-[360px] lg:h-[450px]"
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
                   </div>
                 </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 flex items-center justify-center rounded-full bg-navy/5 flex-shrink-0">
-                    <Phone className="w-6 h-6 text-navy" />
-                  </div>
-                  <div>
-                    <h3 className="font-sans font-semibold text-navy mb-1">Phone</h3>
-                    <a
-                      href="tel:+919996263370"
-                      className="font-sans text-gray-600 hover:text-gold transition-colors"
-                    >
-                      +91 99962 63370
-                    </a>
-                    <p className="font-sans text-sm text-gray-500">WhatsApp Available</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 flex items-center justify-center rounded-full bg-navy/5 flex-shrink-0">
-                    <MapPin className="w-6 h-6 text-navy" />
-                  </div>
-                  <div>
-                    <h3 className="font-sans font-semibold text-navy mb-1">Office Address</h3>
-                    <p className="font-sans text-gray-600">
-                      123 Lawyers Colony<br />
-                      Connaught Place<br />
-                      New Delhi - 110001
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 rounded-sm overflow-hidden shadow-md h-64 bg-navy/90 flex items-center justify-center">
-                <p className="font-sans text-white text-sm">Google Map Embed Placeholder</p>
               </div>
             </div>
 
-            <div className="bg-white rounded-sm shadow-md p-8 lg:p-10">
-              <div className="mb-6">
-                <h2 className="font-serif text-3xl font-bold text-navy mb-2">
+            {/* RIGHT — Form */}
+            <div className="mt-12 lg:mt-0 lg:pl-10 xl:pl-14">
+              <div
+                className="rounded-[12px] border border-[#C9A84C]/50 p-6 sm:p-8 md:p-[2rem] shadow-xl shadow-black/25"
+                style={{ backgroundColor: PANEL }}
+              >
+                <h2 className="font-serif text-2xl md:text-3xl lg:text-[2rem] font-bold text-white">
                   Send Us a Message
                 </h2>
-                <p className="font-sans text-gray-600">
-                  Fill out the form below and we'll get back to you within 24 hours.
+                <p className="mt-3 font-sans text-sm md:text-[0.9375rem] text-[#8FA3B8] leading-relaxed">
+                  Fill out the form below and we&apos;ll get back to you within 24 hours.
                 </p>
+
+                {submitStatus && (
+                  <div
+                    role="status"
+                    className={`mt-6 rounded-md border px-4 py-3 font-sans text-sm ${
+                      submitStatus.type === 'success'
+                        ? 'border-emerald-500/40 bg-emerald-950/40 text-emerald-100'
+                        : 'border-red-500/40 bg-red-950/35 text-red-100'
+                    }`}
+                  >
+                    {submitStatus.message}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+                  <div>
+                    <label htmlFor="name" className={labelClass}>
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      className={inputClass}
+                      placeholder="Your full name"
+                      autoComplete="name"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+                    <div>
+                      <label htmlFor="email" className={labelClass}>
+                        Email Address
+                      </label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                        className={inputClass}
+                        placeholder="you@example.com"
+                        autoComplete="email"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="phone" className={labelClass}>
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        required
+                        className={inputClass}
+                        placeholder="Your mobile number (with country code)"
+                        autoComplete="tel"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="serviceOfInterest" className={labelClass}>
+                      Practice Area of Interest
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="serviceOfInterest"
+                        name="serviceOfInterest"
+                        value={formData.serviceOfInterest}
+                        onChange={handleChange}
+                        required
+                        className={`${inputClass} cursor-pointer pr-11 appearance-none`}
+                      >
+                        <option value="" className="bg-[#0B1526] text-gray-400">
+                          Select a practice area
+                        </option>
+                        {services.map((service) => (
+                          <option
+                            key={service._id}
+                            value={service.name || service.title}
+                            className="bg-[#0B1526] text-white"
+                          >
+                            {service.name || service.title}
+                          </option>
+                        ))}
+                        <option value="Other" className="bg-[#0B1526] text-white">
+                          Other
+                        </option>
+                      </select>
+                      <ChevronDown
+                        className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#C9A84C]/80"
+                        aria-hidden
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="message" className={labelClass}>
+                      Message
+                    </label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      required
+                      rows={5}
+                      className={`${inputClass} min-h-[8.75rem] resize-y`}
+                      placeholder="Tell us about your legal matter..."
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full rounded-md bg-[#C9A84C] py-3.5 px-6 font-sans text-base font-bold text-[#0B1526] shadow-md transition-all duration-200 hover:bg-[#B08A3E] hover:scale-[1.01] disabled:opacity-60 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? 'Submitting...' : 'Submit Inquiry →'}
+                  </button>
+                </form>
               </div>
-
-              {submitStatus && (
-                <div
-                  className={`mb-6 p-4 rounded-sm ${
-                    submitStatus.type === 'success'
-                      ? 'bg-green-50 text-green-800 border border-green-200'
-                      : 'bg-red-50 text-red-800 border border-red-200'
-                  }`}
-                >
-                  <p className="font-sans text-sm">{submitStatus.message}</p>
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="block font-sans text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition-colors font-sans"
-                    placeholder="Your full name"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label
-                      htmlFor="email"
-                      className="block font-sans text-sm font-medium text-gray-700 mb-2"
-                    >
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition-colors font-sans"
-                      placeholder="you@example.com"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="phone"
-                      className="block font-sans text-sm font-medium text-gray-700 mb-2"
-                    >
-                      Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition-colors font-sans"
-                      placeholder="Your mobile number (with country code)"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="serviceOfInterest"
-                    className="block font-sans text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Practice Area of Interest
-                  </label>
-                  <select
-                    id="serviceOfInterest"
-                    name="serviceOfInterest"
-                    value={formData.serviceOfInterest}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition-colors font-sans bg-white"
-                  >
-                    <option value="">Select a practice area</option>
-                    {services.map(service => (
-                      <option key={service._id} value={service.name || service.title}>
-                        {service.name || service.title}
-                      </option>
-                    ))}
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="message"
-                    className="block font-sans text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Message
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    required
-                    rows="6"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition-colors font-sans resize-none"
-                    placeholder="Tell us about your legal matter..."
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="lg"
-                  className="w-full"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Submitting...' : 'Submit Inquiry'}
-                </Button>
-              </form>
             </div>
           </div>
         </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, Lock, Eye, Database, UserCheck, FileText, Mail, ArrowLeft } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
+import { OFFICE_ADDRESS_LINE } from '../constants/officeAddress';
 
 const PrivacyPolicy = () => {
   return (
@@ -286,7 +287,7 @@ const PrivacyPolicy = () => {
                       <strong>Phone:</strong> <a href="tel:+919996263370" className="text-gold hover:underline">+91 99962 63370</a>
                     </p>
                     <p className="font-sans text-gray-700">
-                      <strong>Address:</strong> GAG Lawyers, New Delhi, India
+                      <strong>Address:</strong> GAG Lawyers, {OFFICE_ADDRESS_LINE}
                     </p>
                   </div>
                 </div>

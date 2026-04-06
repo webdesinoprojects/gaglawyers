@@ -148,7 +148,7 @@ const HeroCarousel = ({
   return (
     <div
       id="hero"
-      className="relative w-full h-[calc(100dvh-8rem)] min-h-[560px] max-h-[800px] overflow-hidden scroll-mt-0"
+      className="relative w-full h-[calc(100dvh-var(--site-header-height))] min-h-[560px] max-h-[800px] overflow-hidden scroll-mt-0"
     >
       {slides.map((s, index) => (
         <div

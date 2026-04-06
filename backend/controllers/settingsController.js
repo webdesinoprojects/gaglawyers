@@ -1,4 +1,5 @@
 const SiteSettings = require('../models/SiteSettings');
+const { OFFICE_ADDRESS_LINE } = require('../config/officeAddress');
 
 const getSetting = async (req, res) => {
   try {
@@ -15,7 +16,7 @@ const getSetting = async (req, res) => {
         whatsappNumber: '+919996263370',
         phoneNumber: '+919996263370',
         email: 'contact@gaglawyers.com',
-        address: '123 Lawyers Colony, Connaught Place, New Delhi - 110001',
+        address: OFFICE_ADDRESS_LINE,
       };
 
       return res.status(200).json({

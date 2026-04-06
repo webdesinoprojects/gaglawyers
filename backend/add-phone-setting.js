@@ -1,6 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const SiteSettings = require('./models/SiteSettings');
+const { OFFICE_ADDRESS_LINE } = require('./config/officeAddress');
 
 const addPhoneSetting = async () => {
   try {
@@ -41,7 +42,7 @@ const addPhoneSetting = async () => {
     if (!addressSetting) {
       await SiteSettings.create({
         settingKey: 'address',
-        settingValue: '123 Lawyers Colony, Connaught Place, New Delhi - 110001',
+        settingValue: OFFICE_ADDRESS_LINE,
         description: 'Office address'
       });
       console.log('✓ address setting added successfully');

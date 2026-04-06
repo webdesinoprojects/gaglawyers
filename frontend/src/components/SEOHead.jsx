@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { OFFICE_ADDRESS_LINE } from '../constants/officeAddress';
 
 const SEOHead = ({ 
   title = 'GAG Lawyers - Grover & Grover Advocates',
@@ -45,7 +46,9 @@ const SEOHead = ({
       email: 'contact@gaglawyers.com',
       address: {
         '@type': 'PostalAddress',
+        streetAddress: OFFICE_ADDRESS_LINE,
         addressLocality: 'New Delhi',
+        addressRegion: 'Delhi',
         addressCountry: 'IN',
       },
     };

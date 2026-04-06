@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, ArrowRight } from 'lucide-react';
 import API_BASE_URL from '../config/api';
+import { OFFICE_ADDRESS_LINES, OFFICE_ADDRESS_MAPS_URL } from '../constants/officeAddress';
 
 const FOOTER_LOCATION_PRIORITY = [
   'Delhi',
@@ -350,9 +351,16 @@ const Footer = () => {
                 <li className="flex items-start gap-3">
                   <MapPin size={20} className="mt-0.5 flex-shrink-0 text-gold" />
                   <div>
-                    <span className="text-gray-300 block">New Delhi, India</span>
+                    <span className="text-gray-300 block">
+                      {OFFICE_ADDRESS_LINES.map((line, i) => (
+                        <React.Fragment key={line}>
+                          {i > 0 && <br />}
+                          {line}
+                        </React.Fragment>
+                      ))}
+                    </span>
                     <a
-                      href="https://maps.google.com/?q=New+Delhi+India"
+                      href={OFFICE_ADDRESS_MAPS_URL}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-gold/90 text-xs font-sans hover:underline mt-1 inline-block"

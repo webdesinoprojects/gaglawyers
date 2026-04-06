@@ -118,6 +118,7 @@ const DynamicNavbar = () => {
 
   return (
     <header
+      id="site-header"
       className={`sticky top-0 left-0 right-0 z-50 w-full transition-shadow duration-300 ${
         isScrolled ? 'shadow-lg shadow-black/20' : ''
       }`}
@@ -157,55 +158,88 @@ const DynamicNavbar = () => {
                 <div
                   key={link.label}
                   className="relative group"
-                  onMouseEnter={() => link.dropdownType === 'about' ? setAboutDropdownOpen(true) : setServicesDropdownOpen(true)}
-                  onMouseLeave={() => link.dropdownType === 'about' ? setAboutDropdownOpen(false) : setServicesDropdownOpen(false)}
+                  onMouseEnter={() => (link.dropdownType === 'about' ? setAboutDropdownOpen(true) : setServicesDropdownOpen(true))}
+                  onMouseLeave={() => (link.dropdownType === 'about' ? setAboutDropdownOpen(false) : setServicesDropdownOpen(false))}
                 >
-                  <button
-                    className={`font-sans text-sm font-medium transition-colors duration-200 flex items-center gap-1 ${
-                      location.pathname === link.url || (link.submenu && link.submenu.some(sub => sub.path === location.pathname))
-                        ? 'text-gold'
-                        : 'text-white hover:text-gold'
-                    }`}
-                  >
-                    {link.label}
-                    <ChevronDown size={16} className={`transition-transform duration-200 ${
-                      (link.dropdownType === 'about' && aboutDropdownOpen) || (link.dropdownType === 'services' && servicesDropdownOpen) ? 'rotate-180' : ''
-                    }`} />
-                  </button>
-                  
-                  {/* Dropdown Menu */}
+                  <div className="flex items-center gap-0">
+                    <Link
+                      to={link.url}
+                      className={`font-sans text-sm font-medium transition-colors duration-200 ${
+                        location.pathname === link.url || (link.submenu && link.submenu.some((sub) => sub.path === location.pathname))
+                          ? 'text-gold'
+                          : 'text-white hover:text-gold'
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                    <button
+                      type="button"
+                      aria-expanded={
+                        (link.dropdownType === 'about' && aboutDropdownOpen) ||
+                        (link.dropdownType === 'services' && servicesDropdownOpen)
+                      }
+                      aria-haspopup="true"
+                      aria-label={`${link.label} submenu`}
+                      className={`p-1 rounded-md transition-colors flex-shrink-0 -mr-1 ${
+                        location.pathname === link.url || (link.submenu && link.submenu.some((sub) => sub.path === location.pathname))
+                          ? 'text-gold'
+                          : 'text-white hover:text-gold'
+                      }`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (link.dropdownType === 'about') {
+                          setAboutDropdownOpen((o) => !o);
+                        } else {
+                          setServicesDropdownOpen((o) => !o);
+                        }
+                      }}
+                    >
+                      <ChevronDown
+                        size={16}
+                        className={`transition-transform duration-200 ${
+                          (link.dropdownType === 'about' && aboutDropdownOpen) ||
+                          (link.dropdownType === 'services' && servicesDropdownOpen)
+                            ? 'rotate-180'
+                            : ''
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* pt-2 bridges the gap so moving into the panel does not fire mouseLeave */}
                   <div
-                    className={`absolute top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden transition-all duration-200 ${
-                      link.dropdownType === 'services' 
-                        ? 'w-[90vw] max-w-[900px] left-1/2 -translate-x-1/2' 
-                        : 'w-56 left-0'
+                    className={`absolute top-full left-0 pt-2 transition-all duration-200 ${
+                      link.dropdownType === 'services'
+                        ? 'w-[90vw] max-w-[900px] left-1/2 -translate-x-1/2'
+                        : 'w-56'
                     } ${
-                      (link.dropdownType === 'about' && aboutDropdownOpen) || (link.dropdownType === 'services' && servicesDropdownOpen)
-                        ? 'opacity-100 visible translate-y-0' 
-                        : 'opacity-0 invisible -translate-y-2'
+                      (link.dropdownType === 'about' && aboutDropdownOpen) ||
+                      (link.dropdownType === 'services' && servicesDropdownOpen)
+                        ? 'opacity-100 visible translate-y-0 pointer-events-auto'
+                        : 'opacity-0 invisible -translate-y-2 pointer-events-none'
                     }`}
                   >
-                    {link.submenu && link.submenu.length > 0 ? (
-                      <div className={link.dropdownType === 'services' ? 'grid grid-cols-4 gap-1 p-3' : ''}>
-                        {link.submenu.map((sublink) => (
-                          <Link
-                            key={sublink.path}
-                            to={sublink.path}
-                            className={`block px-3 py-2.5 font-sans text-xs transition-colors rounded-md ${
-                              location.pathname === sublink.path
-                                ? 'bg-gold/10 text-gold font-medium'
-                                : 'text-gray-700 hover:bg-gray-100 hover:text-navy'
-                            }`}
-                          >
-                            {sublink.name}
-                          </Link>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="px-4 py-3 text-sm text-gray-500 font-sans">
-                        Loading...
-                      </div>
-                    )}
+                    <div className="bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden">
+                      {link.submenu && link.submenu.length > 0 ? (
+                        <div className={link.dropdownType === 'services' ? 'grid grid-cols-4 gap-1 p-3' : ''}>
+                          {link.submenu.map((sublink) => (
+                            <Link
+                              key={sublink.path}
+                              to={sublink.path}
+                              className={`block px-3 py-2.5 font-sans text-xs transition-colors rounded-md ${
+                                location.pathname === sublink.path
+                                  ? 'bg-gold/10 text-gold font-medium'
+                                  : 'text-gray-700 hover:bg-gray-100 hover:text-navy'
+                              }`}
+                            >
+                              {sublink.name}
+                            </Link>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="px-4 py-3 text-sm text-gray-500 font-sans">Loading...</div>
+                      )}
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -314,15 +348,43 @@ const DynamicNavbar = () => {
             {navLinks.map((link) => (
               link.hasDropdown ? (
                 <div key={link.label}>
-                  <button
-                    onClick={() => link.dropdownType === 'about' ? setAboutDropdownOpen(!aboutDropdownOpen) : setServicesDropdownOpen(!servicesDropdownOpen)}
-                    className="w-full flex items-center justify-between py-2 font-sans text-base font-medium text-white hover:text-gold transition-colors"
-                  >
-                    {link.label}
-                    <ChevronDown size={16} className={`transition-transform duration-200 ${
-                      (link.dropdownType === 'about' && aboutDropdownOpen) || (link.dropdownType === 'services' && servicesDropdownOpen) ? 'rotate-180' : ''
-                    }`} />
-                  </button>
+                  <div className="flex items-center justify-between gap-2 py-2">
+                    <Link
+                      to={link.url}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex-1 font-sans text-base font-medium transition-colors ${
+                        location.pathname === link.url
+                          ? 'text-gold'
+                          : 'text-white hover:text-gold'
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                    <button
+                      type="button"
+                      aria-expanded={
+                        (link.dropdownType === 'about' && aboutDropdownOpen) ||
+                        (link.dropdownType === 'services' && servicesDropdownOpen)
+                      }
+                      aria-label={`Toggle ${link.label} submenu`}
+                      className="p-2 text-white hover:text-gold transition-colors flex-shrink-0"
+                      onClick={() =>
+                        link.dropdownType === 'about'
+                          ? setAboutDropdownOpen(!aboutDropdownOpen)
+                          : setServicesDropdownOpen(!servicesDropdownOpen)
+                      }
+                    >
+                      <ChevronDown
+                        size={16}
+                        className={`transition-transform duration-200 ${
+                          (link.dropdownType === 'about' && aboutDropdownOpen) ||
+                          (link.dropdownType === 'services' && servicesDropdownOpen)
+                            ? 'rotate-180'
+                            : ''
+                        }`}
+                      />
+                    </button>
+                  </div>
                   {((link.dropdownType === 'about' && aboutDropdownOpen) || (link.dropdownType === 'services' && servicesDropdownOpen)) && (
                     <div className={`pl-4 space-y-1 ${link.dropdownType === 'services' ? 'max-h-64 overflow-y-auto' : ''}`}>
                       {link.submenu && link.submenu.length > 0 ? (

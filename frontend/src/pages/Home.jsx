@@ -44,9 +44,11 @@ function LinkedInIcon({ size = 20, className = '' }) {
 }
 
 const scrollMainOffset = () => {
-  const topBar = document.querySelector('header[class*="sticky"]');
-  const h = (topBar?.offsetHeight || 0) + 8;
-  return Math.min(h, 120);
+  const raw = getComputedStyle(document.documentElement)
+    .getPropertyValue('--site-header-height')
+    .trim();
+  const px = parseFloat(raw);
+  return Number.isFinite(px) ? px + 8 : 120;
 };
 
 const Home = () => {
@@ -312,7 +314,7 @@ const Home = () => {
   const bookAppointmentForm = (formId = 'book-appointment') => (
     <div
       id={formId}
-      className="scroll-mt-28 rounded-2xl shadow-2xl border border-white/25 bg-white/95 backdrop-blur-md max-h-[min(75vh,640px)] overflow-y-auto overscroll-contain"
+      className="scroll-mt-[var(--site-header-height)] rounded-2xl shadow-2xl border border-white/25 bg-white/95 backdrop-blur-md max-h-[min(75vh,640px)] overflow-y-auto overscroll-contain"
     >
       <div className="p-6 lg:p-7">
         <div className="text-center mb-6">
@@ -457,7 +459,7 @@ const Home = () => {
       {/* Practice areas + book appointment */}
       <section
         id="practice-areas"
-        className="relative scroll-mt-28 bg-white py-16 lg:py-24 border-t border-gray-100"
+        className="relative scroll-mt-[var(--site-header-height)] bg-white py-16 lg:py-24 border-t border-gray-100"
       >
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           <SectionReveal>
@@ -512,7 +514,7 @@ const Home = () => {
       {/* Who we are / Why us / Values / Process */}
       <section
         id="about"
-        className="scroll-mt-28 bg-gradient-to-b from-grey-light to-white py-16 lg:py-24 border-t border-gray-100"
+        className="scroll-mt-[var(--site-header-height)] bg-gradient-to-b from-grey-light to-white py-16 lg:py-24 border-t border-gray-100"
       >
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 space-y-16 lg:space-y-20">
           <SectionReveal>
@@ -614,7 +616,7 @@ const Home = () => {
 
       {/* Team */}
       {teamMembers.length > 0 && (
-        <section id="team" className="scroll-mt-28 bg-white py-16 lg:py-24 border-t border-gray-100">
+        <section id="team" className="scroll-mt-[var(--site-header-height)] bg-white py-16 lg:py-24 border-t border-gray-100">
           <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
             <SectionReveal>
               <div className="text-center mb-12">
@@ -721,7 +723,7 @@ const Home = () => {
       {/* Testimonials */}
       <section
         id="testimonials"
-        className="scroll-mt-28 bg-gradient-to-br from-grey-light via-white to-grey-light py-12 lg:py-16 relative overflow-hidden border-t border-gray-100"
+        className="scroll-mt-[var(--site-header-height)] bg-gradient-to-br from-grey-light via-white to-grey-light py-12 lg:py-16 relative overflow-hidden border-t border-gray-100"
       >
         <div className="absolute top-0 right-0 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-navy/5 rounded-full blur-3xl pointer-events-none" />
@@ -805,7 +807,7 @@ const Home = () => {
       {/* Glance of our experience — stats */}
       <section
         id="experience"
-        className="scroll-mt-28 bg-gradient-to-b from-navy to-[#0a1628] py-16 lg:py-20 border-t border-white/10"
+        className="scroll-mt-[var(--site-header-height)] bg-gradient-to-b from-navy to-[#0a1628] py-16 lg:py-20 border-t border-white/10"
       >
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           <SectionReveal>
@@ -847,7 +849,7 @@ const Home = () => {
 
       {/* Blog */}
       {blogPosts.length > 0 && (
-        <section id="articles" className="scroll-mt-28 bg-white py-16 lg:py-24 border-t border-gray-100">
+        <section id="articles" className="scroll-mt-[var(--site-header-height)] bg-white py-16 lg:py-24 border-t border-gray-100">
           <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
             <SectionReveal>
               <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12">
@@ -936,7 +938,7 @@ const Home = () => {
       {awards.length > 0 && (
         <section
           id="awards"
-          className="scroll-mt-28 bg-[#f4f4f2] py-14 lg:py-20 border-t border-gray-200/80"
+          className="scroll-mt-[var(--site-header-height)] bg-[#f4f4f2] py-14 lg:py-20 border-t border-gray-200/80"
         >
           <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
             <SectionReveal>
@@ -987,7 +989,7 @@ const Home = () => {
       {/* Consultation CTA */}
       <section
         id="consultation"
-        className="scroll-mt-28 relative py-16 lg:py-24 bg-gradient-to-br from-navy via-navy/95 to-[#0a1628] overflow-hidden border-t border-white/10"
+        className="scroll-mt-[var(--site-header-height)] relative py-16 lg:py-24 bg-gradient-to-br from-navy via-navy/95 to-[#0a1628] overflow-hidden border-t border-white/10"
       >
         <div
           className="absolute inset-0 opacity-[0.07] pointer-events-none"

@@ -9,6 +9,7 @@ const BlogPost = require('./models/BlogPost');
 const Review = require('./models/Review');
 const User = require('./models/User');
 const SiteSettings = require('./models/SiteSettings');
+const { OFFICE_ADDRESS_LINE } = require('./config/officeAddress');
 
 const seedData = async () => {
   try {
@@ -262,7 +263,7 @@ const seedData = async () => {
       },
       {
         settingKey: 'address',
-        settingValue: '123 Lawyers Colony, Connaught Place, New Delhi - 110001',
+        settingValue: OFFICE_ADDRESS_LINE,
         description: 'Office address',
       },
       {

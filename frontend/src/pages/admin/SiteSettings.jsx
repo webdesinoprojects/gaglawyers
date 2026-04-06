@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Save } from 'lucide-react';
 import Button from '../../components/Button';
 import API_BASE_URL from '../../config/api';
+import { OFFICE_ADDRESS_LINE } from '../../constants/officeAddress';
 import { invalidatePublicWidgetSettingsCache } from '../../utils/widgetSettingsCache';
 
 const SiteSettings = () => {
@@ -12,7 +13,7 @@ const SiteSettings = () => {
     whatsappNumber: '+919996263370',
     phoneNumber: '+919996263370',
     email: 'contact@gaglawyers.com',
-    address: '123 Lawyers Colony, Connaught Place, New Delhi - 110001',
+    address: OFFICE_ADDRESS_LINE,
     copyProtectionEnabled: false,
     rightClickDisabled: false,
   });

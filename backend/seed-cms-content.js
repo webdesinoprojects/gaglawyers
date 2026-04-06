@@ -5,6 +5,7 @@ const PageBlock = require('./models/PageBlock');
 const NavigationMenu = require('./models/NavigationMenu');
 const FormContent = require('./models/FormContent');
 const GlobalSettings = require('./models/GlobalSettings');
+const { OFFICE_ADDRESS_MULTILINE, getGlobalAddressFields } = require('./config/officeAddress');
 
 const connectDB = async () => {
   try {
@@ -286,7 +287,7 @@ const seedReusableBlocks = async () => {
         },
         address: {
           label: 'Office Address',
-          value: '123 Lawyers Colony\nConnaught Place\nNew Delhi - 110001',
+          value: OFFICE_ADDRESS_MULTILINE,
         },
         mapEmbedUrl: '',
       },
@@ -544,15 +545,7 @@ const seedGlobalSettings = async () => {
         primary: 'contact@gaglawyers.com',
         displayText: 'contact@gaglawyers.com',
       },
-      address: {
-        street: '123 Lawyers Colony',
-        city: 'New Delhi',
-        state: 'Delhi',
-        country: 'India',
-        zipCode: '110001',
-        displayText: '123 Lawyers Colony, Connaught Place, New Delhi - 110001',
-        mapEmbedUrl: '',
-      },
+      address: getGlobalAddressFields(),
     },
     socialMedia: {
       facebook: { url: '', isVisible: false },

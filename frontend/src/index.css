@@ -3,8 +3,14 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Fallback until SiteHeaderHeightSync measures #site-header */
+    --site-header-height: 7.25rem;
+  }
+
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: var(--site-header-height);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -75,5 +81,29 @@
   .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: rgba(212, 175, 55, 0.3) rgba(255, 255, 255, 0.05);
+  }
+
+  /* Practice Areas / Services sidebar — thin gold thumb */
+  .services-sidebar-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(201, 168, 76, 0.55) rgba(11, 21, 38, 0.06);
+  }
+
+  .services-sidebar-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .services-sidebar-scroll::-webkit-scrollbar-track {
+    background: rgba(11, 21, 38, 0.06);
+    border-radius: 9999px;
+  }
+
+  .services-sidebar-scroll::-webkit-scrollbar-thumb {
+    background: rgba(201, 168, 76, 0.55);
+    border-radius: 9999px;
+  }
+
+  .services-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(201, 168, 76, 0.75);
   }
 }

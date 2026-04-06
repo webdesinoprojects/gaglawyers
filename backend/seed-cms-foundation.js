@@ -3,6 +3,7 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const GlobalSettings = require('./models/GlobalSettings');
+const { getGlobalAddressFields } = require('./config/officeAddress');
 const Navigation = require('./models/Navigation');
 
 const seedCMSFoundation = async () => {
@@ -28,11 +29,7 @@ const seedCMSFoundation = async () => {
           email: {
             primary: 'contact@gaglawyers.com',
           },
-          address: {
-            city: 'New Delhi',
-            country: 'India',
-            displayText: 'New Delhi, India',
-          },
+          address: getGlobalAddressFields(),
         },
         socialMedia: {
           facebook: 'https://www.facebook.com/gaglawyers',
