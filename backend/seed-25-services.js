@@ -202,7 +202,7 @@ const services25 = [
   },
   {
     name: "Criminal Defense Cases",
-    slug: "criminal-defense",
+    slug: "criminal-defense-cases",
     category: "criminal",
     shortDescription: "Aggressive defense representation in criminal matters.",
     longDescription: "Our criminal defense team provides comprehensive representation in all criminal matters, from investigation stage through trial and appeals. We protect client rights and mount vigorous defense strategies against criminal charges.",
@@ -566,7 +566,7 @@ const services25 = [
   },
   {
     name: "Motor Accident & MACT Cases",
-    slug: "motor-accident-mact",
+    slug: "motor-accident-claims",
     category: "civil",
     shortDescription: "Representation in motor accident claims and Motor Accidents Claims Tribunal.",
     longDescription: "We handle motor accident injury claims, disability assessments, and MACT proceedings. Our expertise includes calculating fair compensation, negotiating with insurers, and representing claimants before tribunals.",
@@ -594,7 +594,7 @@ const services25 = [
   },
   {
     name: "Property Law & Real Estate Disputes",
-    slug: "property-real-estate",
+    slug: "property-real-estate-disputes",
     category: "property",
     shortDescription: "Expert handling of property disputes and real estate legal matters.",
     longDescription: "We provide comprehensive property law services including real estate disputes, title issues, registration matters, and possession disputes. Our team handles residential, commercial, and agricultural property matters.",

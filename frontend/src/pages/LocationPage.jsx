@@ -2,9 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { MapPin, Phone, Mail, ArrowRight, CheckCircle, ChevronRight } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
-import Button from '../components/Button';
 import API_BASE_URL from '../config/api';
-import { getServiceBySlug } from '../data/services';
 
 // List of supported cities - can be expanded
 const SUPPORTED_CITIES = [
@@ -25,6 +23,9 @@ const getCityName = (slug) => {
   return city ? city.name : slug.charAt(0).toUpperCase() + slug.slice(1);
 };
 
+const SERVICES_CACHE_KEY = 'gag-services-cache-v1';
+let servicesCache = null;
+
 const LocationPage = () => {
   const { service, city } = useParams();
   const navigate = useNavigate();
@@ -33,18 +34,76 @@ const LocationPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (service && city) {
-      const foundService = getServiceBySlug(service);
-      if (foundService) {
-        setServiceData(foundService);
-        setCityName(getCityName(city));
-      } else {
-        navigate('/');
+    let isMounted = true;
+    const controller = new AbortController();
+
+    const getServices = async () => {
+      if (servicesCache) {
+        return servicesCache;
       }
-    } else {
-      navigate('/');
-    }
-    setLoading(false);
+
+      try {
+        const cachedServices = sessionStorage.getItem(SERVICES_CACHE_KEY);
+        if (cachedServices) {
+          const parsedServices = JSON.parse(cachedServices);
+          if (Array.isArray(parsedServices) && parsedServices.length > 0) {
+            servicesCache = parsedServices;
+            return parsedServices;
+          }
+        }
+      } catch (error) {
+        sessionStorage.removeItem(SERVICES_CACHE_KEY);
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/services`, {
+        signal: controller.signal,
+      });
+      const data = await response.json();
+      const nextServices = data.success && Array.isArray(data.data) ? data.data : [];
+      servicesCache = nextServices;
+      sessionStorage.setItem(SERVICES_CACHE_KEY, JSON.stringify(nextServices));
+      return nextServices;
+    };
+
+    const fetchService = async () => {
+      try {
+        if (service && city) {
+          const services = await getServices();
+
+          if (services.length > 0) {
+            const foundService = services.find(s => s.slug === service);
+            if (foundService) {
+              if (isMounted) {
+                setServiceData(foundService);
+                setCityName(getCityName(city));
+              }
+            } else {
+              navigate('/');
+            }
+          } else {
+            navigate('/');
+          }
+        } else {
+          navigate('/');
+        }
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Error fetching service:', error);
+          navigate('/');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchService();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [service, city, navigate]);
 
   if (loading || !serviceData) {

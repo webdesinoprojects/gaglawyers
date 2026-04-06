@@ -1,22 +1,155 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, Globe, MessageCircle, ExternalLink, ArrowRight } from 'lucide-react';
+import { Mail, Phone, MapPin, ArrowRight } from 'lucide-react';
 import API_BASE_URL from '../config/api';
+
+const FOOTER_LOCATION_PRIORITY = [
+  'Delhi',
+  'New Delhi',
+  'Gurgaon',
+  'Gurugram',
+  'Noida',
+  'Greater Noida',
+  'Ghaziabad',
+  'Faridabad',
+  'Mumbai',
+  'Pune',
+  'Bangalore',
+  'Hyderabad',
+  'Chennai',
+  'Kolkata',
+  'Chandigarh',
+  'Jaipur',
+  'Lucknow',
+  'Ahmedabad',
+  'Indore',
+];
+
+const CITY_ALIASES = {
+  delhi: ['delhi', 'new delhi'],
+  'new delhi': ['new delhi', 'delhi'],
+  gurgaon: ['gurgaon', 'gurugram'],
+  gurugram: ['gurugram', 'gurgaon'],
+  noida: ['noida'],
+  'greater noida': ['greater noida'],
+  ghaziabad: ['ghaziabad'],
+  faridabad: ['faridabad'],
+  mumbai: ['mumbai'],
+  pune: ['pune'],
+  bangalore: ['bangalore', 'bengaluru'],
+  bengaluru: ['bengaluru', 'bangalore'],
+  hyderabad: ['hyderabad'],
+  chennai: ['chennai'],
+  kolkata: ['kolkata'],
+  chandigarh: ['chandigarh'],
+  jaipur: ['jaipur'],
+  lucknow: ['lucknow'],
+  ahmedabad: ['ahmedabad'],
+  indore: ['indore'],
+};
+
+const normalizeCity = (value = '') => value.toString().trim().toLowerCase();
+const FOOTER_LOCATION_LIMIT = 200;
+const FOOTER_FETCH_LIMIT = 1000;
+const FOOTER_LOCATIONS_CACHE_KEY = 'gag-footer-locations-v3';
+let footerLocationsCache = null;
+
+const getCityPriority = (cityName) => {
+  const normalized = normalizeCity(cityName);
+
+  for (let index = 0; index < FOOTER_LOCATION_PRIORITY.length; index += 1) {
+    const priorityCity = FOOTER_LOCATION_PRIORITY[index];
+    const aliases = CITY_ALIASES[normalizeCity(priorityCity)] || [normalizeCity(priorityCity)];
+
+    if (aliases.includes(normalized)) {
+      return index;
+    }
+  }
+
+  return Number.MAX_SAFE_INTEGER;
+};
+
+const sortFooterLocations = (items) => {
+  return [...items].sort((left, right) => {
+    const priorityDiff = getCityPriority(left.city) - getCityPriority(right.city);
+    if (priorityDiff !== 0) {
+      return priorityDiff;
+    }
+
+    const cityDiff = left.city.localeCompare(right.city);
+    if (cityDiff !== 0) {
+      return cityDiff;
+    }
+
+    return left.serviceName.localeCompare(right.serviceName);
+  });
+};
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const [locations, setLocations] = useState([]);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchLocations = async () => {
+      if (footerLocationsCache) {
+        if (isMounted) {
+          setLocations(footerLocationsCache);
+        }
+        return;
+      }
+
       try {
-        const response = await fetch(`${API_BASE_URL}/api/locations?limit=200`);
+        const cachedLocations = sessionStorage.getItem(FOOTER_LOCATIONS_CACHE_KEY);
+        if (cachedLocations) {
+          const parsedLocations = JSON.parse(cachedLocations);
+          if (Array.isArray(parsedLocations) && parsedLocations.length > 0) {
+            footerLocationsCache = parsedLocations;
+            if (isMounted) {
+              setLocations(parsedLocations);
+            }
+            return;
+          }
+        }
+      } catch (error) {
+        sessionStorage.removeItem(FOOTER_LOCATIONS_CACHE_KEY);
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/locations/footer-links?limit=${FOOTER_FETCH_LIMIT}`);
         const data = await response.json();
         
         if (data.success && data.data) {
-          // Get unique cities
-          const uniqueCities = [...new Set(data.data.map(page => page.city))].sort();
-          setLocations(uniqueCities); // Show all unique cities
+          const dedupedLocationsBySlug = new Map();
+          const seenSlugs = new Set();
+
+          data.data.forEach((item) => {
+            const normalizedCity = normalizeCity(item?.city);
+            const city = item?.city?.trim();
+            const serviceName = item?.serviceName?.trim();
+            const slug = item?.slug?.trim();
+
+            if (!normalizedCity || !city || !serviceName || !slug || seenSlugs.has(slug)) {
+              return;
+            }
+
+            seenSlugs.add(slug);
+            dedupedLocationsBySlug.set(slug, {
+              city,
+              serviceName,
+              slug,
+            });
+          });
+
+          const nextLocations = sortFooterLocations(
+            Array.from(dedupedLocationsBySlug.values())
+          ).slice(0, FOOTER_LOCATION_LIMIT);
+          footerLocationsCache = nextLocations;
+          sessionStorage.setItem(FOOTER_LOCATIONS_CACHE_KEY, JSON.stringify(nextLocations));
+          if (isMounted) {
+            setLocations(nextLocations);
+          }
         }
       } catch (error) {
         console.error('Error fetching locations:', error);
@@ -24,6 +157,10 @@ const Footer = () => {
     };
 
     fetchLocations();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
@@ -188,30 +325,38 @@ const Footer = () => {
           {/* Locations Section */}
           {locations.length > 0 && (
             <div className="border-t border-white/10 mt-12 pt-12">
-              <h4 className="font-serif text-xl font-semibold mb-6 text-white text-center">
-                We Serve Clients Across Multiple Locations
-              </h4>
-              <div className="max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gold/30 scrollbar-track-white/5 hover:scrollbar-thumb-gold/50">
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 pr-2">
-                  {locations.map((city, index) => {
-                    // Generate slug for criminal lawyer service in this city
-                    const slug = `criminal-defense-cases-${city.toLowerCase().replace(/\s+/g, '-')}`;
-                    return (
-                      <Link
-                        key={index}
-                        to={`/${slug}`}
-                        className="text-gray-400 hover:text-gold transition-colors text-sm font-sans text-center py-2 px-3 rounded hover:bg-white/5"
-                      >
-                        {city}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="text-center mt-6">
-                <p className="text-gray-500 text-xs font-sans">
-                  Showing {locations.length} locations • Scroll to see more
+              <div className="text-center mb-6">
+                <h4 className="font-serif text-xl font-semibold text-white">
+                  Browse Our Service Locations
+                </h4>
+                <p className="font-sans text-sm text-gray-400 mt-2">
+                  200 live location pages, arranged to stay useful and pleasantly scrollable.
                 </p>
+              </div>
+              <div className="rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.03] p-4 md:p-5 shadow-[0_24px_60px_rgba(0,0,0,0.18)]">
+                <div className="max-h-[26rem] overflow-y-auto pr-2 scrollbar-thin">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {locations.map(({ city, serviceName, slug }, index) => (
+                      <Link
+                        key={`${slug}-${index}`}
+                        to={`/${slug}`}
+                        className="group rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-gold/30 hover:bg-white/[0.08]"
+                      >
+                        <span className="block font-sans text-sm font-semibold text-white group-hover:text-gold transition-colors">
+                          {serviceName}
+                        </span>
+                        <span className="mt-1 block font-sans text-xs uppercase tracking-[0.18em] text-gray-400">
+                          {city}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+                <div className="text-center mt-6">
+                  <p className="text-gray-500 text-xs font-sans">
+                    Showing {locations.length} locations • Scroll to see more
+                  </p>
+                </div>
               </div>
             </div>
           )}

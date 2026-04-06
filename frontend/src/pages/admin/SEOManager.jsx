@@ -122,8 +122,24 @@ const SEOManager = () => {
             headers: { Authorization: `Bearer ${token}` }
           });
           const data = await response.json();
-          setSeoData(prev => ({ ...prev, pages: data.success ? data.data : [] }));
-          setTotalCount(data.success ? data.data.length : 0);
+          let pages = data.success ? data.data : [];
+          
+          // Client-side filtering for pages
+          if (debouncedSearch) {
+            const searchLower = debouncedSearch.toLowerCase();
+            pages = pages.filter(page => 
+              page.pageName.toLowerCase().includes(searchLower) ||
+              (page.seo?.title && page.seo.title.toLowerCase().includes(searchLower)) ||
+              (page.seo?.description && page.seo.description.toLowerCase().includes(searchLower))
+            );
+          }
+          
+          if (filterMissing) {
+            pages = pages.filter(page => !page.seo?.description);
+          }
+          
+          setSeoData(prev => ({ ...prev, pages }));
+          setTotalCount(pages.length);
         } else if (activeTab === 'locations') {
           const skip = (currentPage - 1) * itemsPerPage;
           let url = `${API_BASE_URL}/api/locations?limit=${itemsPerPage}&skip=${skip}`;
@@ -142,16 +158,28 @@ const SEOManager = () => {
           setSeoData(prev => ({ ...prev, locations: data.success ? data.data : [] }));
           setTotalCount(data.success ? data.pagination?.total || data.data.length : 0);
         } else if (activeTab === 'blogs') {
-          let url = `${API_BASE_URL}/api/blog?page=${currentPage}&limit=${itemsPerPage}`;
-          if (debouncedSearch) {
-            url += `&search=${encodeURIComponent(debouncedSearch)}`;
-          }
-          const response = await fetch(url, {
+          const response = await fetch(`${API_BASE_URL}/api/blog`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           const data = await response.json();
-          setSeoData(prev => ({ ...prev, blogs: data.success ? data.data : [] }));
-          setTotalCount(data.success ? data.total : 0);
+          let blogs = data.success ? data.data : [];
+          
+          // Client-side filtering for blogs
+          if (debouncedSearch) {
+            const searchLower = debouncedSearch.toLowerCase();
+            blogs = blogs.filter(blog => 
+              blog.title.toLowerCase().includes(searchLower) ||
+              blog.slug.toLowerCase().includes(searchLower) ||
+              (blog.seo?.description && blog.seo.description.toLowerCase().includes(searchLower))
+            );
+          }
+          
+          if (filterMissing) {
+            blogs = blogs.filter(blog => !blog.seo?.description);
+          }
+          
+          setSeoData(prev => ({ ...prev, blogs }));
+          setTotalCount(blogs.length);
         }
       }
     } catch (error) {
@@ -432,28 +460,24 @@ const SEOManager = () => {
           <h1 className="font-serif text-3xl font-bold text-navy mb-2">SEO Manager</h1>
           <p className="font-sans text-gray-600">Manage meta tags for {stats.totalPages.toLocaleString()} pages</p>
         </div>
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <Button
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <button
             type="button"
-            variant="outline"
-            size="sm"
             onClick={fetchSEOData}
             disabled={loading}
-            className="inline-flex items-center gap-2"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white text-navy border border-gray-300 rounded-lg font-sans text-sm font-medium hover:bg-gray-50 hover:border-navy/30 focus:outline-none focus:ring-2 focus:ring-navy/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
             Refresh
-          </Button>
-          <Button
+          </button>
+          <button
             type="button"
-            variant="outline"
-            size="sm"
             onClick={() => window.open(`${API_BASE_URL}/sitemap.xml`, '_blank')}
-            className="inline-flex items-center gap-2"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white text-navy border border-gray-300 rounded-lg font-sans text-sm font-medium hover:bg-gray-50 hover:border-navy/30 focus:outline-none focus:ring-2 focus:ring-navy/20 transition-colors"
           >
             <ExternalLink size={16} />
             Sitemap
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -556,13 +580,13 @@ const SEOManager = () => {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                   <input
                     type="text"
-                    placeholder="Search by title, slug, or city..."
+                    placeholder={activeTab === 'locations' ? 'Search by title, slug, or city...' : 'Search by title or slug...'}
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg font-sans text-sm focus:ring-2 focus:ring-navy/20 focus:border-navy"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg font-sans text-sm focus:ring-2 focus:ring-navy/20 focus:border-navy transition-colors"
                   />
                 </div>
 

@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Check, ChevronRight } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import FAQItem from '../components/FAQItem';
-import { getServiceBySlug, services } from '../data/services';
+import API_BASE_URL from '../config/api';
 
 const ServicePage = () => {
   const { slug } = useParams();
@@ -13,18 +13,37 @@ const ServicePage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const foundService = getServiceBySlug(slug);
-    if (foundService) {
-      setService(foundService);
-      // Get related services from same category
-      const related = services
-        .filter(s => s.category === foundService.category && s.slug !== slug)
-        .slice(0, 3);
-      setRelatedServices(related);
-    } else {
-      navigate('/');
-    }
-    setLoading(false);
+    const fetchService = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/services`);
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          const foundService = data.data.find(s => s.slug === slug);
+          
+          if (foundService) {
+            setService(foundService);
+            
+            // Get related services from same category
+            const related = data.data
+              .filter(s => s.category === foundService.category && s.slug !== slug)
+              .slice(0, 3);
+            setRelatedServices(related);
+          } else {
+            navigate('/');
+          }
+        } else {
+          navigate('/');
+        }
+      } catch (error) {
+        console.error('Error fetching service:', error);
+        navigate('/');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchService();
   }, [slug, navigate]);
 
   if (loading || !service) {
@@ -94,7 +113,7 @@ const ServicePage = () => {
 
             <Link to={`/${service.slug}/delhi`}>
               <button className="inline-flex items-center gap-2 px-8 py-4 bg-gold text-navy font-sans font-semibold rounded-md transition-all duration-200 hover:brightness-110 hover:scale-105">
-                Find {service.name.split(' ')[0]} Near You
+                Find Lawyer Near You
                 <ArrowRight size={20} />
               </button>
             </Link>
@@ -275,7 +294,7 @@ const ServicePage = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {relatedServices.map((relatedService) => (
                 <Link
-                  key={relatedService.id}
+                  key={relatedService.slug}
                   to={`/services/${relatedService.slug}`}
                   className="group"
                 >

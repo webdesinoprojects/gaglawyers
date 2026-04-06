@@ -26,12 +26,14 @@ const ContactForms = () => {
     
     if (!token) {
       console.error('❌ No token found in localStorage');
-      showNotification('Authentication required - Please login again', 'error');
+      showNotification('Please login to view submissions', 'error');
       setLoading(false);
+      // Redirect to login
+      window.location.href = '/admin/login';
       return;
     }
     
-    console.log('🔑 Token found:', token.substring(0, 20) + '...');
+    console.log('🔑 Using token for auth');
     
     try {
       console.log('📡 Fetching from:', `${API_BASE_URL}/api/contact`);
@@ -45,6 +47,18 @@ const ContactForms = () => {
       });
       
       console.log('📊 Response status:', response.status);
+      
+      if (response.status === 401) {
+        // Token is invalid or expired
+        console.error('❌ Unauthorized - Token invalid or expired');
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        showNotification('Session expired. Please login again.', 'error');
+        setTimeout(() => {
+          window.location.href = '/admin/login';
+        }, 2000);
+        return;
+      }
       
       if (!response.ok) {
         const errorData = await response.text();

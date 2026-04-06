@@ -118,32 +118,32 @@ const Navbar = () => {
                   
                   {/* Dropdown Menu */}
                   <div
-                    className={`absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden transition-all duration-200 ${
-                      link.dropdownType === 'services' ? 'w-80 max-h-96 overflow-y-auto' : 'w-56'
+                    className={`absolute top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden transition-all duration-200 ${
+                      link.dropdownType === 'services' 
+                        ? 'w-[90vw] max-w-[900px] left-1/2 -translate-x-1/2' 
+                        : 'w-56 left-0'
                     } ${
                       (link.dropdownType === 'about' && aboutDropdownOpen) || (link.dropdownType === 'services' && servicesDropdownOpen)
                         ? 'opacity-100 visible translate-y-0' 
                         : 'opacity-0 invisible -translate-y-2'
                     }`}
-                    style={link.dropdownType === 'services' ? {
-                      scrollbarWidth: 'thin',
-                      scrollbarColor: '#C5A572 #f3f4f6'
-                    } : {}}
                   >
                     {link.submenu.length > 0 ? (
-                      link.submenu.map((sublink, index) => (
-                        <Link
-                          key={sublink.path}
-                          to={sublink.path}
-                          className={`block px-4 py-3 font-sans text-sm transition-colors ${
-                            location.pathname === sublink.path
-                              ? 'bg-gold/10 text-gold font-medium'
-                              : 'text-gray-700 hover:bg-grey-light hover:text-navy'
-                          } ${index !== link.submenu.length - 1 ? 'border-b border-gray-100' : ''}`}
-                        >
-                          {sublink.name}
-                        </Link>
-                      ))
+                      <div className={link.dropdownType === 'services' ? 'grid grid-cols-4 gap-1 p-3' : ''}>
+                        {link.submenu.map((sublink, index) => (
+                          <Link
+                            key={sublink.path}
+                            to={sublink.path}
+                            className={`block px-3 py-2.5 font-sans text-xs transition-colors rounded-md ${
+                              location.pathname === sublink.path
+                                ? 'bg-gold/10 text-gold font-medium'
+                                : 'text-gray-700 hover:bg-gray-100 hover:text-navy'
+                            }`}
+                          >
+                            {sublink.name}
+                          </Link>
+                        ))}
+                      </div>
                     ) : (
                       <div className="px-4 py-3 text-sm text-gray-500 font-sans">
                         Loading services...

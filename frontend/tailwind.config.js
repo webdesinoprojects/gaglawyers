@@ -12,7 +12,7 @@ export default {
           dark: '#081629',
         },
         gold: {
-          DEFAULT: '#C9A86A',
+          DEFAULT: '#D4AF37',
           light: '#E6D5B8',
         },
         grey: {

@@ -66,7 +66,10 @@ const About = () => {
   const values = defaultValues;
   const practiceAreas = defaultPracticeAreas;
   const clientTypes = defaultClientTypes;
-  const whyChooseUs = defaultWhyChooseUs;
+  const whyChooseUs =
+    Array.isArray(pageContent?.sections?.whyChooseUs) && pageContent.sections.whyChooseUs.length > 0
+      ? pageContent.sections.whyChooseUs
+      : defaultWhyChooseUs;
 
   const hero = pageContent?.sections?.hero || {
     heading: 'GAG Lawyers',
@@ -131,17 +134,65 @@ const About = () => {
         </div>
       </section>
 
-      {/* Introduction */}
-      <section className="bg-white py-20 lg:py-28">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="space-y-8">
-            <p className="font-sans text-xl text-gray-700 leading-relaxed text-center">
-              {introduction.text}
+      {/* Who we are & why clients choose us — unified */}
+      <section className="relative bg-gradient-to-b from-white via-grey-light/40 to-white py-20 lg:py-28 overflow-hidden">
+        <div
+          className="absolute top-0 right-0 w-[min(100%,28rem)] h-72 bg-gold/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"
+          aria-hidden
+        />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-14 lg:mb-20">
+            <span className="inline-block font-sans text-sm font-semibold text-gold uppercase tracking-wider bg-gold/10 px-4 py-2 rounded-full border border-gold/15 mb-5">
+              About the firm
+            </span>
+            <h2 className="font-serif text-4xl lg:text-5xl font-bold text-navy mb-5 leading-tight">
+              Who we are
+            </h2>
+            <p className="font-sans text-xl lg:text-2xl text-navy/75 font-medium leading-snug">
+              — and why clients choose GAG Lawyers
             </p>
-            <div className="h-1 w-24 bg-gradient-to-r from-gold to-gold/50 mx-auto rounded-full"></div>
-            <p className="font-sans text-lg text-gray-600 leading-relaxed text-center max-w-4xl mx-auto">
-              Founded by <span className="font-semibold text-navy">{founder.name}</span>, the firm has built a reputation for delivering high-quality legal services across India and abroad. Over the years, we have grown from a single-practice office into a full-service law firm catering to individuals, entrepreneurs, corporates, and international clients.
+            <p className="font-sans text-base lg:text-lg text-gray-600 leading-relaxed mt-6">
+              One story: who we are as a firm, and what you can expect when you work with us.
             </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-start">
+            <div className="lg:col-span-7 space-y-8">
+              <p className="font-sans text-xl text-gray-800 leading-relaxed">
+                {introduction.text}
+              </p>
+              <div className="h-px w-full max-w-lg bg-gradient-to-r from-gold via-gold/50 to-transparent rounded-full" />
+              <p className="font-sans text-lg text-gray-600 leading-relaxed">
+                Founded by <span className="font-semibold text-navy">{founder.name}</span>, the firm
+                has built a reputation for delivering high-quality legal services across India and
+                abroad. Over the years, we have grown from a single-practice office into a full-service
+                law firm catering to individuals, entrepreneurs, corporates, and international clients.
+              </p>
+            </div>
+
+            <aside className="lg:col-span-5 w-full">
+              <div className="relative rounded-2xl border border-navy/10 bg-white shadow-xl shadow-navy/[0.06] overflow-hidden lg:sticky lg:top-28">
+                <div className="h-1.5 bg-gradient-to-r from-gold via-gold/70 to-navy/25" aria-hidden />
+                <div className="p-8 lg:p-9">
+                  <h3 className="font-serif text-2xl font-bold text-navy mb-2">Why clients work with us</h3>
+                  <p className="font-sans text-sm text-gray-600 mb-6 leading-relaxed">
+                    Clear reasons clients trust our team with high-stakes matters—in India and beyond.
+                  </p>
+                  <ul className="space-y-4">
+                    {whyChooseUs.map((reason, index) => (
+                      <li key={index} className="flex gap-3">
+                        <CheckCircle
+                          className="w-5 h-5 text-gold flex-shrink-0 mt-0.5"
+                          strokeWidth={2}
+                          aria-hidden
+                        />
+                        <p className="font-sans text-[15px] text-gray-700 leading-relaxed">{reason}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </aside>
           </div>
         </div>
       </section>
@@ -314,31 +365,6 @@ const About = () => {
                 We work in close partnership with our clients, keeping them informed and involved at every stage. By doing so, we build trust and long-term relationships rather than one-time engagements.
               </p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose Us */}
-      <section className="bg-white py-20 lg:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="font-serif text-4xl lg:text-5xl font-bold text-navy mb-6">
-              Why Clients Choose Us
-            </h2>
-            <div className="h-1 w-24 bg-gradient-to-r from-gold to-gold/50 mx-auto rounded-full"></div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-            {whyChooseUs.map((reason, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-4 p-6 bg-gradient-to-br from-grey-light to-white rounded-xl border-l-4 border-gold hover:shadow-lg transition-all"
-              >
-                <CheckCircle className="w-6 h-6 text-gold flex-shrink-0 mt-1" />
-                <p className="font-sans text-gray-700 leading-relaxed">
-                  {reason}
-                </p>
-              </div>
-            ))}
           </div>
         </div>
       </section>

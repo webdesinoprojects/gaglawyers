@@ -1,7 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { MessageCircle, Phone, X } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import API_BASE_URL from '../config/api';
+import { useGuidedChatbot } from '../hooks/useGuidedChatbot';
+import GuidedChatbotPanel from './chatbot/GuidedChatbotPanel';
+
+const WIDGET_SETTINGS_CACHE_KEY = 'gag-widget-settings-v1';
+let widgetSettingsCache = null;
 
 const FloatingWidgets = () => {
   const location = useLocation();
@@ -17,14 +22,43 @@ const FloatingWidgets = () => {
   const isAdminPanel = location.pathname.startsWith('/admin');
 
   useEffect(() => {
+    let isMounted = true;
+    let visibilityTimer;
+
     if (!isAdminPanel) {
-      fetchSettings();
+      fetchSettings().then((nextSettings) => {
+        if (isMounted && nextSettings) {
+          setSettings(nextSettings);
+        }
+      });
       // Show widgets after a small delay for better UX
-      setTimeout(() => setIsVisible(true), 1000);
+      visibilityTimer = setTimeout(() => {
+        if (isMounted) {
+          setIsVisible(true);
+        }
+      }, 1000);
     }
+
+    return () => {
+      isMounted = false;
+      if (visibilityTimer) {
+        clearTimeout(visibilityTimer);
+      }
+    };
   }, [isAdminPanel]);
 
   const fetchSettings = async () => {
+    if (widgetSettingsCache) {
+      return widgetSettingsCache;
+    }
+
+    const cachedSettings = sessionStorage.getItem(WIDGET_SETTINGS_CACHE_KEY);
+    if (cachedSettings) {
+      const parsedSettings = JSON.parse(cachedSettings);
+      widgetSettingsCache = parsedSettings;
+      return parsedSettings;
+    }
+
     try {
       const [whatsappEnabledRes, whatsappNumberRes, phoneNumberRes] = await Promise.all([
         fetch(`${API_BASE_URL}/api/settings/whatsappEnabled`),
@@ -36,23 +70,29 @@ const FloatingWidgets = () => {
       const whatsappNumberData = await whatsappNumberRes.json();
       const phoneNumberData = await phoneNumberRes.json();
 
-      setSettings({
+      const nextSettings = {
         whatsappEnabled: whatsappEnabledData.success ? whatsappEnabledData.data.settingValue : false,
         whatsappNumber: whatsappNumberData.success ? whatsappNumberData.data.settingValue : '',
         phoneNumber: phoneNumberData.success ? phoneNumberData.data.settingValue : ''
-      });
+      };
+
+      widgetSettingsCache = nextSettings;
+      sessionStorage.setItem(WIDGET_SETTINGS_CACHE_KEY, JSON.stringify(nextSettings));
+
+      return nextSettings;
     } catch (error) {
       console.error('Error fetching widget settings:', error);
+      return null;
     }
   };
 
-  const handleWhatsAppClick = () => {
+  const handleWhatsAppClick = useCallback(() => {
     if (settings.whatsappNumber) {
       const cleanNumber = settings.whatsappNumber.replace(/[^0-9]/g, '');
       const message = encodeURIComponent('Hello! I would like to inquire about your legal services.');
       window.open(`https://wa.me/${cleanNumber}?text=${message}`, '_blank');
     }
-  };
+  }, [settings.whatsappNumber]);
 
   const handlePhoneClick = () => {
     if (settings.phoneNumber) {
@@ -64,10 +104,18 @@ const FloatingWidgets = () => {
     setShowChat(!showChat);
   };
 
-  // Don't render if widgets are disabled or in admin panel
-  if (isAdminPanel || (!settings.whatsappEnabled && !settings.phoneNumber)) {
+  const guidedChatbot = useGuidedChatbot({
+    onWhatsApp: handleWhatsAppClick,
+    typingDelayMs: 420,
+  });
+
+  // Hide entire widget rail on admin; public site always gets guided assistant
+  if (isAdminPanel) {
     return null;
   }
+
+  const hasWhatsApp = settings.whatsappEnabled && settings.whatsappNumber;
+  const hasPhone = Boolean(settings.phoneNumber);
 
   return (
     <>
@@ -77,13 +125,13 @@ const FloatingWidgets = () => {
         <button
           onClick={handleChatClick}
           className="group relative w-14 h-14 bg-gold hover:bg-gold/90 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center hover:scale-110"
-          title="Live Chat"
+          title="GAG Assistant"
         >
           {showChat ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
           
           {/* Tooltip */}
           <span className="absolute right-full mr-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-            {showChat ? 'Close Chat' : 'Live Chat'}
+            {showChat ? 'Close' : 'Help & options'}
           </span>
 
           {/* Notification Badge */}
@@ -93,7 +141,7 @@ const FloatingWidgets = () => {
         </button>
 
         {/* WhatsApp Button */}
-        {settings.whatsappEnabled && settings.whatsappNumber && (
+        {hasWhatsApp && (
           <button
             onClick={handleWhatsAppClick}
             className="group relative w-16 h-16 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center hover:scale-110"
@@ -119,7 +167,7 @@ const FloatingWidgets = () => {
       </div>
 
       {/* Phone Button - Bottom Left */}
-      {settings.phoneNumber && (
+      {hasPhone && (
         <div className={`fixed bottom-6 left-6 z-50 transition-all duration-500 ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-20 opacity-0'}`}>
           <button
             onClick={handlePhoneClick}
@@ -139,99 +187,20 @@ const FloatingWidgets = () => {
         </div>
       )}
 
-      {/* Chat Widget Popup - Above the widget buttons */}
       {showChat && (
-        <div className="fixed bottom-32 right-6 z-50 w-80 md:w-96 bg-white rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 animate-slideUp">
-          {/* Chat Header */}
-          <div className="bg-gradient-to-r from-navy to-navy/90 text-white p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gold rounded-full flex items-center justify-center">
-                  <MessageCircle className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-sans font-semibold">GAG Lawyers</h3>
-                  <p className="text-xs text-white/80">We're here to help!</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowChat(false)}
-                className="p-1 hover:bg-white/10 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Chat Body */}
-          <div className="p-6 bg-gray-50 h-64 overflow-y-auto">
-            <div className="space-y-4">
-              {/* Bot Message */}
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-navy rounded-full flex items-center justify-center flex-shrink-0">
-                  <MessageCircle className="w-4 h-4 text-white" />
-                </div>
-                <div className="bg-white rounded-lg rounded-tl-none p-4 shadow-sm max-w-[80%]">
-                  <p className="font-sans text-sm text-gray-800">
-                    Hello! 👋 Welcome to GAG Lawyers. How can we assist you with your legal needs today?
-                  </p>
-                  <p className="font-sans text-xs text-gray-500 mt-2">Just now</p>
-                </div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="space-y-2">
-                <p className="font-sans text-xs text-gray-600 font-medium px-2">Quick Actions:</p>
-                <button
-                  onClick={handleWhatsAppClick}
-                  className="w-full text-left bg-white hover:bg-gray-50 rounded-lg p-3 shadow-sm transition-colors border border-gray-100"
-                >
-                  <p className="font-sans text-sm font-medium text-navy">💬 Continue on WhatsApp</p>
-                  <p className="font-sans text-xs text-gray-600 mt-1">Get instant responses</p>
-                </button>
-                <button
-                  onClick={handlePhoneClick}
-                  className="w-full text-left bg-white hover:bg-gray-50 rounded-lg p-3 shadow-sm transition-colors border border-gray-100"
-                >
-                  <p className="font-sans text-sm font-medium text-navy">📞 Call Us Now</p>
-                  <p className="font-sans text-xs text-gray-600 mt-1">{settings.phoneNumber}</p>
-                </button>
-                <a
-                  href="/contact"
-                  className="block w-full text-left bg-white hover:bg-gray-50 rounded-lg p-3 shadow-sm transition-colors border border-gray-100"
-                >
-                  <p className="font-sans text-sm font-medium text-navy">📧 Send Email</p>
-                  <p className="font-sans text-xs text-gray-600 mt-1">We'll respond within 24 hours</p>
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* Chat Footer */}
-          <div className="p-4 bg-white border-t border-gray-200">
-            <p className="font-sans text-xs text-gray-500 text-center">
-              Available Mon-Fri, 9am-6pm IST
-            </p>
-          </div>
-        </div>
+        <GuidedChatbotPanel
+          messages={guidedChatbot.messages}
+          currentOptions={guidedChatbot.currentOptions}
+          currentNodeId={guidedChatbot.currentNodeId}
+          stack={guidedChatbot.stack}
+          isTyping={guidedChatbot.isTyping}
+          selectOption={guidedChatbot.selectOption}
+          goBack={guidedChatbot.goBack}
+          startOver={guidedChatbot.startOver}
+          onClose={() => setShowChat(false)}
+          phoneDisplay={hasPhone ? settings.phoneNumber : ''}
+        />
       )}
-
-      {/* Custom Animations */}
-      <style jsx>{`
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-slideUp {
-          animation: slideUp 0.3s ease-out;
-        }
-      `}</style>
     </>
   );
 };

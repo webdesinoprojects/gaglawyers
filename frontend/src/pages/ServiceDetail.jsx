@@ -583,7 +583,7 @@ const ServiceDetail = () => {
             
             {/* Emergency Helpline (for Sexual Harassment / 498A) */}
             {slug === 'sexual-harassment-section-498a-lawyer-in-delhi' && (
-              <div className="bg-red-600 rounded-xl p-6 mt-6 text-white sticky top-24">
+              <div className="bg-red-600 rounded-xl p-6 mt-6 text-white sticky top-36">
                 <div className="flex items-center gap-3 mb-3">
                   <AlertCircle size={24} className="flex-shrink-0" />
                   <h3 className="font-serif text-xl font-bold">Emergency Helpline</h3>

@@ -95,7 +95,7 @@ const Awards = () => {
 
       {/* Year Filter */}
       {years.length > 2 && (
-        <section className="bg-white py-8 border-b border-gray-200 sticky top-20 z-40 shadow-sm">
+        <section className="bg-white py-8 border-b border-gray-200 sticky top-36 z-40 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-center gap-3 flex-wrap">
               <span className="font-sans text-sm font-medium text-gray-600 mr-2">Filter by Year:</span>

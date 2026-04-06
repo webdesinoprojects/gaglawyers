@@ -199,7 +199,7 @@ const BlogPost = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             {/* Sidebar - Social Share (Sticky) */}
             <aside className="hidden lg:block lg:col-span-1">
-              <div className="sticky top-24">
+              <div className="sticky top-36">
                 <div className="flex flex-col gap-4">
                   <p className="font-sans text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Share</p>
                   <a
@@ -331,7 +331,7 @@ const BlogPost = () => {
 
             {/* Right Sidebar - Author & Related Posts */}
             <aside className="lg:col-span-3">
-              <div className="sticky top-24 space-y-8">
+              <div className="sticky top-36 space-y-8">
                 {/* Author Card */}
                 {post.author && (
                   <div className="bg-white rounded-2xl shadow-lg p-6">

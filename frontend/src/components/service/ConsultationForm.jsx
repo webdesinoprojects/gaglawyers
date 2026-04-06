@@ -55,7 +55,7 @@ const ConsultationForm = ({ serviceName }) => {
   return (
     <div className="space-y-6">
       {/* Consultation Form */}
-      <div className="bg-gradient-to-br from-[#1a2744] to-[#1a2744]/90 rounded-xl p-6 sticky top-24">
+      <div className="bg-gradient-to-br from-[#1a2744] to-[#1a2744]/90 rounded-xl p-6 sticky top-36">
         {notification && (
           <div className={`mb-4 p-4 rounded-lg ${
             notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'

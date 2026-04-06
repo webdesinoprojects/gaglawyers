@@ -1,38 +1,66 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { MapPin, Phone, Mail, ArrowRight, CheckCircle, ChevronRight } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import API_BASE_URL from '../config/api';
 
 const LocationPageDynamic = () => {
   const { slug } = useParams();
-  const navigate = useNavigate();
   const [pageData, setPageData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
     const fetchLocationPage = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/locations/slug/${slug}`);
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch(`${API_BASE_URL}/api/locations/slug/${slug}`, {
+          signal: controller.signal,
+        });
         const data = await response.json();
 
         if (data.success && data.data) {
-          setPageData(data.data);
+          if (isMounted) {
+            setPageData(data.data);
+          }
         } else {
-          setError('Page not found');
+          if (isMounted) {
+            setPageData(null);
+            setError('Page not found');
+          }
         }
       } catch (err) {
-        console.error('Error fetching location page:', err);
-        setError('Failed to load page');
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching location page:', err);
+          if (isMounted) {
+            setPageData(null);
+            setError('Failed to load page');
+          }
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     if (slug) {
       fetchLocationPage();
+    } else {
+      setPageData(null);
+      setError('Page not found');
+      setLoading(false);
     }
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [slug]);
 
   if (loading) {

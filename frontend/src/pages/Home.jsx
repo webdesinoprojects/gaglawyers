@@ -4,15 +4,29 @@ import { ArrowRight, Quote, ChevronLeft, ChevronRight, Shield, Users, Award, Tre
 import ServiceCard from '../components/ServiceCard';
 import TestimonialCard from '../components/TestimonialCard';
 import SEOHead from '../components/SEOHead';
+import HeroCarousel from '../components/HeroCarousel';
+import AnimatedStatValue from '../components/AnimatedStatValue';
 import API_BASE_URL from '../config/api';
 
 const Home = () => {
   const [services, setServices] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [blogPosts, setBlogPosts] = useState([]);
+  const [teamMembers, setTeamMembers] = useState([]);
   const [pageContent, setPageContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const scrollContainerRef = useRef(null);
+  
+  // Appointment form state
+  const [appointmentForm, setAppointmentForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    service: '',
+    description: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
 
   useEffect(() => {
     fetchDynamicContent();
@@ -20,20 +34,22 @@ const Home = () => {
 
   const fetchDynamicContent = async () => {
     try {
-      const [servicesRes, reviewsRes, pageRes, blogRes] = await Promise.all([
+      const [servicesRes, reviewsRes, pageRes, blogRes, teamRes] = await Promise.all([
         fetch(`${API_BASE_URL}/api/services`),
         fetch(`${API_BASE_URL}/api/reviews?featured=true`),
         fetch(`${API_BASE_URL}/api/pages/home`),
         fetch(`${API_BASE_URL}/api/blog?limit=3`),
+        fetch(`${API_BASE_URL}/api/team?limit=5`),
       ]);
 
       const servicesData = await servicesRes.json();
       const reviewsData = await reviewsRes.json();
       const pageData = await pageRes.json();
       const blogData = await blogRes.json();
+      const teamData = await teamRes.json();
 
       if (servicesData.success && servicesData.data.length > 0) {
-        setServices(servicesData.data.slice(0, 4)); // Only first 4 for homepage
+        setServices(servicesData.data); // Load all services for dropdown
       }
 
       if (reviewsData.success && reviewsData.data.length > 0) {
@@ -46,6 +62,10 @@ const Home = () => {
 
       if (blogData.success && blogData.data.length > 0) {
         setBlogPosts(blogData.data);
+      }
+
+      if (teamData.success && teamData.data.length > 0) {
+        setTeamMembers(teamData.data);
       }
     } catch (error) {
       console.error('Error fetching dynamic content:', error);
@@ -62,6 +82,69 @@ const Home = () => {
         left: newScrollPosition,
         behavior: 'smooth'
       });
+    }
+  };
+
+  const handleAppointmentChange = (e) => {
+    const { name, value } = e.target;
+    setAppointmentForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleAppointmentSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: appointmentForm.name,
+          email: appointmentForm.email,
+          phone: appointmentForm.phone,
+          serviceOfInterest: appointmentForm.service,
+          message: appointmentForm.description
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubmitStatus({
+          type: 'success',
+          message: 'Thank you! Your appointment request has been submitted. We will contact you within 24 hours.'
+        });
+        // Reset form
+        setAppointmentForm({
+          name: '',
+          email: '',
+          phone: '',
+          service: '',
+          description: ''
+        });
+        // Auto-hide success message after 5 seconds
+        setTimeout(() => {
+          setSubmitStatus(null);
+        }, 5000);
+      } else {
+        setSubmitStatus({
+          type: 'error',
+          message: data.message || 'Something went wrong. Please try again.'
+        });
+      }
+    } catch (error) {
+      setSubmitStatus({
+        type: 'error',
+        message: 'Unable to submit appointment request. Please try again later.'
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -89,6 +172,114 @@ const Home = () => {
     subheading: 'Trusted by leading businesses and individuals across India',
   };
 
+  const bookAppointmentAside = (
+    <div
+      id="book-consultation"
+      className="scroll-mt-28 rounded-2xl shadow-2xl border border-white/25 bg-white/95 backdrop-blur-md max-h-[min(70vh,620px)] overflow-y-auto overscroll-contain"
+    >
+      <div className="p-6 lg:p-7">
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-gold/15 rounded-full mb-3">
+            <Calendar className="text-gold" size={26} />
+          </div>
+          <h2 className="font-serif text-xl lg:text-2xl font-bold text-navy mb-1">
+            Book Your Consultation
+          </h2>
+          <p className="font-sans text-sm text-gray-600">
+            We will contact you within 24 hours
+          </p>
+        </div>
+
+        {submitStatus && (
+          <div
+            className={`mb-4 p-3 rounded-lg ${
+              submitStatus.type === 'success'
+                ? 'bg-green-50 text-green-800 border border-green-200'
+                : 'bg-red-50 text-red-800 border border-red-200'
+            }`}
+          >
+            <p className="font-sans text-xs font-medium">{submitStatus.message}</p>
+          </div>
+        )}
+
+        <form className="space-y-4" onSubmit={handleAppointmentSubmit}>
+          <div>
+            <label className="block font-sans text-xs font-medium text-gray-700 mb-1">Full Name *</label>
+            <input
+              type="text"
+              name="name"
+              value={appointmentForm.name}
+              onChange={handleAppointmentChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm text-gray-900 focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
+              placeholder="Your name"
+            />
+          </div>
+          <div>
+            <label className="block font-sans text-xs font-medium text-gray-700 mb-1">Email *</label>
+            <input
+              type="email"
+              name="email"
+              value={appointmentForm.email}
+              onChange={handleAppointmentChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
+              placeholder="your@email.com"
+            />
+          </div>
+          <div>
+            <label className="block font-sans text-xs font-medium text-gray-700 mb-1">Phone *</label>
+            <input
+              type="tel"
+              name="phone"
+              value={appointmentForm.phone}
+              onChange={handleAppointmentChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
+              placeholder="+91 ..."
+            />
+          </div>
+          <div>
+            <label className="block font-sans text-xs font-medium text-gray-700 mb-1">Legal Service *</label>
+            <select
+              name="service"
+              value={appointmentForm.service}
+              onChange={handleAppointmentChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
+            >
+              <option value="">Select a service</option>
+              {services.map((service) => (
+                <option key={service._id} value={service.name || service.title}>
+                  {service.name || service.title}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block font-sans text-xs font-medium text-gray-700 mb-1">Brief description</label>
+            <textarea
+              name="description"
+              value={appointmentForm.description}
+              onChange={handleAppointmentChange}
+              rows={2}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm resize-none focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
+              placeholder="Your legal matter (optional)"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full px-4 py-3 bg-gold text-navy font-sans text-sm font-semibold rounded-lg transition-all hover:brightness-110 flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            {isSubmitting ? 'Submitting...' : 'Book appointment'}
+            {!isSubmitting && <ArrowRight size={16} />}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+
   return (
     <div>
       <SEOHead 
@@ -96,80 +287,17 @@ const Home = () => {
         description={pageContent?.seo?.description || "Expert legal services in corporate law, civil litigation, real estate, and family law. 25+ years of excellence serving clients across India."}
         keywords={pageContent?.seo?.keywords || "lawyers in delhi, advocates in india, corporate law firm, civil litigation, real estate lawyers, family law"}
       />
-      <section className="bg-navy text-white py-24">
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left Column - Content */}
-            <div className="space-y-8">
-              <p className="font-sans text-xs lg:text-sm text-gold uppercase tracking-wide font-semibold">
-                GROVER & GROVER ADVOCATES
-              </p>
-              
-              <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                Precision in Law.<br />
-                <span className="text-gold">Excellence in Practice.</span>
-              </h1>
-              
-              <p className="font-sans text-base lg:text-lg text-gray-300 leading-relaxed max-w-[550px]">
-                India's premier law firm delivering strategic legal counsel across
-                corporate, litigation, and regulatory matters for over two decades.
-              </p>
-              
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-2">
-                <Link to="/contact">
-                  <button className="px-6 py-3 bg-gold text-navy font-sans text-sm font-semibold rounded-md transition-all duration-200 hover:brightness-110 hover:scale-105 flex items-center justify-center gap-2">
-                    Schedule a Consultation
-                    <ArrowRight size={18} />
-                  </button>
-                </Link>
-                <Link to="/services">
-                  <button className="px-6 py-3 bg-transparent text-white font-sans text-sm font-semibold rounded-md border border-white/30 transition-all duration-200 hover:bg-white/10">
-                    Our Practice Areas
-                  </button>
-                </Link>
-              </div>
-              
-              {/* Trust Indicators */}
-              <div className="flex flex-wrap items-center gap-6 lg:gap-8 pt-6 border-t border-white/10">
-                <div>
-                  <p className="font-serif text-2xl lg:text-3xl font-bold text-white">20+</p>
-                  <p className="font-sans text-xs lg:text-sm text-gray-400 mt-1">Years Experience</p>
-                </div>
-                <div className="w-px h-12 bg-white/20 hidden sm:block"></div>
-                <div>
-                  <p className="font-serif text-2xl lg:text-3xl font-bold text-white">5000+</p>
-                  <p className="font-sans text-xs lg:text-sm text-gray-400 mt-1">Cases Won</p>
-                </div>
-                <div className="w-px h-12 bg-white/20 hidden sm:block"></div>
-                <div>
-                  <p className="font-serif text-2xl lg:text-3xl font-bold text-white">98%</p>
-                  <p className="font-sans text-xs lg:text-sm text-gray-400 mt-1">Success Rate</p>
-                </div>
-              </div>
-            </div>
-            
-            {/* Right Column - Image */}
-            <div className="relative h-[400px] lg:h-[500px] order-first lg:order-last">
-              <div className="absolute inset-0 bg-gradient-to-br from-gold/20 via-transparent to-navy/50 rounded-xl"></div>
-              <img 
-                src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&q=80"
-                alt="Professional legal consultation"
-                className="w-full h-full object-cover rounded-xl shadow-2xl"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-navy/60 via-transparent to-transparent rounded-xl"></div>
-            </div>
-          </div>
-        </div>
-      </section>
+      
+      {/* Hero + book appointment (form stays on the right on large screens) */}
+      <HeroCarousel aside={bookAppointmentAside} />
 
       {/* Stats / Authority Strip Section */}
       <section className="bg-gradient-to-b from-navy to-[#0a1628] py-16 border-t border-white/10">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
-              <p className="font-serif text-3xl lg:text-4xl font-semibold text-white mb-2">
-                {stats.casesRepresented}
+              <p className="font-serif text-3xl lg:text-4xl font-semibold text-white mb-2 tabular-nums">
+                <AnimatedStatValue value={stats.casesRepresented} duration={1900} />
               </p>
               <p className="font-sans text-sm text-gray-400">
                 Cases Represented
@@ -177,8 +305,8 @@ const Home = () => {
             </div>
             
             <div className="text-center border-l border-white/10">
-              <p className="font-serif text-3xl lg:text-4xl font-semibold text-white mb-2">
-                {stats.criminalMatters}
+              <p className="font-serif text-3xl lg:text-4xl font-semibold text-white mb-2 tabular-nums">
+                <AnimatedStatValue value={stats.criminalMatters} duration={1900} />
               </p>
               <p className="font-sans text-sm text-gray-400">
                 Criminal Matters
@@ -186,8 +314,8 @@ const Home = () => {
             </div>
             
             <div className="text-center border-l border-white/10">
-              <p className="font-serif text-3xl lg:text-4xl font-semibold text-white mb-2">
-                {stats.familyMatters}
+              <p className="font-serif text-3xl lg:text-4xl font-semibold text-white mb-2 tabular-nums">
+                <AnimatedStatValue value={stats.familyMatters} duration={1900} />
               </p>
               <p className="font-sans text-sm text-gray-400">
                 Family Dispute Matters
@@ -195,8 +323,8 @@ const Home = () => {
             </div>
             
             <div className="text-center border-l border-white/10">
-              <p className="font-serif text-3xl lg:text-4xl font-semibold text-white mb-2">
-                {stats.civilMatters}
+              <p className="font-serif text-3xl lg:text-4xl font-semibold text-white mb-2 tabular-nums">
+                <AnimatedStatValue value={stats.civilMatters} duration={1900} />
               </p>
               <p className="font-sans text-sm text-gray-400">
                 Civil Matters
@@ -355,9 +483,8 @@ const Home = () => {
             </p>
           </div>
           
-          {/* Practice Areas Grid - Only 4 Services */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {services.map((service, index) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+            {services.slice(0, 8).map((service, index) => (
               <div
                 key={service._id || index}
                 className="group bg-gray-50 rounded-lg border border-gray-200 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-gold/30"
@@ -381,6 +508,101 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Meet Our Team Section */}
+      {teamMembers.length > 0 && (
+        <section className="bg-white py-20 lg:py-24">
+          <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <span className="inline-block px-4 py-1.5 bg-gold/10 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
+                Our Team
+              </span>
+              <h2 className="font-serif text-3xl lg:text-4xl font-bold text-navy mb-4">
+                Meet the Legal Minds Behind Our Success
+              </h2>
+              <p className="font-sans text-lg text-gray-600 max-w-2xl mx-auto">
+                Led by experienced advocates with decades of combined expertise in diverse legal domains
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {/* Founder/First Member - Larger Card */}
+              {teamMembers[0] && (
+                <div className="lg:col-span-3 flex flex-col md:flex-row items-center gap-8 bg-gradient-to-br from-navy/5 to-gold/5 rounded-2xl p-8 border border-navy/10">
+                  <div className="relative group flex-shrink-0">
+                    <div className="absolute inset-0 bg-gradient-to-br from-gold to-navy rounded-2xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                    <img
+                      src={teamMembers[0].imageUrl}
+                      alt={teamMembers[0].name}
+                      className="relative w-48 h-48 md:w-64 md:h-64 object-cover rounded-2xl shadow-xl"
+                    />
+                  </div>
+                  <div className="flex-1 text-center md:text-left">
+                    <div className="inline-block px-3 py-1 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-3">
+                      Founder
+                    </div>
+                    <h3 className="font-serif text-3xl font-bold text-navy mb-2">
+                      {teamMembers[0].name}
+                    </h3>
+                    <p className="font-sans text-lg text-gold font-semibold mb-4">
+                      {teamMembers[0].designation}
+                    </p>
+                    <p className="font-sans text-gray-600 leading-relaxed mb-6">
+                      {teamMembers[0].bio}
+                    </p>
+                    <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                      <span className="px-3 py-1 bg-navy/10 text-navy text-xs font-sans font-medium rounded-full">
+                        20+ Years Experience
+                      </span>
+                      <span className="px-3 py-1 bg-navy/10 text-navy text-xs font-sans font-medium rounded-full">
+                        Supreme Court Advocate
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Other Team Members */}
+              {teamMembers.slice(1, 5).map((member) => (
+                <div
+                  key={member._id}
+                  className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-xl hover:border-gold/30 transition-all duration-300"
+                >
+                  <div className="relative overflow-hidden">
+                    <img
+                      src={member.imageUrl}
+                      alt={member.name}
+                      className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-navy/80 via-navy/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="font-serif text-xl font-bold text-navy mb-1 group-hover:text-gold transition-colors">
+                      {member.name}
+                    </h3>
+                    <p className="font-sans text-sm text-gold font-semibold mb-3">
+                      {member.designation}
+                    </p>
+                    <p className="font-sans text-sm text-gray-600 line-clamp-3">
+                      {member.bio}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Know More Button */}
+            <div className="text-center">
+              <Link to="/team">
+                <button className="inline-flex items-center gap-2 px-8 py-4 bg-navy text-white font-sans text-base font-semibold rounded-lg hover:bg-navy/90 transition-all hover:scale-105 shadow-lg">
+                  Know More About Our Team
+                  <ArrowRight size={20} />
+                </button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Latest Blog Posts Section */}
       {blogPosts.length > 0 && (
@@ -595,15 +817,6 @@ const Home = () => {
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
               <h3 className="font-serif text-2xl font-bold text-white mb-6">What to Expect</h3>
               <div className="space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-gold/20 rounded-full flex items-center justify-center flex-shrink-0">
-                    <CheckCircle className="w-5 h-5 text-gold" />
-                  </div>
-                  <div>
-                    <h4 className="font-sans font-semibold text-white mb-1">Free Initial Consultation</h4>
-                    <p className="font-sans text-sm text-gray-300">Discuss your case with no obligation</p>
-                  </div>
-                </div>
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 bg-gold/20 rounded-full flex items-center justify-center flex-shrink-0">
                     <CheckCircle className="w-5 h-5 text-gold" />

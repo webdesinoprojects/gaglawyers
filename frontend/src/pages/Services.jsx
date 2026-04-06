@@ -111,7 +111,7 @@ const Services = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
             {/* SIDEBAR - Services List */}
             <aside className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-md p-4 lg:sticky lg:top-32 max-h-[650px] overflow-y-auto border-l-4 border-gold">
+              <div className="bg-white rounded-lg shadow-md p-4 lg:sticky lg:top-40 max-h-[650px] overflow-y-auto border-l-4 border-gold">
                 <h3 className="font-serif text-lg font-bold text-navy mb-6 px-2">
                   All Services
                 </h3>

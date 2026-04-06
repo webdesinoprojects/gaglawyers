@@ -2,6 +2,7 @@ const express = require('express');
 const {
   getAllLocationPages,
   getLocationPageBySlug,
+  getFooterLocationLinks,
   createLocationPage,
   updateLocationPage,
   toggleLocationPage,
@@ -15,6 +16,7 @@ const { protect, adminOnly } = require('../middleware/auth');
 const router = express.Router();
 
 router.get('/', getAllLocationPages);
+router.get('/footer-links', getFooterLocationLinks);
 router.get('/stats/summary', protect, adminOnly, getLocationStats);
 router.get('/slug/:slug', getLocationPageBySlug);
 router.get('/:id', getLocationPageBySlug); // Keep for backward compatibility

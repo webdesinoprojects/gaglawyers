@@ -78,7 +78,8 @@ const getAllLocationPages = async (req, res) => {
 const getLocationPageBySlug = async (req, res) => {
   try {
     const page = await LocationPage.findOne({ slug: req.params.slug, isActive: true })
-      .populate('service', 'title description');
+      .populate('service', 'title description')
+      .lean();
 
     if (!page) {
       return res.status(404).json({
@@ -87,12 +88,61 @@ const getLocationPageBySlug = async (req, res) => {
       });
     }
 
-    page.views += 1;
-    await page.save();
+    LocationPage.updateOne(
+      { _id: page._id },
+      { $inc: { views: 1 } }
+    ).catch((error) => {
+      console.error('Error incrementing location page views:', error);
+    });
 
     res.status(200).json({
       success: true,
       data: page,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message,
+    });
+  }
+};
+
+const getFooterLocationLinks = async (req, res) => {
+  try {
+    const requestedLimit = parseInt(req.query.limit, 10);
+    const limit = Number.isFinite(requestedLimit)
+      ? Math.min(Math.max(requestedLimit, 1), 1000)
+      : 300;
+
+    const links = await LocationPage.aggregate([
+      {
+        $match: {
+          isActive: true,
+          city: { $exists: true, $ne: '' },
+          slug: { $exists: true, $ne: '' },
+          serviceName: { $exists: true, $ne: '' },
+        },
+      },
+      {
+        $project: {
+          city: { $trim: { input: '$city' } },
+          serviceName: { $trim: { input: '$serviceName' } },
+          slug: 1,
+        },
+      },
+      {
+        $sort: { city: 1, serviceName: 1, createdAt: -1 },
+      },
+      {
+        $limit: limit,
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      count: links.length,
+      data: links.map(({ city, serviceName, slug }) => ({ city, serviceName, slug })),
     });
   } catch (error) {
     res.status(500).json({
@@ -317,6 +367,7 @@ const getLocationStats = async (req, res) => {
 module.exports = {
   getAllLocationPages,
   getLocationPageBySlug,
+  getFooterLocationLinks,
   createLocationPage,
   updateLocationPage,
   toggleLocationPage,

@@ -192,8 +192,16 @@ const AdminLayout = () => {
       title: 'Pages & SEO',
       items: [
         { name: 'Page Content', path: '/admin/pages', icon: FileText },
+        { name: 'Reusable Blocks', path: '/admin/blocks', icon: FileText },
+        { name: 'Page Blocks', path: '/admin/page-blocks', icon: FileText },
         { name: 'Location Pages', path: '/admin/locations', icon: MapPin },
-        { name: 'SEO Manager', path: '/admin/seo', icon: Search },
+      ],
+    },
+    {
+      title: 'Site Structure',
+      items: [
+        { name: 'Navigation Menus', path: '/admin/navigation', icon: Menu },
+        { name: 'Form Content', path: '/admin/forms', icon: MessageSquare },
       ],
     },
     {
@@ -354,7 +362,7 @@ const AdminLayout = () => {
                       const Icon = result.icon;
                       return (
                         <button
-                          key={index}
+                          key={result.path}
                           onClick={() => handleSearchResultClick(result.path)}
                           className="w-full flex items-center gap-4 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 text-left"
                         >

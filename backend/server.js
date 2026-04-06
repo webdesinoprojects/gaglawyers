@@ -18,6 +18,17 @@ const seoRoutes = require('./routes/seoRoutes');
 const seoManagementRoutes = require('./routes/seoManagementRoutes');
 const cloudinaryRoutes = require('./routes/cloudinaryRoutes');
 
+// CMS Routes
+const globalSettingsRoutes = require('./routes/globalSettingsRoutes');
+const navigationRoutes = require('./routes/navigationRoutes');
+const mediaLibraryRoutes = require('./routes/mediaLibraryRoutes');
+const pageRoutes = require('./routes/pageRoutes');
+const contentBlockRoutes = require('./routes/contentBlockRoutes');
+const reusableBlockRoutes = require('./routes/reusableBlockRoutes');
+const pageBlockRoutes = require('./routes/pageBlockRoutes');
+const formContentRoutes = require('./routes/formContentRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+
 const app = express();
 
 if (process.env.NODE_ENV !== 'production') {
@@ -62,6 +73,18 @@ app.use('/api/locations', locationRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/seo', seoManagementRoutes);
 app.use('/api/cloudinary', cloudinaryRoutes);
+
+// CMS Routes
+app.use('/api/cms/global-settings', globalSettingsRoutes);
+app.use('/api/cms/navigation', navigationRoutes);
+app.use('/api/cms/media', mediaLibraryRoutes);
+app.use('/api/cms/pages', pageRoutes);
+app.use('/api/cms/blocks', contentBlockRoutes);
+app.use('/api/cms/reusable-blocks', reusableBlockRoutes);
+app.use('/api/cms/page-blocks', pageBlockRoutes);
+app.use('/api/cms/forms', formContentRoutes);
+app.use('/api/admin/dashboard', dashboardRoutes);
+
 app.use('/', seoRoutes);
 
 app.get('/', (req, res) => {
