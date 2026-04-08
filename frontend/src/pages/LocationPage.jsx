@@ -115,7 +115,7 @@ const LocationPage = () => {
   }
 
   const pageTitle = `Best ${serviceData.name} Lawyer in ${cityName} | Grover & Grover Advocates`;
-  const pageDescription = `Expert ${serviceData.name.toLowerCase()} services in ${cityName}. Our experienced advocates provide specialized legal counsel and representation in ${cityName}. Schedule a free consultation today.`;
+  const pageDescription = `Expert ${serviceData.name.toLowerCase()} services in ${cityName}. Our experienced advocates provide specialized legal counsel and representation in ${cityName}. Schedule a consultation today.`;
 
   return (
     <div>
@@ -155,7 +155,7 @@ const LocationPage = () => {
 
             <Link to="/contact">
               <button className="inline-flex items-center gap-2 px-8 py-4 bg-gold text-navy font-sans font-semibold rounded-md transition-all duration-200 hover:brightness-110 hover:scale-105">
-                Schedule Free Consultation
+                Schedule Consultation
                 <ArrowRight size={20} />
               </button>
             </Link>

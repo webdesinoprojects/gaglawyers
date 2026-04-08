@@ -160,10 +160,10 @@ export const DEFAULT_AWARDS_HOME = {
 };
 
 export const DEFAULT_CONSULTATION_CTA = {
-  eyebrow: 'Free Consultation',
-  title: 'Get a Free Consultation Today',
+  eyebrow: 'Schedule Consultation',
+  title: 'Schedule Your Legal Consultation Today',
   subtitle: 'Share your legal issue and preferred time to talk. Our team will respond promptly.',
-  submitLabel: 'Submit request',
+  submitLabel: 'Request consultation',
   submittingLabel: 'Sending…',
 };
 

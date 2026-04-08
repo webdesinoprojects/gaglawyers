@@ -192,16 +192,8 @@ const AdminLayout = () => {
       title: 'Pages & SEO',
       items: [
         { name: 'Page Content', path: '/admin/pages', icon: FileText },
-        { name: 'Reusable Blocks', path: '/admin/blocks', icon: FileText },
-        { name: 'Page Blocks', path: '/admin/page-blocks', icon: FileText },
         { name: 'Location Pages', path: '/admin/locations', icon: MapPin },
-      ],
-    },
-    {
-      title: 'Site Structure',
-      items: [
-        { name: 'Navigation Menus', path: '/admin/navigation', icon: Menu },
-        { name: 'Form Content', path: '/admin/forms', icon: MessageSquare },
+        { name: 'SEO Manager', path: '/admin/seo', icon: Search },
       ],
     },
     {

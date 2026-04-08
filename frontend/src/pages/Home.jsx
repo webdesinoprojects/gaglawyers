@@ -459,15 +459,21 @@ const Home = () => {
       {/* Practice areas + book appointment */}
       <section
         id="practice-areas"
-        className="relative scroll-mt-[var(--site-header-height)] bg-white py-16 lg:py-24 border-t border-gray-100"
+        className="relative scroll-mt-[var(--site-header-height)] bg-[#0B1F3A] py-16 lg:py-24 border-t border-gold/20"
       >
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           <SectionReveal>
-            <div className="text-center mb-10 lg:mb-14">
-              <h2 className="font-serif text-3xl lg:text-4xl font-bold text-navy">
+            {/* Section Heading with Gold Ornament */}
+            <div className="text-center mb-14 pt-4">
+              <div className="flex items-center justify-center mb-6">
+                <div className="h-px w-12 bg-gold"></div>
+                <div className="mx-3 w-2 h-2 bg-gold rotate-45"></div>
+                <div className="h-px w-12 bg-gold"></div>
+              </div>
+              <h2 className="font-serif text-4xl lg:text-5xl font-bold text-white mb-4">
                 {practiceAreasSection.heading}
               </h2>
-              <p className="font-sans text-base lg:text-lg text-gray-600 mt-3 max-w-2xl mx-auto">
+              <p className="font-sans text-base lg:text-lg text-[#E6D5B8] max-w-2xl mx-auto">
                 {practiceAreasSection.subheading}
               </p>
             </div>
@@ -479,7 +485,7 @@ const Home = () => {
                     <Link
                       key={service._id || index}
                       to={`/services/${service.slug}`}
-                      className="group bg-gray-50 rounded-xl border border-gray-200 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-gold/35 flex flex-col h-full"
+                      className="group bg-[#112240] rounded-xl border border-gold/30 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-gold/10 hover:border-gold/60 flex flex-col h-full"
                     >
                       <ServiceCard
                         title={service.name || service.title}
@@ -497,7 +503,7 @@ const Home = () => {
                   <Link to="/services">
                     <button
                       type="button"
-                      className="px-8 py-3 bg-navy text-white font-sans text-sm font-semibold rounded-md transition-all duration-200 hover:bg-navy/90 hover:scale-[1.02]"
+                      className="px-8 py-3 bg-gold text-navy font-sans text-sm font-semibold rounded-md transition-all duration-200 hover:brightness-110 hover:scale-[1.02] shadow-lg shadow-gold/20"
                     >
                       {home.practiceCta?.viewAllServicesText || 'View all practice areas'}
                     </button>
@@ -514,29 +520,41 @@ const Home = () => {
       {/* Who we are / Why us / Values / Process */}
       <section
         id="about"
-        className="scroll-mt-[var(--site-header-height)] bg-gradient-to-b from-grey-light to-white py-16 lg:py-24 border-t border-gray-100"
+        className="scroll-mt-[var(--site-header-height)] bg-gradient-to-b from-[#081629] to-[#0B1F3A] py-16 lg:py-24 border-t border-gold/20"
       >
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 space-y-16 lg:space-y-20">
           <SectionReveal>
-            <div className="max-w-3xl">
-              <span className="inline-block px-4 py-1.5 bg-navy/10 text-navy text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
+            {/* Section Heading with Gold Ornament */}
+            <div className="max-w-3xl pt-4">
+              <div className="flex items-center mb-6">
+                <div className="h-px w-12 bg-gold"></div>
+                <div className="mx-3 w-2 h-2 bg-gold rotate-45"></div>
+                <div className="h-px w-12 bg-gold"></div>
+              </div>
+              <span className="inline-block px-4 py-1.5 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
                 {home.whoWeAre.eyebrow}
               </span>
-              <h2 className="font-serif text-3xl lg:text-4xl font-bold text-navy mb-4">
+              <h2 className="font-serif text-4xl lg:text-5xl font-bold text-white mb-4">
                 {home.whoWeAre.title}
               </h2>
-              <p className="font-sans text-lg text-gray-600 leading-relaxed mb-4">{home.whoWeAre.intro}</p>
-              <p className="font-sans text-gray-600 leading-relaxed">{home.whoWeAre.mission}</p>
+              <p className="font-sans text-lg text-[#E6D5B8] leading-relaxed mb-4">{home.whoWeAre.intro}</p>
+              <p className="font-sans text-gray-300 leading-relaxed">{home.whoWeAre.mission}</p>
             </div>
           </SectionReveal>
 
           <SectionReveal>
-            <div className="text-center mb-12">
-              <span className="inline-block px-4 py-1.5 bg-gold/15 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
+            {/* Section Heading with Gold Ornament */}
+            <div className="text-center mb-14 pt-4">
+              <div className="flex items-center justify-center mb-6">
+                <div className="h-px w-12 bg-gold"></div>
+                <div className="mx-3 w-2 h-2 bg-gold rotate-45"></div>
+                <div className="h-px w-12 bg-gold"></div>
+              </div>
+              <span className="inline-block px-4 py-1.5 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
                 {home.whyChoose.eyebrow}
               </span>
-              <h3 className="font-serif text-2xl lg:text-3xl font-bold text-navy mb-3">{home.whyChoose.title}</h3>
-              <p className="font-sans text-gray-600 max-w-2xl mx-auto">{home.whyChoose.subtitle}</p>
+              <h3 className="font-serif text-4xl lg:text-5xl font-bold text-white mb-4">{home.whyChoose.title}</h3>
+              <p className="font-sans text-base lg:text-lg text-[#E6D5B8] max-w-2xl mx-auto">{home.whyChoose.subtitle}</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {(home.whyChoose.cards || []).map((card, idx) => {
@@ -544,13 +562,13 @@ const Home = () => {
                 return (
                   <div
                     key={`${card.title}-${idx}`}
-                    className="rounded-xl p-7 border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow"
+                    className="rounded-xl p-7 border-t-4 border-gold bg-[#0B1F3A] shadow-lg hover:shadow-xl hover:shadow-gold/10 transition-all"
                   >
                     <div className="w-12 h-12 bg-gold/15 rounded-full flex items-center justify-center mb-4">
-                      <IconComp className="w-6 h-6 text-navy" />
+                      <IconComp className="w-6 h-6 text-gold" />
                     </div>
-                    <h4 className="font-serif text-lg font-bold text-navy mb-2">{card.title}</h4>
-                    <p className="font-sans text-sm text-gray-600 leading-relaxed">{card.body}</p>
+                    <h4 className="font-serif text-lg font-bold text-white mb-2">{card.title}</h4>
+                    <p className="font-sans text-sm text-gray-300 leading-relaxed">{card.body}</p>
                   </div>
                 );
               })}
@@ -558,49 +576,61 @@ const Home = () => {
           </SectionReveal>
 
           <SectionReveal>
-            <div className="text-center mb-10">
-              <span className="inline-block px-4 py-1.5 bg-navy/10 text-navy text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
+            {/* Section Heading with Gold Ornament */}
+            <div className="text-center mb-14 pt-4">
+              <div className="flex items-center justify-center mb-6">
+                <div className="h-px w-12 bg-gold"></div>
+                <div className="mx-3 w-2 h-2 bg-gold rotate-45"></div>
+                <div className="h-px w-12 bg-gold"></div>
+              </div>
+              <span className="inline-block px-4 py-1.5 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
                 {home.ourValues.eyebrow}
               </span>
-              <h3 className="font-serif text-2xl lg:text-3xl font-bold text-navy mb-3">{home.ourValues.title}</h3>
-              <p className="font-sans text-gray-600 max-w-2xl mx-auto">{home.ourValues.subtitle}</p>
+              <h3 className="font-serif text-4xl lg:text-5xl font-bold text-white mb-4">{home.ourValues.title}</h3>
+              <p className="font-sans text-base lg:text-lg text-[#E6D5B8] max-w-2xl mx-auto">{home.ourValues.subtitle}</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {(home.ourValues.cards || []).map((card, i) => (
                 <div
                   key={`${card.title}-${i}`}
-                  className="rounded-xl border border-gray-200 bg-white p-6 text-center hover:border-gold/40 transition-colors"
+                  className="rounded-xl border-l-4 border-gold bg-[#081629] p-6 text-center hover:border-l-[6px] hover:shadow-lg hover:shadow-gold/10 transition-all"
                 >
-                  <h4 className="font-serif text-lg font-bold text-navy mb-2">{card.title}</h4>
-                  <p className="font-sans text-sm text-gray-600 leading-relaxed">{card.body}</p>
+                  <h4 className="font-serif text-lg font-bold text-white mb-2">{card.title}</h4>
+                  <p className="font-sans text-sm text-gray-300 leading-relaxed">{card.body}</p>
                 </div>
               ))}
             </div>
           </SectionReveal>
 
           <SectionReveal>
-            <div className="text-center mb-10">
-              <span className="inline-block px-4 py-1.5 bg-navy/10 text-navy text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
+            {/* Section Heading with Gold Ornament */}
+            <div className="text-center mb-14 pt-4">
+              <div className="flex items-center justify-center mb-6">
+                <div className="h-px w-12 bg-gold"></div>
+                <div className="mx-3 w-2 h-2 bg-gold rotate-45"></div>
+                <div className="h-px w-12 bg-gold"></div>
+              </div>
+              <span className="inline-block px-4 py-1.5 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
                 {home.howWeWork.eyebrow}
               </span>
-              <h3 className="font-serif text-2xl lg:text-3xl font-bold text-navy mb-3">{home.howWeWork.title}</h3>
-              <p className="font-sans text-gray-600 max-w-2xl mx-auto">{home.howWeWork.subtitle}</p>
+              <h3 className="font-serif text-4xl lg:text-5xl font-bold text-white mb-4">{home.howWeWork.title}</h3>
+              <p className="font-sans text-base lg:text-lg text-[#E6D5B8] max-w-2xl mx-auto">{home.howWeWork.subtitle}</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
               {(home.howWeWork.steps || []).map((step) => {
                 const v = (step.variant || 'light').toLowerCase();
                 const box =
                   v === 'navy'
-                    ? 'bg-gradient-to-br from-navy to-navy/90 rounded-xl p-6 text-white'
+                    ? 'bg-gradient-to-br from-[#0B1F3A] to-[#081629] rounded-xl p-6 text-white border border-gold/20'
                     : v === 'gold'
                       ? 'bg-gradient-to-br from-gold to-gold/90 rounded-xl p-6 text-navy'
-                      : 'bg-white rounded-xl p-6 border border-gray-200';
+                      : 'bg-[#081629] rounded-xl p-6 border border-gold/20';
                 const numCircle =
                   v === 'gold'
                     ? 'w-10 h-10 bg-navy rounded-full flex items-center justify-center font-serif text-sm font-bold text-white mb-4'
-                    : 'w-10 h-10 bg-gold/20 rounded-full flex items-center justify-center font-serif text-sm font-bold text-navy mb-4';
-                const titleCls = v === 'navy' ? 'text-white' : v === 'gold' ? 'text-navy' : 'text-navy';
-                const bodyCls = v === 'navy' ? 'text-gray-300' : v === 'gold' ? 'text-navy/85' : 'text-gray-600';
+                    : 'w-10 h-10 bg-gold/20 rounded-full flex items-center justify-center font-serif text-sm font-bold text-gold mb-4';
+                const titleCls = v === 'navy' ? 'text-white' : v === 'gold' ? 'text-navy' : 'text-white';
+                const bodyCls = v === 'navy' ? 'text-gray-300' : v === 'gold' ? 'text-navy/85' : 'text-gray-300';
                 return (
                   <div key={step.number + step.title} className={box}>
                     <div className={numCircle}>{step.number}</div>
@@ -616,19 +646,25 @@ const Home = () => {
 
       {/* Team */}
       {teamMembers.length > 0 && (
-        <section id="team" className="scroll-mt-[var(--site-header-height)] bg-white py-16 lg:py-24 border-t border-gray-100">
+        <section id="team" className="scroll-mt-[var(--site-header-height)] bg-[#F7F9FC] py-16 lg:py-24 border-t border-gold/20">
           <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
             <SectionReveal>
-              <div className="text-center mb-12">
-                <span className="inline-block px-4 py-1.5 bg-gold/10 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
+              {/* Section Heading with Gold Ornament */}
+              <div className="text-center mb-14 pt-4">
+                <div className="flex items-center justify-center mb-6">
+                  <div className="h-px w-12 bg-gold"></div>
+                  <div className="mx-3 w-2 h-2 bg-gold rotate-45"></div>
+                  <div className="h-px w-12 bg-gold"></div>
+                </div>
+                <span className="inline-block px-4 py-1.5 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
                   {home.teamSection.eyebrow}
                 </span>
-                <h2 className="font-serif text-3xl lg:text-4xl font-bold text-navy mb-4">{home.teamSection.title}</h2>
-                <p className="font-sans text-lg text-gray-600 max-w-2xl mx-auto">{home.teamSection.subtitle}</p>
+                <h2 className="font-serif text-4xl lg:text-5xl font-bold text-navy mb-4">{home.teamSection.title}</h2>
+                <p className="font-sans text-base lg:text-lg text-gray-600 max-w-2xl mx-auto">{home.teamSection.subtitle}</p>
               </div>
 
               {teamMembers[0] && (
-                <div className="mb-14 flex flex-col lg:flex-row items-center gap-10 rounded-2xl border border-navy/10 bg-gradient-to-br from-navy/[0.04] to-gold/[0.06] p-8 lg:p-10">
+                <div className="mb-14 flex flex-col lg:flex-row items-center gap-10 rounded-2xl border-l-4 border-gold bg-white shadow-xl p-8 lg:p-10">
                   <div className="relative flex-shrink-0 group">
                     <img
                       src={teamMembers[0].imageUrl}
@@ -644,10 +680,10 @@ const Home = () => {
                     <p className="font-sans text-lg text-gold font-semibold mb-4">{teamMembers[0].designation}</p>
                     <p className="font-sans text-gray-600 leading-relaxed mb-5">{teamMembers[0].bio}</p>
                     <div className="flex flex-wrap gap-3 justify-center lg:justify-start items-center">
-                      <span className="px-3 py-1 bg-navy/10 text-navy text-xs font-sans font-medium rounded-full">
+                      <span className="px-3 py-1 bg-navy/10 text-navy text-xs font-sans font-medium rounded-full border border-gold/30">
                         {home.teamSection.badgeA}
                       </span>
-                      <span className="px-3 py-1 bg-navy/10 text-navy text-xs font-sans font-medium rounded-full">
+                      <span className="px-3 py-1 bg-navy/10 text-navy text-xs font-sans font-medium rounded-full border border-gold/30">
                         {home.teamSection.badgeB}
                       </span>
                       {teamMembers[0].linkedinUrl && (
@@ -671,7 +707,7 @@ const Home = () => {
                 {teamMembers.slice(1).map((member) => (
                   <div
                     key={member._id}
-                    className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-xl hover:border-gold/30 transition-all duration-300"
+                    className="group bg-white rounded-xl border-t-4 border-gold overflow-hidden hover:shadow-2xl hover:shadow-gold/10 transition-all duration-300"
                   >
                     <div className="relative overflow-hidden">
                       <img
@@ -685,7 +721,7 @@ const Home = () => {
                             href={member.linkedinUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white text-navy hover:bg-gold transition-colors"
+                            className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-gold text-navy hover:bg-white transition-colors"
                             aria-label={`${member.name} LinkedIn`}
                           >
                             <LinkedInIcon size={22} />
@@ -708,7 +744,7 @@ const Home = () => {
                 <Link to="/team">
                   <button
                     type="button"
-                    className="inline-flex items-center gap-2 px-8 py-4 bg-navy text-white font-sans text-base font-semibold rounded-lg hover:bg-navy/90 transition-all hover:scale-[1.02] shadow-lg"
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-gold text-navy font-sans text-base font-semibold rounded-lg hover:brightness-110 transition-all hover:scale-[1.02] shadow-lg shadow-gold/20"
                   >
                     {home.teamSection.ctaText}
                     <ArrowRight size={20} />
@@ -723,21 +759,27 @@ const Home = () => {
       {/* Testimonials */}
       <section
         id="testimonials"
-        className="scroll-mt-[var(--site-header-height)] bg-gradient-to-br from-grey-light via-white to-grey-light py-12 lg:py-16 relative overflow-hidden border-t border-gray-100"
+        className="scroll-mt-[var(--site-header-height)] bg-gradient-to-br from-[#0B1F3A] via-[#081629] to-[#0B1F3A] py-12 lg:py-16 relative overflow-hidden border-t border-gold/20"
       >
         <div className="absolute top-0 right-0 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-navy/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <SectionReveal>
-            <div className="text-center mb-12 lg:mb-14">
+            {/* Section Heading with Gold Ornament */}
+            <div className="text-center mb-14 pt-4">
+              <div className="flex items-center justify-center mb-6">
+                <div className="h-px w-12 bg-gold"></div>
+                <div className="mx-3 w-2 h-2 bg-gold rotate-45"></div>
+                <div className="h-px w-12 bg-gold"></div>
+              </div>
               <span className="inline-block font-sans text-sm font-semibold text-gold uppercase tracking-wider bg-gold/10 px-4 py-2 rounded-full mb-4">
                 {home.testimonialsIntro.eyebrow}
               </span>
-              <h2 className="font-serif text-4xl lg:text-5xl font-bold text-navy mb-4">
+              <h2 className="font-serif text-4xl lg:text-5xl font-bold text-white mb-4">
                 {testimonialsSection.heading}
               </h2>
-              <p className="font-sans text-lg text-gray-600 max-w-2xl mx-auto">{testimonialsSection.subheading}</p>
+              <p className="font-sans text-base lg:text-lg text-[#E6D5B8] max-w-2xl mx-auto">{testimonialsSection.subheading}</p>
             </div>
           </SectionReveal>
 
@@ -769,8 +811,8 @@ const Home = () => {
                 </>
               )}
 
-              <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-grey-light to-transparent z-10 pointer-events-none" />
-              <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-grey-light to-transparent z-10 pointer-events-none" />
+              <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-[#0B1F3A] to-transparent z-10 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#0B1F3A] to-transparent z-10 pointer-events-none" />
 
               <div ref={scrollContainerRef} className="overflow-x-auto scrollbar-hide pb-4 scroll-smooth">
                 <div className="flex gap-6 px-2 lg:px-14">
@@ -849,20 +891,26 @@ const Home = () => {
 
       {/* Blog */}
       {blogPosts.length > 0 && (
-        <section id="articles" className="scroll-mt-[var(--site-header-height)] bg-white py-16 lg:py-24 border-t border-gray-100">
+        <section id="articles" className="scroll-mt-[var(--site-header-height)] bg-[#F7F9FC] py-16 lg:py-24 border-t border-gold/20">
           <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
             <SectionReveal>
-              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12">
+              {/* Section Heading with Gold Ornament */}
+              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-14 pt-4">
                 <div>
-                  <span className="inline-block px-4 py-1.5 bg-navy/10 text-navy text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
+                  <div className="flex items-center mb-6">
+                    <div className="h-px w-12 bg-gold"></div>
+                    <div className="mx-3 w-2 h-2 bg-gold rotate-45"></div>
+                    <div className="h-px w-12 bg-gold"></div>
+                  </div>
+                  <span className="inline-block px-4 py-1.5 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
                     {home.blogSection.eyebrow}
                   </span>
-                  <h2 className="font-serif text-3xl lg:text-4xl font-bold text-navy mb-3">{home.blogSection.title}</h2>
-                  <p className="font-sans text-lg text-gray-600 max-w-2xl">{home.blogSection.subtitle}</p>
+                  <h2 className="font-serif text-4xl lg:text-5xl font-bold text-navy mb-4">{home.blogSection.title}</h2>
+                  <p className="font-sans text-base lg:text-lg text-gray-600 max-w-2xl">{home.blogSection.subtitle}</p>
                 </div>
                 <Link
                   to="/blog"
-                  className="hidden sm:inline-flex items-center gap-2 px-6 py-3 bg-navy text-white font-sans font-semibold rounded-lg hover:bg-navy/90 transition-all shrink-0"
+                  className="hidden sm:inline-flex items-center gap-2 px-6 py-3 bg-gold text-navy font-sans font-semibold rounded-lg hover:brightness-110 transition-all shrink-0 shadow-lg shadow-gold/20"
                 >
                   {home.blogSection.viewAllText}
                   <ArrowRight size={18} />
@@ -873,7 +921,7 @@ const Home = () => {
                 {blogPosts.map((post) => (
                   <article
                     key={post._id}
-                    className="group bg-grey-light/50 rounded-xl overflow-hidden border border-gray-100 hover:shadow-xl hover:border-gold/25 transition-all duration-300 flex flex-col"
+                    className="group bg-white rounded-xl overflow-hidden border-l-4 border-gold hover:shadow-2xl hover:shadow-gold/10 transition-all duration-300 flex flex-col"
                   >
                     {post.featuredImage && (
                       <Link to={`/blog/${post.slug}`} className="aspect-video overflow-hidden block">
@@ -923,7 +971,7 @@ const Home = () => {
               <div className="text-center mt-10 sm:hidden">
                 <Link
                   to="/blog"
-                  className="inline-flex items-center gap-2 px-8 py-3 bg-navy text-white font-sans font-semibold rounded-lg hover:bg-navy/90 transition-all"
+                  className="inline-flex items-center gap-2 px-8 py-3 bg-gold text-navy font-sans font-semibold rounded-lg hover:brightness-110 transition-all shadow-lg shadow-gold/20"
                 >
                   {home.blogSection.viewAllText}
                   <ArrowRight size={18} />
@@ -938,25 +986,31 @@ const Home = () => {
       {awards.length > 0 && (
         <section
           id="awards"
-          className="scroll-mt-[var(--site-header-height)] bg-[#f4f4f2] py-14 lg:py-20 border-t border-gray-200/80"
+          className="scroll-mt-[var(--site-header-height)] bg-[#081629] py-14 lg:py-20 border-t border-gold/20"
         >
           <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
             <SectionReveal>
-              <div className="text-center mb-10">
-                <span className="inline-block px-4 py-1.5 bg-navy/10 text-navy text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
+              {/* Section Heading with Gold Ornament */}
+              <div className="text-center mb-14 pt-4">
+                <div className="flex items-center justify-center mb-6">
+                  <div className="h-px w-12 bg-gold"></div>
+                  <div className="mx-3 w-2 h-2 bg-gold rotate-45"></div>
+                  <div className="h-px w-12 bg-gold"></div>
+                </div>
+                <span className="inline-block px-4 py-1.5 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
                   {home.awardsHome.eyebrow}
                 </span>
-                <h2 className="font-serif text-3xl lg:text-4xl font-bold text-navy mb-3">{home.awardsHome.title}</h2>
-                <p className="font-sans text-gray-600 max-w-2xl mx-auto">{home.awardsHome.subtitle}</p>
+                <h2 className="font-serif text-4xl lg:text-5xl font-bold text-white mb-4">{home.awardsHome.title}</h2>
+                <p className="font-sans text-base lg:text-lg text-[#E6D5B8] max-w-2xl mx-auto">{home.awardsHome.subtitle}</p>
               </div>
 
               <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4 scroll-smooth snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-visible">
                 {awards.map((a) => (
                   <div
                     key={a._id}
-                    className="flex-shrink-0 w-[min(100%,320px)] md:w-auto snap-start rounded-xl bg-white border border-gray-200/90 p-5 flex gap-4 shadow-sm hover:shadow-md transition-shadow"
+                    className="flex-shrink-0 w-[min(100%,320px)] md:w-auto snap-start rounded-xl bg-[#0B1F3A] border-l-4 border-gold p-5 flex gap-4 shadow-lg hover:shadow-xl hover:shadow-gold/10 transition-all"
                   >
-                    <div className="w-20 h-20 flex-shrink-0 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center">
+                    <div className="w-20 h-20 flex-shrink-0 rounded-lg bg-gold/10 overflow-hidden flex items-center justify-center">
                       {a.imageUrl ? (
                         <img src={a.imageUrl} alt="" className="w-full h-full object-contain" />
                       ) : (
@@ -965,8 +1019,8 @@ const Home = () => {
                     </div>
                     <div className="min-w-0">
                       <p className="font-sans text-xs font-bold text-gold uppercase tracking-wide mb-1">{a.year}</p>
-                      <h3 className="font-serif text-base font-bold text-navy leading-snug mb-1 line-clamp-2">{a.title}</h3>
-                      <p className="font-sans text-xs text-gray-500 line-clamp-2">{a.issuingBody}</p>
+                      <h3 className="font-serif text-base font-bold text-white leading-snug mb-1 line-clamp-2">{a.title}</h3>
+                      <p className="font-sans text-xs text-gray-400 line-clamp-2">{a.issuingBody}</p>
                     </div>
                   </div>
                 ))}
@@ -975,7 +1029,7 @@ const Home = () => {
               <div className="text-center mt-10">
                 <Link
                   to="/awards"
-                  className="inline-flex items-center gap-2 px-6 py-3 border-2 border-navy text-navy font-sans font-semibold rounded-lg hover:bg-navy hover:text-white transition-colors"
+                  className="inline-flex items-center gap-2 px-6 py-3 border-2 border-gold text-gold font-sans font-semibold rounded-lg hover:bg-gold hover:text-navy transition-all"
                 >
                   {home.awardsHome.viewAllText}
                   <ArrowRight size={18} />

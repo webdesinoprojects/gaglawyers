@@ -226,11 +226,7 @@ const HeroCarousel = ({
 
             {aside ? (
               <div className="w-full lg:w-[min(100%,380px)] xl:w-[420px] flex-shrink-0 lg:mr-12 xl:mr-14 z-30">{aside}</div>
-            ) : (
-              <div className="flex w-full lg:w-[45%] flex-shrink-0 justify-center lg:justify-end z-30 pt-2 sm:pt-4 lg:pt-0">
-                <HeroStatCards items={trustStrip.length ? trustStrip : DEFAULT_CAROUSEL_TRUST_STRIP} />
-              </div>
-            )}
+            ) : null}
           </div>
         </div>
       </div>

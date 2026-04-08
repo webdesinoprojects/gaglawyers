@@ -1,27 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Users, Briefcase, MessageSquare, BookOpen, TrendingUp, Eye, Calendar, ArrowUpRight, Loader2 } from 'lucide-react';
+import { Users, Briefcase, MessageSquare, BookOpen, TrendingUp, Eye, Calendar, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import API_BASE_URL from '../../config/api';
-
-function formatRelativeTime(iso) {
-  const d = new Date(iso);
-  const sec = Math.round((Date.now() - d.getTime()) / 1000);
-  if (sec < 45) return 'Just now';
-  const min = Math.floor(sec / 60);
-  if (min < 60) return `${min} minute${min === 1 ? '' : 's'} ago`;
-  const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr} hour${hr === 1 ? '' : 's'} ago`;
-  const day = Math.floor(hr / 24);
-  if (day < 14) return `${day} day${day === 1 ? '' : 's'} ago`;
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-const feedIconByType = {
-  blog: BookOpen,
-  team: Users,
-  contact: MessageSquare,
-  service: Briefcase,
-};
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -31,13 +11,9 @@ const AdminDashboard = () => {
     contacts: 0,
     blog: 0,
   });
-  const [feed, setFeed] = useState([]);
-  const [feedLoading, setFeedLoading] = useState(true);
-  const [feedError, setFeedError] = useState(null);
 
   useEffect(() => {
     fetchStats();
-    fetchActivityFeed();
   }, []);
 
   const fetchStats = async () => {
@@ -73,28 +49,6 @@ const AdminDashboard = () => {
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
-    }
-  };
-
-  const fetchActivityFeed = async () => {
-    const token = localStorage.getItem('adminToken');
-    setFeedLoading(true);
-    setFeedError(null);
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/admin/dashboard/feed`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        throw new Error(json.message || 'Failed to load activity');
-      }
-      setFeed(Array.isArray(json.data) ? json.data : []);
-    } catch (err) {
-      console.error('Error fetching dashboard feed:', err);
-      setFeedError(err.message || 'Could not load recent activity');
-      setFeed([]);
-    } finally {
-      setFeedLoading(false);
     }
   };
 
@@ -146,6 +100,12 @@ const AdminDashboard = () => {
     { title: 'Add Team Member', description: 'Add new lawyer to the team', link: '/admin/team', icon: Users, color: 'text-blue-600' },
     { title: 'Manage Gallery', description: 'Upload and organize images', link: '/admin/gallery', icon: Eye, color: 'text-purple-600' },
     { title: 'Site Settings', description: 'Configure website settings', link: '/admin/settings', icon: TrendingUp, color: 'text-green-600' },
+  ];
+
+  const recentActivity = [
+    { action: 'Blog post published', item: 'Understanding Corporate Law', time: '2 hours ago', icon: BookOpen },
+    { action: 'Team member added', item: 'Advocate Neha Kapoor', time: '1 day ago', icon: Users },
+    { action: 'Settings updated', item: 'Disclaimer text modified', time: '3 days ago', icon: TrendingUp },
   ];
 
   return (
@@ -212,66 +172,29 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Recent activity — live from blog, team, contacts, services */}
+        {/* Recent Activity */}
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <div className="flex items-center justify-between gap-3 mb-6">
-            <h3 className="font-serif text-xl font-bold text-navy">Recent Activity</h3>
-            <button
-              type="button"
-              onClick={() => fetchActivityFeed()}
-              className="font-sans text-xs font-medium text-navy/70 hover:text-navy underline-offset-2 hover:underline"
-            >
-              Refresh
-            </button>
+          <h3 className="font-serif text-xl font-bold text-navy mb-6">Recent Activity</h3>
+          <div className="space-y-4">
+            {recentActivity.map((activity, index) => {
+              const Icon = activity.icon;
+              return (
+                <div key={index} className="flex items-start space-x-3 pb-4 border-b border-gray-100 last:border-0 last:pb-0">
+                  <div className="flex-shrink-0 w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <Icon className="text-gray-600" size={16} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-sans text-sm text-gray-600">{activity.action}</p>
+                    <p className="font-sans text-sm font-medium text-navy truncate">{activity.item}</p>
+                    <div className="flex items-center space-x-1 mt-1">
+                      <Calendar size={12} className="text-gray-400" />
+                      <p className="font-sans text-xs text-gray-500">{activity.time}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-
-          {feedLoading && (
-            <div className="flex items-center justify-center py-12 text-gray-500 gap-2">
-              <Loader2 className="animate-spin" size={20} />
-              <span className="font-sans text-sm">Loading activity…</span>
-            </div>
-          )}
-
-          {!feedLoading && feedError && (
-            <div className="rounded-lg bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-800 font-sans">
-              {feedError}
-            </div>
-          )}
-
-          {!feedLoading && !feedError && feed.length === 0 && (
-            <p className="font-sans text-sm text-gray-600 leading-relaxed">
-              No recent activity yet. Publish a blog post, add a team member, or receive a contact inquiry to see updates here.
-            </p>
-          )}
-
-          {!feedLoading && !feedError && feed.length > 0 && (
-            <div className="space-y-4">
-              {feed.map((activity) => {
-                const Icon = feedIconByType[activity.type] || BookOpen;
-                return (
-                  <Link
-                    key={`${activity.type}-${activity.id}`}
-                    to={activity.link || '/admin'}
-                    className="flex items-start space-x-3 pb-4 border-b border-gray-100 last:border-0 last:pb-0 group"
-                  >
-                    <div className="flex-shrink-0 w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-navy/10 transition-colors">
-                      <Icon className="text-gray-600 group-hover:text-navy" size={16} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-sans text-sm text-gray-600">{activity.action}</p>
-                      <p className="font-sans text-sm font-medium text-navy truncate group-hover:text-gold transition-colors">
-                        {activity.item}
-                      </p>
-                      <div className="flex items-center space-x-1 mt-1">
-                        <Calendar size={12} className="text-gray-400" />
-                        <p className="font-sans text-xs text-gray-500">{formatRelativeTime(activity.at)}</p>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
         </div>
       </div>
 

@@ -16,8 +16,6 @@
     "fix-admin": "node fix-admin-user.js",
     "debug-auth": "node debug-auth.js",
     "check-reviews": "node check-reviews.js",
-    "migrate-location-slugs": "node migrate-location-page-slugs.js",
-    "set-office-address": "node set-office-address.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

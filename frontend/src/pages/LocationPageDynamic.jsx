@@ -125,7 +125,7 @@ const LocationPageDynamic = () => {
 
             <Link to="/contact">
               <button className="inline-flex items-center gap-2 px-8 py-4 bg-gold text-navy font-sans font-semibold rounded-md transition-all duration-200 hover:brightness-110 hover:scale-105">
-                Schedule Free Consultation
+                Schedule Consultation
                 <ArrowRight size={20} />
               </button>
             </Link>

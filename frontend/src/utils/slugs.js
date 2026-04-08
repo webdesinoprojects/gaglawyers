@@ -17,14 +17,6 @@ export const generateSlug = (text) => {
     .replace(/^-+|-+$/g, ''); // Remove leading/trailing dashes
 };
 
-/** Matches backend: {service-slug}-lawyer-in-{city-slug} */
-export const buildLocationPageSlug = (serviceSlug, cityDisplayName) => {
-  const s = generateSlug(serviceSlug || '');
-  const c = generateSlug(cityDisplayName || '');
-  if (!s || !c) return '';
-  return `${s}-lawyer-in-${c}`;
-};
-
 /**
  * Convert slug back to readable text
  * @param {string} slug - URL slug
@@ -45,6 +37,17 @@ export const slugToText = (slug) => {
  */
 export const getLocationPath = (serviceSlug, citySlug) => {
   return `/${serviceSlug}/${citySlug}`;
+};
+
+/**
+ * Build location page slug (without leading slash)
+ * @param {string} serviceSlug - Service slug
+ * @param {string} city - City name or slug
+ * @returns {string} Location page slug
+ */
+export const buildLocationPageSlug = (serviceSlug, city) => {
+  const citySlug = generateSlug(city);
+  return `${serviceSlug}-${citySlug}`;
 };
 
 /**

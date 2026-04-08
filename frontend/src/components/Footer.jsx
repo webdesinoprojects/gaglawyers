@@ -227,26 +227,23 @@ const Footer = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
             {/* Brand Section */}
             <div className="space-y-6 sm:col-span-2 lg:col-span-1">
-              <Link to="/" className="flex items-center gap-3">
-                {/* Logo Image */}
+              <Link to="/" className="flex items-center gap-4">
+                {/* Logo Image - Enlarged */}
                 <img 
                   src="/logo.png" 
                   alt="GAG Lawyers" 
-                  className="h-10 w-auto"
+                  className="h-14 w-auto"
                 />
-                {/* Text Logo - Always show alongside image */}
-                <div className="flex items-center gap-2">
-                  <span className="font-serif text-2xl font-bold text-white">
-                    GAG
+                {/* Text Logo */}
+                <div className="flex flex-col gap-0.5 items-center">
+                  <span className="text-[22px] font-bold text-white leading-none tracking-tight" style={{ fontFamily: '"Baskerville", "Times New Roman", Georgia, serif' }}>
+                    Grover & Grover
                   </span>
-                  <span className="font-serif text-2xl font-light text-gold">
-                    Lawyers
+                  <span className="font-sans text-[11px] text-gray-400 tracking-wide font-normal leading-none">
+                    Advocates and Solicitors
                   </span>
                 </div>
               </Link>
-              <p className="font-sans text-xs uppercase tracking-widest text-gold/90 font-semibold">
-                Grover & Grover · Advocates and Solicitors
-              </p>
               <p className="font-sans text-sm text-gray-300 leading-relaxed max-w-[300px]">
                 Delivering excellence in legal services with integrity and precision.
               </p>

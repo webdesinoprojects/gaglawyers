@@ -20,6 +20,7 @@ import LocationPageDynamic from './pages/LocationPageDynamic';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import NotFound from './pages/NotFound';
+import LogoGenerator from './pages/LogoGenerator';
 import DisclaimerModal from './components/DisclaimerModal';
 import ContentProtection from './components/ContentProtection';
 import AdminLogin from './pages/admin/Login';
@@ -34,10 +35,6 @@ import GalleryManager from './pages/admin/GalleryManager';
 import ServiceManager from './pages/admin/ServiceManager';
 import PageContentManager from './pages/admin/PageContentManager';
 import LocationManager from './pages/admin/LocationManager';
-import BlockManager from './pages/admin/BlockManager';
-import NavigationManager from './pages/admin/NavigationManager';
-import FormContentManager from './pages/admin/FormContentManager';
-import PageBlockAssignmentManager from './pages/admin/PageBlockAssignmentManager';
 import ComingSoon from './pages/admin/ComingSoon';
 import Affiliation from './pages/Affiliation';
 
@@ -48,6 +45,9 @@ function App() {
       <DisclaimerModal />
       <ContentProtection />
       <Routes>
+        {/* Utility routes */}
+        <Route path="/logo-generator" element={<LogoGenerator />} />
+        
         {/* Admin routes MUST come before Layout routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
         
@@ -68,10 +68,6 @@ function App() {
           <Route path="awards" element={<AwardManager />} />
           <Route path="reviews" element={<ReviewManager />} />
           <Route path="locations" element={<LocationManager />} />
-          <Route path="blocks" element={<BlockManager />} />
-          <Route path="navigation" element={<NavigationManager />} />
-          <Route path="forms" element={<FormContentManager />} />
-          <Route path="page-blocks" element={<PageBlockAssignmentManager />} />
           <Route path="contacts" element={<ContactForms />} />
           <Route path="settings" element={<SiteSettings />} />
         </Route>

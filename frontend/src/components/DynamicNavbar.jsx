@@ -133,19 +133,19 @@ const DynamicNavbar = () => {
       >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-[72px]">
-          <Link to="/" className="flex items-center gap-3.5 py-3">
-            {/* Logo Image */}
+          <Link to="/" className="flex items-center gap-4 py-3">
+            {/* Logo Image - Enlarged */}
             <img 
               src="/logo.png" 
               alt="GAG Lawyers" 
-              className="h-11 w-auto"
+              className="h-14 w-auto lg:h-16"
             />
             {/* Text Logo */}
-            <div className="flex flex-col justify-center -space-y-0.5">
-              <span className="font-serif text-[19px] lg:text-[21px] font-bold text-white leading-tight tracking-wide">
+            <div className="flex flex-col justify-center gap-0.5 items-center">
+              <span className="text-[22px] lg:text-[26px] font-bold text-white leading-none tracking-tight" style={{ fontFamily: '"Baskerville", "Times New Roman", Georgia, serif' }}>
                 Grover & Grover
               </span>
-              <span className="font-sans text-[10.5px] lg:text-[11px] text-gold/90 tracking-wider uppercase font-medium leading-tight">
+              <span className="font-sans text-[11px] lg:text-[12px] text-gray-400 tracking-wide font-normal leading-none">
                 Advocates and Solicitors
               </span>
             </div>
@@ -226,13 +226,16 @@ const DynamicNavbar = () => {
                             <Link
                               key={sublink.path}
                               to={sublink.path}
-                              className={`block px-3 py-2.5 font-sans text-xs transition-colors rounded-md ${
+                              className={`group relative block px-3 py-2.5 font-sans text-xs transition-all duration-200 rounded-md ${
                                 location.pathname === sublink.path
-                                  ? 'bg-gold/10 text-gold font-medium'
-                                  : 'text-gray-700 hover:bg-gray-100 hover:text-navy'
+                                  ? 'bg-gold/15 text-gold font-semibold shadow-sm'
+                                  : 'text-gray-700 hover:text-white hover:bg-navy hover:shadow-md font-medium'
                               }`}
                             >
-                              {sublink.name}
+                              {/* Content */}
+                              <span className="relative z-10 group-hover:translate-x-0.5 transition-transform duration-200">
+                                {sublink.name}
+                              </span>
                             </Link>
                           ))}
                         </div>
