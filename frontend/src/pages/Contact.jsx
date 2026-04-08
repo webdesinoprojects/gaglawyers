@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Mail, Phone, MapPin, ChevronDown } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
+import ReCaptcha from '../components/ReCaptcha';
 import API_BASE_URL from '../config/api';
 import { OFFICE_ADDRESS_LINES } from '../constants/officeAddress';
 
@@ -10,6 +11,7 @@ const MAP_EMBED_SRC =
   'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6998.3752460208125!2d77.13081933769948!3d28.71393836202312!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d010b75f3e47d%3A0x4e92383cc436853f!2sGAG%20Lawyers%20-%20Grover%20%26%20Grover%2C%20Advocates%20%7C%20Best%20Divorce%20Lawyer%20in%20Delhi%2C%20Property%20Lawyer%20in%20Delhi%2C%20Civil%20%26%20Criminal%20Lawyers!5e0!3m2!1sen!2sin!4v1775508641842!5m2!1sen!2sin';
 
 const Contact = () => {
+  const captchaRef = useRef(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -20,6 +22,7 @@ const Contact = () => {
   const [services, setServices] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
+  const [captchaToken, setCaptchaToken] = useState(null);
 
   useEffect(() => {
     fetchServices();
@@ -46,6 +49,12 @@ const Contact = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!captchaToken) {
+      setSubmitStatus({ type: 'error', message: 'Please complete the captcha verification.' });
+      return;
+    }
+    
     setIsSubmitting(true);
     setSubmitStatus(null);
 
@@ -55,7 +64,10 @@ const Contact = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          captchaToken
+        }),
       });
 
       const data = await response.json();
@@ -69,6 +81,10 @@ const Contact = () => {
           serviceOfInterest: '',
           message: '',
         });
+        setCaptchaToken(null);
+        if (captchaRef.current) {
+          captchaRef.current.reset();
+        }
       } else {
         setSubmitStatus({ type: 'error', message: data.message || 'Something went wrong. Please try again.' });
       }
@@ -77,6 +93,16 @@ const Contact = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleCaptchaChange = (token) => {
+    setCaptchaToken(token);
+    setSubmitStatus(null);
+  };
+
+  const handleCaptchaExpired = () => {
+    setCaptchaToken(null);
+    setSubmitStatus({ type: 'error', message: 'Captcha expired. Please verify again.' });
   };
 
   const inputClass =
@@ -333,9 +359,19 @@ const Contact = () => {
                     />
                   </div>
 
+                  {/* reCAPTCHA */}
+                  <div className="flex justify-center">
+                    <ReCaptcha
+                      ref={captchaRef}
+                      onChange={handleCaptchaChange}
+                      onExpired={handleCaptchaExpired}
+                      theme="dark"
+                    />
+                  </div>
+
                   <button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !captchaToken}
                     className="w-full rounded-md bg-[#C9A84C] py-3.5 px-6 font-sans text-base font-bold text-[#0B1526] shadow-md transition-all duration-200 hover:bg-[#B08A3E] hover:scale-[1.01] disabled:opacity-60 disabled:hover:scale-100 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? 'Submitting...' : 'Submit Inquiry →'}

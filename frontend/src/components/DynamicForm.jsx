@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import ReCaptcha from './ReCaptcha';
 import API_BASE_URL from '../config/api';
 
 const DynamicForm = ({ formIdentifier, onSuccess, services = [] }) => {
+  const captchaRef = useRef(null);
   const [formConfig, setFormConfig] = useState(null);
   const [formData, setFormData] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
+  const [captchaToken, setCaptchaToken] = useState(null);
 
   useEffect(() => {
     fetchFormConfig();
@@ -36,6 +39,15 @@ const DynamicForm = ({ formIdentifier, onSuccess, services = [] }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!captchaToken) {
+      setSubmitStatus({ 
+        type: 'error', 
+        message: 'Please complete the captcha verification.' 
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     setSubmitStatus(null);
 
@@ -43,7 +55,10 @@ const DynamicForm = ({ formIdentifier, onSuccess, services = [] }) => {
       const response = await fetch(`${API_BASE_URL}/api/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          captchaToken
+        }),
       });
 
       const data = await response.json();
@@ -60,6 +75,10 @@ const DynamicForm = ({ formIdentifier, onSuccess, services = [] }) => {
           resetData[field.fieldName] = '';
         });
         setFormData(resetData);
+        setCaptchaToken(null);
+        if (captchaRef.current) {
+          captchaRef.current.reset();
+        }
 
         if (onSuccess) onSuccess(data);
       } else {
@@ -76,6 +95,19 @@ const DynamicForm = ({ formIdentifier, onSuccess, services = [] }) => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleCaptchaChange = (token) => {
+    setCaptchaToken(token);
+    setSubmitStatus(null);
+  };
+
+  const handleCaptchaExpired = () => {
+    setCaptchaToken(null);
+    setSubmitStatus({ 
+      type: 'error', 
+      message: 'Captcha expired. Please verify again.' 
+    });
   };
 
   if (!formConfig) {
@@ -177,9 +209,19 @@ const DynamicForm = ({ formIdentifier, onSuccess, services = [] }) => {
             </div>
           ))}
 
+        {/* reCAPTCHA */}
+        <div className="flex justify-center">
+          <ReCaptcha
+            ref={captchaRef}
+            onChange={handleCaptchaChange}
+            onExpired={handleCaptchaExpired}
+            theme="light"
+          />
+        </div>
+
         <button
           type="submit"
-          disabled={isSubmitting || !formConfig.isActive}
+          disabled={isSubmitting || !formConfig.isActive || !captchaToken}
           className="w-full px-6 py-3 bg-gold text-navy font-sans text-sm font-semibold rounded-lg transition-all duration-200 hover:brightness-110 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? 'Submitting...' : formConfig.submitButtonText}

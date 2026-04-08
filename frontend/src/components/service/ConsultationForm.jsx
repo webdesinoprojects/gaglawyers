@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Phone, Mail, MapPin, Send, CheckCircle, AlertCircle } from 'lucide-react';
+import ReCaptcha from '../ReCaptcha';
 import API_BASE_URL from '../../config/api';
 
 const ConsultationForm = ({ serviceName }) => {
+  const captchaRef = useRef(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -11,6 +13,7 @@ const ConsultationForm = ({ serviceName }) => {
   });
   const [submitting, setSubmitting] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [captchaToken, setCaptchaToken] = useState(null);
 
   const handleChange = (e) => {
     setFormData({
@@ -21,6 +24,13 @@ const ConsultationForm = ({ serviceName }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!captchaToken) {
+      setNotification({ type: 'error', message: 'Please complete the captcha verification.' });
+      setTimeout(() => setNotification(null), 5000);
+      return;
+    }
+    
     setSubmitting(true);
 
     try {
@@ -34,13 +44,18 @@ const ConsultationForm = ({ serviceName }) => {
           email: formData.email,
           phone: formData.phone,
           serviceOfInterest: serviceName,
-          message: formData.message
+          message: formData.message,
+          captchaToken
         }),
       });
 
       if (response.ok) {
         setNotification({ type: 'success', message: 'Consultation request sent successfully!' });
         setFormData({ name: '', email: '', phone: '', message: '' });
+        setCaptchaToken(null);
+        if (captchaRef.current) {
+          captchaRef.current.reset();
+        }
       } else {
         setNotification({ type: 'error', message: 'Failed to send request. Please try again.' });
       }
@@ -50,6 +65,16 @@ const ConsultationForm = ({ serviceName }) => {
       setSubmitting(false);
       setTimeout(() => setNotification(null), 5000);
     }
+  };
+
+  const handleCaptchaChange = (token) => {
+    setCaptchaToken(token);
+  };
+
+  const handleCaptchaExpired = () => {
+    setCaptchaToken(null);
+    setNotification({ type: 'error', message: 'Captcha expired. Please verify again.' });
+    setTimeout(() => setNotification(null), 5000);
   };
 
   return (
@@ -132,9 +157,19 @@ const ConsultationForm = ({ serviceName }) => {
             />
           </div>
 
+          {/* reCAPTCHA */}
+          <div className="flex justify-center">
+            <ReCaptcha
+              ref={captchaRef}
+              onChange={handleCaptchaChange}
+              onExpired={handleCaptchaExpired}
+              theme="dark"
+            />
+          </div>
+
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || !captchaToken}
             className="w-full bg-[#c9a84c] text-[#1a2744] font-sans font-bold py-3 px-6 rounded-lg hover:bg-[#b89840] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {submitting ? (

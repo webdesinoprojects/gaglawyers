@@ -21,6 +21,7 @@ import SEOHead from '../components/SEOHead';
 import HeroCarousel from '../components/HeroCarousel';
 import AnimatedStatValue from '../components/AnimatedStatValue';
 import SectionReveal from '../components/SectionReveal';
+import ReCaptcha from '../components/ReCaptcha';
 import API_BASE_URL from '../config/api';
 import { mergeHomeSections } from '../data/homePageContentDefaults';
 
@@ -53,6 +54,8 @@ const scrollMainOffset = () => {
 
 const Home = () => {
   const location = useLocation();
+  const appointmentCaptchaRef = useRef(null);
+  const ctaCaptchaRef = useRef(null);
   const [services, setServices] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [blogPosts, setBlogPosts] = useState([]);
@@ -72,6 +75,7 @@ const Home = () => {
   });
   const [isSubmittingAppointment, setIsSubmittingAppointment] = useState(false);
   const [appointmentStatus, setAppointmentStatus] = useState(null);
+  const [appointmentCaptchaToken, setAppointmentCaptchaToken] = useState(null);
 
   const [ctaForm, setCtaForm] = useState({
     name: '',
@@ -82,6 +86,7 @@ const Home = () => {
   });
   const [isSubmittingCta, setIsSubmittingCta] = useState(false);
   const [ctaStatus, setCtaStatus] = useState(null);
+  const [ctaCaptchaToken, setCtaCaptchaToken] = useState(null);
 
   useEffect(() => {
     fetchDynamicContent();
@@ -183,6 +188,15 @@ const Home = () => {
 
   const handleAppointmentSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!appointmentCaptchaToken) {
+      setAppointmentStatus({
+        type: 'error',
+        message: 'Please complete the captcha verification.',
+      });
+      return;
+    }
+    
     setIsSubmittingAppointment(true);
     setAppointmentStatus(null);
 
@@ -199,6 +213,7 @@ const Home = () => {
           phone: appointmentForm.phone,
           serviceOfInterest: appointmentForm.service,
           message,
+          captchaToken: appointmentCaptchaToken,
         }),
       });
 
@@ -220,6 +235,10 @@ const Home = () => {
           preferredDate: '',
           description: '',
         });
+        setAppointmentCaptchaToken(null);
+        if (appointmentCaptchaRef.current) {
+          appointmentCaptchaRef.current.reset();
+        }
         setTimeout(() => setAppointmentStatus(null), 5000);
       } else {
         setAppointmentStatus({
@@ -237,6 +256,19 @@ const Home = () => {
     }
   };
 
+  const handleAppointmentCaptchaChange = (token) => {
+    setAppointmentCaptchaToken(token);
+    setAppointmentStatus(null);
+  };
+
+  const handleAppointmentCaptchaExpired = () => {
+    setAppointmentCaptchaToken(null);
+    setAppointmentStatus({
+      type: 'error',
+      message: 'Captcha expired. Please verify again.',
+    });
+  };
+
   const handleCtaChange = (e) => {
     const { name, value } = e.target;
     setCtaForm((prev) => ({ ...prev, [name]: value }));
@@ -244,6 +276,15 @@ const Home = () => {
 
   const handleCtaSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!ctaCaptchaToken) {
+      setCtaStatus({
+        type: 'error',
+        message: 'Please complete the captcha verification.',
+      });
+      return;
+    }
+    
     setIsSubmittingCta(true);
     setCtaStatus(null);
 
@@ -265,6 +306,7 @@ const Home = () => {
           phone: ctaForm.phone,
           serviceOfInterest: 'General consultation — home page',
           message: message || 'Consultation request from home page CTA.',
+          captchaToken: ctaCaptchaToken,
         }),
       });
 
@@ -282,11 +324,15 @@ const Home = () => {
           legalIssue: '',
           preferredContactTime: '',
         });
+        setCtaCaptchaToken(null);
+        if (ctaCaptchaRef.current) {
+          ctaCaptchaRef.current.reset();
+        }
         setTimeout(() => setCtaStatus(null), 5000);
       } else {
         setCtaStatus({
           type: 'error',
-          message: data.message || 'Submission failed. Please try again.',
+          message: data.message || 'Something went wrong. Please try again.',
         });
       }
     } catch {
@@ -297,6 +343,19 @@ const Home = () => {
     } finally {
       setIsSubmittingCta(false);
     }
+  };
+
+  const handleCtaCaptchaChange = (token) => {
+    setCtaCaptchaToken(token);
+    setCtaStatus(null);
+  };
+
+  const handleCtaCaptchaExpired = () => {
+    setCtaCaptchaToken(null);
+    setCtaStatus({
+      type: 'error',
+      message: 'Captcha expired. Please verify again.',
+    });
   };
 
   const home = mergeHomeSections(pageContent?.sections);
@@ -416,9 +475,20 @@ const Home = () => {
               placeholder={cf.placeholders?.description || 'Tell us how we can help'}
             />
           </div>
+          
+          {/* reCAPTCHA */}
+          <div className="flex justify-center">
+            <ReCaptcha
+              ref={appointmentCaptchaRef}
+              onChange={handleAppointmentCaptchaChange}
+              onExpired={handleAppointmentCaptchaExpired}
+              theme="light"
+            />
+          </div>
+          
           <button
             type="submit"
-            disabled={isSubmittingAppointment}
+            disabled={isSubmittingAppointment || !appointmentCaptchaToken}
             className="w-full px-4 py-3 bg-gold text-navy font-sans text-sm font-semibold rounded-lg transition-all hover:brightness-110 hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {isSubmittingAppointment ? cf.submittingLabel || 'Submitting...' : cf.submitLabel || 'Book appointment'}
@@ -1151,9 +1221,20 @@ const Home = () => {
                       <option value="Any time">Any time</option>
                     </select>
                   </div>
+                  
+                  {/* reCAPTCHA */}
+                  <div className="flex justify-center">
+                    <ReCaptcha
+                      ref={ctaCaptchaRef}
+                      onChange={handleCtaCaptchaChange}
+                      onExpired={handleCtaCaptchaExpired}
+                      theme="light"
+                    />
+                  </div>
+                  
                   <button
                     type="submit"
-                    disabled={isSubmittingCta}
+                    disabled={isSubmittingCta || !ctaCaptchaToken}
                     className="w-full px-4 py-3.5 bg-gold text-navy font-sans text-sm font-bold rounded-lg transition-all hover:brightness-110 hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
                   >
                     {isSubmittingCta
