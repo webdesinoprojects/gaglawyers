@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Check, ChevronRight, MapPin } from 'lucide-react';
+import { ArrowRight, Check, ChevronRight } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import FAQItem from '../components/FAQItem';
 import API_BASE_URL from '../config/api';
@@ -11,198 +11,6 @@ const ServicePage = () => {
   const [service, setService] = useState(null);
   const [relatedServices, setRelatedServices] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [userCity, setUserCity] = useState(null);
-  const [nearestLocationSlug, setNearestLocationSlug] = useState(null);
-  const [detectingLocation, setDetectingLocation] = useState(false);
-  const [availableLocations, setAvailableLocations] = useState([]);
-
-  // Function to convert city name to slug format
-  const cityToSlug = (cityName) => {
-    return cityName
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, '') // Remove special characters
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/-+/g, '-'); // Replace multiple hyphens with single hyphen
-  };
-
-  // Function to calculate string similarity (Levenshtein distance)
-  const calculateSimilarity = (str1, str2) => {
-    const s1 = str1.toLowerCase();
-    const s2 = str2.toLowerCase();
-    
-    // Exact match
-    if (s1 === s2) return 1;
-    
-    // Check if one contains the other
-    if (s1.includes(s2) || s2.includes(s1)) return 0.8;
-    
-    // Simple character overlap
-    const set1 = new Set(s1.split(''));
-    const set2 = new Set(s2.split(''));
-    const intersection = new Set([...set1].filter(x => set2.has(x)));
-    const union = new Set([...set1, ...set2]);
-    
-    return intersection.size / union.size;
-  };
-
-  // Function to find nearest available location
-  const findNearestLocation = async (detectedCity, currentService) => {
-    try {
-      // Fetch all active location pages - we'll filter by service name on the client side
-      const response = await fetch(`${API_BASE_URL}/api/locations?active=true&limit=1000`);
-      
-      if (!response.ok) {
-        console.error('Failed to fetch locations:', response.status);
-        return null;
-      }
-      
-      const data = await response.json();
-      
-      if (data.success && data.data && data.data.length > 0) {
-        // Filter locations by service name (case-insensitive match)
-        // Try multiple matching strategies to find relevant locations
-        const serviceLocations = data.data.filter(loc => {
-          if (!loc.serviceName) return false;
-          
-          const locServiceName = loc.serviceName.toLowerCase();
-          const currentServiceName = currentService.name.toLowerCase();
-          
-          // Exact match
-          if (locServiceName === currentServiceName) return true;
-          
-          // Check if location service name contains the current service name
-          if (locServiceName.includes(currentServiceName)) return true;
-          
-          // Check if current service name contains location service name
-          if (currentServiceName.includes(locServiceName)) return true;
-          
-          // Check first word match (e.g., "Cyber" from "Cyber Crime Cases")
-          const firstWord = currentServiceName.split(' ')[0];
-          if (firstWord.length > 3 && locServiceName.includes(firstWord)) return true;
-          
-          return false;
-        });
-        
-        console.log(`Found ${serviceLocations.length} locations for service: ${currentService.name}`);
-        
-        if (serviceLocations.length === 0) {
-          console.log('No locations found for this service');
-          return null;
-        }
-        
-        setAvailableLocations(serviceLocations);
-        
-        const detectedCitySlug = cityToSlug(detectedCity);
-        
-        // First, try exact match on city name
-        const exactMatch = serviceLocations.find(loc => 
-          cityToSlug(loc.city) === detectedCitySlug
-        );
-        
-        if (exactMatch) {
-          console.log('Exact match found:', exactMatch.slug);
-          return exactMatch.slug;
-        }
-        
-        // If no exact match, find the most similar city
-        let bestMatch = serviceLocations[0];
-        let bestSimilarity = 0;
-        
-        serviceLocations.forEach(loc => {
-          const similarity = calculateSimilarity(detectedCity, loc.city);
-          if (similarity > bestSimilarity) {
-            bestSimilarity = similarity;
-            bestMatch = loc;
-          }
-        });
-        
-        console.log('Best match found:', bestMatch.city, 'with similarity:', bestSimilarity);
-        return bestMatch.slug;
-      } else {
-        // No locations found
-        console.log('No locations found in database');
-        return null;
-      }
-    } catch (error) {
-      console.error('Error fetching locations:', error);
-      return null;
-    }
-  };
-
-  // Function to detect user's location
-  const detectUserLocation = async () => {
-    setDetectingLocation(true);
-    
-    if (!navigator.geolocation) {
-      console.log('Geolocation not supported');
-      // Try to find any available location as fallback
-      if (service) {
-        const fallbackSlug = await findNearestLocation('Delhi', service);
-        setNearestLocationSlug(fallbackSlug);
-      }
-      setDetectingLocation(false);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        
-        try {
-          // Use OpenStreetMap Nominatim API for reverse geocoding (free, no API key needed)
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`,
-            {
-              headers: {
-                'User-Agent': 'GAG-Lawyers-Website'
-              }
-            }
-          );
-          
-          const data = await response.json();
-          
-          // Extract city name from response
-          const city = data.address?.city || 
-                      data.address?.town || 
-                      data.address?.village || 
-                      data.address?.state_district ||
-                      'Delhi';
-          
-          setUserCity(city);
-          console.log('Detected city:', city);
-          
-          // Find nearest available location
-          if (service) {
-            const nearestSlug = await findNearestLocation(city, service);
-            setNearestLocationSlug(nearestSlug);
-          }
-        } catch (error) {
-          console.error('Error reverse geocoding:', error);
-          // Fallback to finding any available location
-          if (service) {
-            const fallbackSlug = await findNearestLocation('Delhi', service.slug);
-            setNearestLocationSlug(fallbackSlug);
-          }
-        } finally {
-          setDetectingLocation(false);
-        }
-      },
-      async (error) => {
-        console.error('Error getting location:', error);
-        // Fallback to finding any available location
-        if (service) {
-          const fallbackSlug = await findNearestLocation('Delhi', service);
-          setNearestLocationSlug(fallbackSlug);
-        }
-        setDetectingLocation(false);
-      },
-      {
-        timeout: 10000,
-        maximumAge: 600000, // Cache for 10 minutes
-      }
-    );
-  };
 
   useEffect(() => {
     const fetchService = async () => {
@@ -237,13 +45,6 @@ const ServicePage = () => {
 
     fetchService();
   }, [slug, navigate]);
-
-  // Detect location after service is loaded
-  useEffect(() => {
-    if (service) {
-      detectUserLocation();
-    }
-  }, [service]);
 
   if (loading || !service) {
     return (
@@ -310,24 +111,12 @@ const ServicePage = () => {
               {service.shortDescription}
             </p>
 
-            {nearestLocationSlug ? (
-              <Link to={`/${nearestLocationSlug}`}>
-                <button className="inline-flex items-center gap-2 px-8 py-4 bg-gold text-navy font-sans font-semibold rounded-md transition-all duration-200 hover:brightness-110 hover:scale-105">
-                  <MapPin size={20} />
-                  Find Lawyer Near You
-                  <ArrowRight size={20} />
-                </button>
-              </Link>
-            ) : (
-              <button 
-                disabled 
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gold/50 text-navy/50 font-sans font-semibold rounded-md cursor-not-allowed"
-              >
-                <MapPin size={20} className={detectingLocation ? "animate-pulse" : ""} />
-                {detectingLocation ? 'Detecting Location...' : 'Find Lawyer Near You'}
+            <Link to={`/${service.slug}/delhi`}>
+              <button className="inline-flex items-center gap-2 px-8 py-4 bg-gold text-navy font-sans font-semibold rounded-md transition-all duration-200 hover:brightness-110 hover:scale-105">
+                Find Lawyer Near You
                 <ArrowRight size={20} />
               </button>
-            )}
+            </Link>
           </div>
         </div>
       </section>
@@ -461,7 +250,7 @@ const ServicePage = () => {
             </p>
             <Link to="/contact">
               <button className="px-8 py-3 bg-navy text-white font-semibold rounded-lg hover:bg-navy/90 transition-all duration-200 hover:shadow-lg">
-                Schedule Consultation
+                Schedule Free Consultation
               </button>
             </Link>
           </div>
@@ -485,28 +274,11 @@ const ServicePage = () => {
                 <ArrowRight size={20} />
               </button>
             </Link>
-            {nearestLocationSlug ? (
-              <Link to={`/${nearestLocationSlug}`}>
-                <button className="px-8 py-4 bg-transparent text-white font-sans font-semibold rounded-md border-2 border-white/30 transition-all duration-200 hover:bg-white/10 flex items-center justify-center gap-2">
-                  <MapPin size={20} />
-                  Find Lawyer Near You
-                </button>
-              </Link>
-            ) : detectingLocation ? (
-              <button 
-                disabled 
-                className="px-8 py-4 bg-transparent text-white/50 font-sans font-semibold rounded-md border-2 border-white/20 cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                <MapPin size={20} className="animate-pulse" />
-                Detecting Location...
+            <Link to={`/${service.slug}/delhi`}>
+              <button className="px-8 py-4 bg-transparent text-white font-sans font-semibold rounded-md border-2 border-white/30 transition-all duration-200 hover:bg-white/10">
+                Find Lawyer Near You
               </button>
-            ) : (
-              <Link to="/services">
-                <button className="px-8 py-4 bg-transparent text-white font-sans font-semibold rounded-md border-2 border-white/30 transition-all duration-200 hover:bg-white/10 flex items-center justify-center gap-2">
-                  View All Services
-                </button>
-              </Link>
-            )}
+            </Link>
           </div>
         </div>
       </section>

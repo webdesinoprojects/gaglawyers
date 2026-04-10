@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 /**
@@ -14,9 +14,16 @@ import { useLocation } from 'react-router-dom';
  * - Works with all navigation types (links, buttons, programmatic)
  */
 const ScrollToTop = () => {
-  const { pathname, hash } = useLocation();
+  const { pathname, search, hash } = useLocation();
 
   useEffect(() => {
+    // Disable native browser restoration so each route change behaves like a fresh page load.
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
+
+  useLayoutEffect(() => {
     // If there's a hash, handle anchor navigation
     if (hash) {
       // Use requestAnimationFrame to ensure DOM is ready
@@ -33,7 +40,7 @@ const ScrollToTop = () => {
       // No hash - immediate scroll to top (no animation)
       window.scrollTo(0, 0);
     }
-  }, [pathname, hash]);
+  }, [pathname, search, hash]);
 
   return null;
 };

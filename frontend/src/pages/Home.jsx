@@ -663,7 +663,7 @@ const Home = () => {
               {(home.ourValues.cards || []).map((card, i) => (
                 <div
                   key={`${card.title}-${i}`}
-                  className="rounded-xl border-l-4 border-gold bg-[#081629] p-6 text-center hover:border-l-[6px] hover:shadow-lg hover:shadow-gold/10 transition-all"
+                  className="rounded-xl border-l-4 border-gold bg-[#0B1F3A] p-6 text-center hover:border-l-[6px] hover:shadow-lg hover:shadow-gold/10 transition-all"
                 >
                   <h4 className="font-serif text-lg font-bold text-white mb-2">{card.title}</h4>
                   <p className="font-sans text-sm text-gray-300 leading-relaxed">{card.body}</p>

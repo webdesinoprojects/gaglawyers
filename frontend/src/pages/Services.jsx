@@ -236,7 +236,7 @@ const Services = () => {
             </p>
             <Link to="/contact">
               <button className="px-8 py-3 bg-navy text-white font-semibold rounded-lg hover:bg-navy/90 transition-all duration-200 hover:shadow-lg">
-                Get Consultation
+                Get Free Consultation
               </button>
             </Link>
           </div>

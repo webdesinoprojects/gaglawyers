@@ -145,7 +145,7 @@ const DynamicNavbar = () => {
               <span className="text-[22px] lg:text-[26px] font-bold text-white leading-none tracking-tight" style={{ fontFamily: '"Baskerville", "Times New Roman", Georgia, serif' }}>
                 Grover & Grover
               </span>
-              <span className="font-sans text-[11px] lg:text-[12px] text-gray-400 tracking-wide font-normal leading-none">
+              <span className="font-sans text-[11px] lg:text-[12px] text-gold tracking-wide font-normal leading-none">
                 Advocates and Solicitors
               </span>
             </div>

@@ -1,57 +1,19 @@
 const ContactInquiry = require('../models/ContactInquiry');
 const nodemailer = require('nodemailer');
-const axios = require('axios');
-
-// Verify reCAPTCHA token
-const verifyCaptcha = async (token) => {
-  try {
-    const secretKey = process.env.RECAPTCHA_SECRET_KEY;
-    
-    // Skip verification in development if no secret key is set
-    if (!secretKey) {
-      console.warn('⚠️  RECAPTCHA_SECRET_KEY not set - skipping verification (development only)');
-      return true;
-    }
-
-    const response = await axios.post(
-      'https://www.google.com/recaptcha/api/siteverify',
-      null,
-      {
-        params: {
-          secret: secretKey,
-          response: token
-        }
-      }
-    );
-
-    return response.data.success;
-  } catch (error) {
-    console.error('❌ Captcha verification error:', error.message);
-    return false;
-  }
-};
+const { verifyRecaptcha } = require('../utils/verifyRecaptcha');
 
 const createContactInquiry = async (req, res) => {
   try {
     const { name, email, phone, serviceOfInterest, message, captchaToken } = req.body;
 
-    // Verify captcha token
-    if (!captchaToken) {
-      return res.status(400).json({
-        success: false,
-        message: 'Captcha verification required',
-      });
-    }
-
-    const isCaptchaValid = await verifyCaptcha(captchaToken);
+    const isCaptchaValid = await verifyRecaptcha(captchaToken, req.ip);
     if (!isCaptchaValid) {
       return res.status(400).json({
         success: false,
-        message: 'Captcha verification failed. Please try again.',
+        message: 'reCAPTCHA verification failed',
       });
     }
 
-    // Validate required fields
     if (!name || !email || !phone || !serviceOfInterest || !message) {
       return res.status(400).json({
         success: false,

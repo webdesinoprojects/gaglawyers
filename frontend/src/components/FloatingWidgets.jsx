@@ -18,6 +18,9 @@ const FloatingWidgets = () => {
   });
   const [showChat, setShowChat] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [phoneVariant, setPhoneVariant] = useState('dark');
+  const hasWhatsApp = settings.whatsappEnabled && settings.whatsappNumber;
+  const hasPhone = Boolean(settings.phoneNumber);
 
   // Don't show widgets in admin panel
   const isAdminPanel = location.pathname.startsWith('/admin');
@@ -115,6 +118,101 @@ const FloatingWidgets = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!hasPhone || isAdminPanel) return undefined;
+
+    const parseRgb = (color) => {
+      if (!color || color === 'transparent') return null;
+      const match = color.match(/\d+(\.\d+)?/g);
+      if (!match || match.length < 3) return null;
+      const r = Number(match[0]);
+      const g = Number(match[1]);
+      const b = Number(match[2]);
+      const a = match[3] ? Number(match[3]) : 1;
+      if ([r, g, b, a].some((v) => Number.isNaN(v))) return null;
+      return { r, g, b, a };
+    };
+
+    const blendOver = (base, top) => {
+      const a = Math.max(0, Math.min(1, top.a));
+      return {
+        r: Math.round(top.r * a + base.r * (1 - a)),
+        g: Math.round(top.g * a + base.g * (1 - a)),
+        b: Math.round(top.b * a + base.b * (1 - a)),
+      };
+    };
+
+    const luminance = ({ r, g, b }) => {
+      const normalize = (v) => {
+        const n = v / 255;
+        return n <= 0.03928 ? n / 12.92 : ((n + 0.055) / 1.055) ** 2.4;
+      };
+      const R = normalize(r);
+      const G = normalize(g);
+      const B = normalize(b);
+      return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+    };
+
+    const detectBackdropVariant = (x, y) => {
+      const stack = document
+        .elementsFromPoint(x, y)
+        .filter((el) => !(el instanceof HTMLElement && el.closest('[data-floating-widget-root]')));
+
+      const target = stack[0];
+      if (!target) return 'dark';
+
+      let node = target;
+      let color = { r: 248, g: 250, b: 252 };
+      let hasImageLikeBackground = false;
+      let passes = 0;
+
+      while (node && node !== document.documentElement && passes < 10) {
+        const style = window.getComputedStyle(node);
+        if (style.backgroundImage && style.backgroundImage !== 'none') {
+          hasImageLikeBackground = true;
+        }
+        const rgb = parseRgb(style.backgroundColor);
+        if (rgb && rgb.a > 0.01) {
+          color = blendOver(color, rgb);
+          if (rgb.a >= 0.98) break;
+        }
+        node = node.parentElement;
+        passes += 1;
+      }
+
+      // Image/gradient-heavy areas are best handled by blend mode for reliable contrast.
+      if (hasImageLikeBackground) {
+        return 'blend';
+      }
+
+      return luminance(color) < 0.34 ? 'light' : 'dark';
+    };
+
+    let rafId = 0;
+    const updateVariant = () => {
+      // Sample just outside the left button so we read page backdrop, not the button itself.
+      const x = 96;
+      const y = Math.max(0, window.innerHeight - 44);
+      const next = detectBackdropVariant(x, y);
+      setPhoneVariant((prev) => (prev === next ? prev : next));
+    };
+
+    const queueUpdate = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(updateVariant);
+    };
+
+    queueUpdate();
+    window.addEventListener('scroll', queueUpdate, { passive: true });
+    window.addEventListener('resize', queueUpdate);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', queueUpdate);
+      window.removeEventListener('resize', queueUpdate);
+    };
+  }, [location.pathname, showChat, hasPhone, isAdminPanel]);
+
   const handleWhatsAppClick = useCallback(() => {
     if (settings.whatsappNumber) {
       const cleanNumber = settings.whatsappNumber.replace(/[^0-9]/g, '');
@@ -142,9 +240,6 @@ const FloatingWidgets = () => {
   if (isAdminPanel) {
     return null;
   }
-
-  const hasWhatsApp = settings.whatsappEnabled && settings.whatsappNumber;
-  const hasPhone = Boolean(settings.phoneNumber);
 
   return (
     <>
@@ -197,10 +292,16 @@ const FloatingWidgets = () => {
 
       {/* Phone Button - Bottom Left */}
       {hasPhone && (
-        <div className={`fixed bottom-6 left-6 z-50 transition-all duration-500 ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-20 opacity-0'}`}>
+        <div data-floating-widget-root className={`fixed bottom-6 left-6 z-50 transition-all duration-500 ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-20 opacity-0'}`}>
           <button
             onClick={handlePhoneClick}
-            className="group relative w-16 h-16 bg-navy hover:bg-navy/90 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center hover:scale-110"
+            className={`group relative w-16 h-16 rounded-full transition-all duration-300 flex items-center justify-center hover:scale-110 border ${
+              phoneVariant === 'blend'
+                ? 'bg-white text-black border-white/80 mix-blend-difference shadow-[0_10px_30px_rgba(0,0,0,0.35)]'
+                : phoneVariant === 'light'
+                  ? 'bg-white/95 hover:bg-white text-navy border-white/90 shadow-[0_10px_24px_rgba(0,0,0,0.28)]'
+                  : 'bg-navy hover:bg-navy/90 text-white border-white/60 shadow-[0_10px_24px_rgba(11,31,58,0.42)]'
+            }`}
             title="Call Us"
           >
             <Phone className="w-7 h-7" />
@@ -211,7 +312,11 @@ const FloatingWidgets = () => {
             </span>
 
             {/* Pulse Animation */}
-            <span className="absolute inset-0 rounded-full bg-navy animate-ping opacity-20"></span>
+            <span
+              className={`absolute inset-0 rounded-full animate-ping opacity-20 ${
+                phoneVariant === 'blend' ? 'bg-white' : phoneVariant === 'light' ? 'bg-white' : 'bg-navy'
+              }`}
+            ></span>
           </button>
         </div>
       )}

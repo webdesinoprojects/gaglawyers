@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import AdminLayout from './components/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
-import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import About from './pages/About';
 import Services from './pages/Services';
@@ -20,9 +19,9 @@ import LocationPageDynamic from './pages/LocationPageDynamic';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import NotFound from './pages/NotFound';
-import LogoGenerator from './pages/LogoGenerator';
 import DisclaimerModal from './components/DisclaimerModal';
 import ContentProtection from './components/ContentProtection';
+import ScrollToTop from './components/ScrollToTop';
 import AdminLogin from './pages/admin/Login';
 import AdminDashboard from './pages/admin/Dashboard';
 import ContactForms from './pages/admin/ContactForms';
@@ -45,9 +44,6 @@ function App() {
       <DisclaimerModal />
       <ContentProtection />
       <Routes>
-        {/* Utility routes */}
-        <Route path="/logo-generator" element={<LogoGenerator />} />
-        
         {/* Admin routes MUST come before Layout routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
         
