@@ -30,16 +30,18 @@ const DisclaimerModal = () => {
         setDisclaimerText(textData.data.settingValue);
       }
 
-      const hasAccepted = localStorage.getItem('gaglawyers-disclaimer-accepted');
-      if (!hasAccepted && (enabledData.data?.settingValue !== false)) {
+      if (enabledData.data?.settingValue !== false) {
         setIsOpen(true);
       }
     } catch (error) {
-      const hasAccepted = localStorage.getItem('gaglawyers-disclaimer-accepted');
-      if (!hasAccepted) {
-        setDisclaimerText('The information provided on this website is for general informational purposes only. It does not constitute legal advice and should not be relied upon as such. No attorney-client relationship is created by use of this website or its content.\n\nFor specific legal advice regarding your individual situation, please consult directly with a qualified attorney at our firm. Past results do not guarantee future outcomes.');
-        setIsOpen(true);
-      }
+      setDisclaimerText(`Current rules of the Bar Council of India impose restrictions on maintaining a web page and do not permit lawyers to provide information concerning their areas of practice. GAG Lawyers – Grover & Grover Advocates & Solicitors is, therefore, constrained from providing any further information on this web page.
+
+The rules of the Bar Council of India prohibit law firms from soliciting work or advertising in any manner. By clicking on “I AGREE”, the user acknowledges that:
+• The user wishes to gain more information about GAG Lawyers – Grover & Grover Advocates & Solicitors, its practice areas and its attorneys, for his/her own information and use
+• The information is made available/provided to the user only on his/her specific request and any information obtained or material downloaded from this website is completely at the user’s volition and any transmission, receipt or use of this site is not intended to, and will not, create any lawyer-client relationship
+• None of the information contained on the website is in the nature of a legal opinion or otherwise amounts to any legal advice.
+• GAG Lawyers – Grover & Grover Advocates & Solicitors is not liable for any consequence of any action taken by the user relying on material/information provided under this website. In cases where the user has any legal issues, he/she in all cases must seek independent legal advice.`);
+      setIsOpen(true);
     }
   };
 
@@ -51,21 +53,23 @@ const DisclaimerModal = () => {
   if (!isOpen || !disclaimerEnabled) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="relative bg-white rounded-sm shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-[100] flex items-stretch justify-center bg-black/60 backdrop-blur-sm md:items-center md:p-4">
+      <div className="relative flex h-full w-full max-h-[100dvh] flex-col overflow-hidden bg-white shadow-2xl md:h-auto md:max-h-[90vh] md:max-w-lg md:rounded-2xl md:overflow-y-auto">
         <button
+          type="button"
           onClick={handleAccept}
-          className="absolute top-4 right-4 text-gray-400 hover:text-navy transition-colors"
+          aria-label="Close disclaimer"
+          className="absolute right-2 top-2 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-navy md:right-3 md:top-3"
         >
           <X size={24} />
         </button>
 
-        <div className="p-8 lg:p-10">
-          <h2 className="font-serif text-3xl lg:text-4xl font-bold text-navy mb-6">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-6 pt-14 md:p-8 lg:p-10">
+          <h2 className="mb-4 font-serif text-xl font-bold leading-snug text-navy md:mb-6 md:text-3xl lg:text-4xl">
             Disclaimer
           </h2>
 
-          <div className="space-y-4 font-sans text-gray-700 leading-relaxed mb-8 whitespace-pre-line">
+          <div className="mb-6 max-w-prose space-y-4 font-sans text-sm leading-normal text-gray-700 whitespace-pre-line md:mb-8 md:text-base">
             {disclaimerText || 'Loading...'}
           </div>
 
@@ -73,9 +77,9 @@ const DisclaimerModal = () => {
             variant="primary"
             size="lg"
             onClick={handleAccept}
-            className="w-full"
+            className="mt-auto w-full min-h-[48px] md:w-full"
           >
-            I Understand & Accept
+            I AGREE
           </Button>
         </div>
       </div>

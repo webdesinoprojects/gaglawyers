@@ -1,4 +1,4 @@
-require('dotenv').config();
+﻿require('dotenv').config();
 const mongoose = require('mongoose');
 const LocationPage = require('./models/LocationPage');
 const Service = require('./models/Service');
@@ -7,9 +7,9 @@ const { generateSlug, buildLocationPageSlug } = require('./utils/slugify');
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log('✅ MongoDB connected');
+    console.log('âœ… MongoDB connected');
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
+    console.error('âŒ MongoDB connection error:', error);
     process.exit(1);
   }
 };
@@ -17,7 +17,7 @@ const connectDB = async () => {
 // All 25 services
 const services25 = [
   "Armed Forces Tribunal (AFT) Cases",
-  "Bail & Anticipatory Bail Cases",
+  "Bail Lawyer",
   "CAT (Central Administrative Tribunal) Matters",
   "Cheque Bounce Cases",
   "Civil Law & Civil Disputes",
@@ -106,19 +106,19 @@ const generateSEO = (city, serviceName) => {
 // Main generation function
 const generateAllLocationPages = async () => {
   try {
-    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🚀 LOCATION PAGES GENERATOR - 25 Services × 1702 Locations');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('\nâ”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
+    console.log('ðŸš€ LOCATION PAGES GENERATOR - 25 Services Ã— 1702 Locations');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
 
     await connectDB();
 
-    console.log('📊 Configuration:');
+    console.log('ðŸ“Š Configuration:');
     console.log(`   Services: ${services25.length}`);
     console.log(`   Locations: ${locations1702.length}`);
     console.log(`   Total pages to generate: ${services25.length * locations1702.length}\n`);
 
     // Step 1: Ensure all services exist in database
-    console.log('📝 Step 1: Processing services...\n');
+    console.log('ðŸ“ Step 1: Processing services...\n');
     const serviceMap = new Map();
 
     for (const serviceName of services25) {
@@ -135,34 +135,34 @@ const generateAllLocationPages = async () => {
           description: `Professional ${serviceName.toLowerCase()} services by GAG Lawyers - Grover & Grover Advocates.`,
           iconName: 'Scale'
         });
-        console.log(`   ✅ Created service: ${serviceName}`);
+        console.log(`   âœ… Created service: ${serviceName}`);
       } else {
-        console.log(`   ✓ Found service: ${serviceName} (${service.name})`);
+        console.log(`   âœ“ Found service: ${serviceName} (${service.name})`);
       }
       
       serviceMap.set(serviceName, service);
     }
 
-    console.log(`\n✅ ${serviceMap.size} services ready\n`);
+    console.log(`\nâœ… ${serviceMap.size} services ready\n`);
 
     // Step 2: Check existing location pages
     const existingCount = await LocationPage.countDocuments();
-    console.log(`📋 Existing location pages in database: ${existingCount}\n`);
+    console.log(`ðŸ“‹ Existing location pages in database: ${existingCount}\n`);
 
     if (existingCount > 0) {
-      console.log('⚠️  WARNING: Location pages already exist!');
+      console.log('âš ï¸  WARNING: Location pages already exist!');
       console.log('   This script will skip duplicates based on slug.');
       console.log('   To delete all and regenerate, uncomment the delete line in code.\n');
       
       // Uncomment to delete all existing pages
       // await LocationPage.deleteMany();
-      // console.log('✅ Deleted all existing location pages\n');
+      // console.log('âœ… Deleted all existing location pages\n');
     }
 
     // Step 3: Generate location pages
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🔨 Step 2: Generating location pages...\n');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
+    console.log('ðŸ”¨ Step 2: Generating location pages...\n');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
 
     let totalCreated = 0;
     let totalSkipped = 0;
@@ -175,13 +175,13 @@ const generateAllLocationPages = async () => {
     const existing = await LocationPage.find({}).select('slug');
     existing.forEach(page => existingSlugs.add(page.slug));
 
-    console.log(`   ℹ️  Found ${existingSlugs.size} existing slugs to skip\n`);
+    console.log(`   â„¹ï¸  Found ${existingSlugs.size} existing slugs to skip\n`);
 
     // Generate all pages
     for (const serviceName of services25) {
       const serviceDoc = serviceMap.get(serviceName);
       const serviceId = serviceDoc._id;
-      console.log(`   📍 Processing: ${serviceName}`);
+      console.log(`   ðŸ“ Processing: ${serviceName}`);
       
       for (const city of locations1702) {
         const slug = buildLocationPageSlug(serviceDoc.slug, city);
@@ -211,14 +211,14 @@ const generateAllLocationPages = async () => {
           try {
             await LocationPage.insertMany(locationPages, { ordered: false });
             totalCreated += locationPages.length;
-            process.stdout.write(`\r   ✅ Progress: ${totalCreated} pages created (${totalSkipped} skipped)`);
+            process.stdout.write(`\r   âœ… Progress: ${totalCreated} pages created (${totalSkipped} skipped)`);
             locationPages.length = 0;
           } catch (error) {
             if (error.code === 11000) {
               totalSkipped += locationPages.length;
             } else {
               totalErrors += locationPages.length;
-              console.error(`\n   ⚠️  Batch error:`, error.message);
+              console.error(`\n   âš ï¸  Batch error:`, error.message);
             }
             locationPages.length = 0;
           }
@@ -240,44 +240,46 @@ const generateAllLocationPages = async () => {
       }
     }
 
-    console.log('\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('✅ GENERATION COMPLETE!');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('\n\nâ”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
+    console.log('âœ… GENERATION COMPLETE!');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
     
-    console.log('📊 SUMMARY:');
-    console.log(`   ✅ Created: ${totalCreated} pages`);
-    console.log(`   ⏭️  Skipped: ${totalSkipped} pages (already exist)`);
+    console.log('ðŸ“Š SUMMARY:');
+    console.log(`   âœ… Created: ${totalCreated} pages`);
+    console.log(`   â­ï¸  Skipped: ${totalSkipped} pages (already exist)`);
     if (totalErrors > 0) {
-      console.log(`   ❌ Errors: ${totalErrors} pages`);
+      console.log(`   âŒ Errors: ${totalErrors} pages`);
     }
-    console.log(`\n   📍 Total locations: ${locations1702.length}`);
-    console.log(`   🔧 Total services: ${services25.length}`);
-    console.log(`   📈 Total in database: ${await LocationPage.countDocuments()}`);
+    console.log(`\n   ðŸ“ Total locations: ${locations1702.length}`);
+    console.log(`   ðŸ”§ Total services: ${services25.length}`);
+    console.log(`   ðŸ“ˆ Total in database: ${await LocationPage.countDocuments()}`);
     
-    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🔗 SAMPLE PAGES:');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('\nâ”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
+    console.log('ðŸ”— SAMPLE PAGES:');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
     
     const samples = await LocationPage.find().limit(10);
     samples.forEach(page => {
       console.log(`   /${page.slug}`);
     });
 
-    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('📝 NEXT STEPS:');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('\nâ”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
+    console.log('ðŸ“ NEXT STEPS:');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
     console.log('   1. View pages in admin panel');
     console.log('   2. Check sitemap: http://localhost:5000/sitemap.xml');
     console.log('   3. Visit sample pages to verify content');
     console.log('   4. Use bulk toggle in admin to manage active status\n');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
 
     process.exit(0);
   } catch (error) {
-    console.error('\n❌ Fatal error:', error);
+    console.error('\nâŒ Fatal error:', error);
     process.exit(1);
   }
 };
 
 // Run the generator
 generateAllLocationPages();
+
+

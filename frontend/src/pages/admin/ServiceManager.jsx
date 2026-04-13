@@ -108,30 +108,58 @@ const normalize = (service) => {
 
 const baseForm = {
   name: '',
+  slug: '',
   category: 'litigation',
   shortDescription: '',
   longDescription: '',
+  description: '',
+  overview: '',
+  typesOfCasesText: '',
+  keyPointsText: '',
+  process: [{ step: 1, title: '', description: '' }],
   iconName: 'Briefcase',
   order: 0,
 };
+
+const toMultilineText = (items) => (Array.isArray(items) ? items.filter(Boolean).join('\n') : '');
+
+const parseMultiline = (value) =>
+  String(value || '')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
 
 const formFromService = (service) => {
   if (!service) {
     return { ...baseForm };
   }
   const normalized = normalize(service);
+  const process = Array.isArray(service?.process) && service.process.length > 0
+    ? service.process.map((item, index) => ({
+        step: Number.isFinite(item?.step) ? item.step : index + 1,
+        title: item?.title || '',
+        description: item?.description || '',
+      }))
+    : [{ step: 1, title: '', description: '' }];
+
   return {
     name: normalized.name,
+    slug: service?.slug || makeSlug(normalized.name),
     category: normalized.category,
     shortDescription: normalized.shortDescription,
     longDescription: normalized.longDescription,
+    description: service?.description || normalized.shortDescription,
+    overview: service?.overview || '',
+    typesOfCasesText: toMultilineText(service?.typesOfCases),
+    keyPointsText: toMultilineText(service?.keyPoints),
+    process,
     iconName: normalized.iconName,
     order: normalized.order,
   };
 };
 
 const HeaderBar = ({ onCreate }) => (
-  <header className="sticky top-[5.5rem] z-30 mb-6 rounded-3xl border border-white/45 bg-white/55 px-6 py-5 shadow-[0_22px_42px_-28px_rgba(15,23,42,0.85)] backdrop-blur-xl sm:px-8 dark:border-slate-700/70 dark:bg-slate-900/55">
+  <header className="mb-6 rounded-3xl border border-white/45 bg-white/55 px-6 py-6 shadow-[0_22px_42px_-28px_rgba(15,23,42,0.85)] backdrop-blur-xl sm:px-8 dark:border-slate-700/70 dark:bg-slate-900/55">
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Legal Tech Console</p>
@@ -160,7 +188,7 @@ const FilterBar = ({
   viewMode,
   onViewMode,
 }) => (
-  <section className="sticky top-[13.5rem] z-20 mb-8 rounded-3xl border border-slate-200/70 bg-white/90 p-4 shadow-[0_20px_36px_-25px_rgba(15,23,42,0.65)] backdrop-blur-xl dark:border-slate-700/70 dark:bg-slate-900/80">
+  <section className="sticky top-4 z-20 mb-6 rounded-3xl border border-slate-200/70 bg-white/90 p-4 shadow-[0_20px_36px_-25px_rgba(15,23,42,0.65)] backdrop-blur-xl dark:border-slate-700/70 dark:bg-slate-900/80">
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
       <div className="relative flex-1">
         <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={17} />
@@ -238,7 +266,7 @@ const ServiceCard = ({ service, onEdit, onDelete }) => {
   const Icon = ICON_MAP[service.iconName] || Briefcase;
 
   return (
-    <article className="group relative overflow-hidden rounded-3xl border border-white/60 bg-gradient-to-b from-white to-slate-50 p-5 shadow-[0_22px_40px_-26px_rgba(15,23,42,0.72)] transition-all duration-200 ease-out hover:-translate-y-1 hover:border-blue-300/65 hover:shadow-[0_32px_46px_-24px_rgba(30,64,175,0.5)] dark:border-slate-700/80 dark:from-slate-900 dark:to-slate-900/80">
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/60 bg-gradient-to-b from-white to-slate-50 p-5 shadow-[0_22px_40px_-26px_rgba(15,23,42,0.72)] transition-all duration-200 ease-out hover:-translate-y-1 hover:border-blue-300/65 hover:shadow-[0_32px_46px_-24px_rgba(30,64,175,0.5)] dark:border-slate-700/80 dark:from-slate-900 dark:to-slate-900/80">
       <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-500/0 to-indigo-500/0 opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 group-hover:from-blue-500/5 group-hover:to-indigo-500/10" />
       <div className="relative flex items-start justify-between gap-3">
         <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-500 text-white shadow-lg shadow-blue-500/30">
@@ -250,15 +278,20 @@ const ServiceCard = ({ service, onEdit, onDelete }) => {
         </div>
       </div>
 
-      <div className="relative mt-5">
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{service.title}</h3>
+      <div className="relative mt-5 flex-1">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{service.title}</h3>
+          <span className="inline-flex rounded-full border border-slate-200 bg-white/90 px-2 py-1 text-[11px] font-medium text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+            #{service.order}
+          </span>
+        </div>
         <span className="mt-2 inline-flex rounded-full border border-blue-200/70 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
           {practiceLabel(service.category)}
         </span>
-        <p className="mt-3 h-10 overflow-hidden text-sm leading-5 text-slate-500 dark:text-slate-400">{service.description}</p>
+        <p className="mt-3 min-h-[3.75rem] text-sm leading-5 text-slate-500 line-clamp-3 dark:text-slate-400">{service.description}</p>
       </div>
 
-      <div className="relative mt-5 flex translate-y-1 items-center gap-2 opacity-0 transition-all duration-200 ease-out group-hover:translate-y-0 group-hover:opacity-100">
+      <div className="relative mt-5 flex items-center gap-2 pt-1">
         <button
           type="button"
           onClick={() => onEdit(service)}
@@ -382,7 +415,18 @@ const ServiceListRow = ({
   );
 };
 
-const DrawerForm = ({ open, editingService, formData, isSaving, onChange, onClose, onSubmit }) => {
+const DrawerForm = ({
+  open,
+  editingService,
+  formData,
+  isSaving,
+  onChange,
+  onProcessChange,
+  onAddProcessStep,
+  onRemoveProcessStep,
+  onClose,
+  onSubmit,
+}) => {
   const Icon = ICON_MAP[formData.iconName] || Briefcase;
 
   return (
@@ -429,6 +473,18 @@ const DrawerForm = ({ open, editingService, formData, isSaving, onChange, onClos
             />
           </div>
 
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Service Slug</label>
+            <input
+              name="slug"
+              value={formData.slug}
+              onChange={onChange}
+              required
+              placeholder="Ex: corporate-lawyer"
+              className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 shadow-sm transition-all duration-200 ease-out placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-200/70 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-100"
+            />
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Practice Area</label>
@@ -459,7 +515,7 @@ const DrawerForm = ({ open, editingService, formData, isSaving, onChange, onClos
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Description</label>
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Short Description</label>
             <textarea
               name="shortDescription"
               value={formData.shortDescription}
@@ -467,6 +523,42 @@ const DrawerForm = ({ open, editingService, formData, isSaving, onChange, onClos
               required
               rows={5}
               placeholder="Concise summary for cards and lists"
+              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 shadow-sm transition-all duration-200 ease-out placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-200/70 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-200"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Overview</label>
+            <textarea
+              name="overview"
+              value={formData.overview}
+              onChange={onChange}
+              rows={4}
+              placeholder="Main overview section content shown on service page"
+              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 shadow-sm transition-all duration-200 ease-out placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-200/70 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-200"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Types of Cases (one per line)</label>
+            <textarea
+              name="typesOfCasesText"
+              value={formData.typesOfCasesText}
+              onChange={onChange}
+              rows={5}
+              placeholder="Regular Bail&#10;Anticipatory Bail&#10;Interim Bail"
+              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 shadow-sm transition-all duration-200 ease-out placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-200/70 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-200"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Key Points (one per line)</label>
+            <textarea
+              name="keyPointsText"
+              value={formData.keyPointsText}
+              onChange={onChange}
+              rows={5}
+              placeholder="Expert legal strategy&#10;Timely updates&#10;Transparent process"
               className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 shadow-sm transition-all duration-200 ease-out placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-200/70 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-200"
             />
           </div>
@@ -493,7 +585,7 @@ const DrawerForm = ({ open, editingService, formData, isSaving, onChange, onClos
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Details (Optional)</label>
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Long Description</label>
             <textarea
               name="longDescription"
               value={formData.longDescription}
@@ -502,6 +594,57 @@ const DrawerForm = ({ open, editingService, formData, isSaving, onChange, onClos
               placeholder="Optional long form details"
               className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 shadow-sm transition-all duration-200 ease-out placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-200/70 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-200"
             />
+          </div>
+
+          <div>
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Process Steps</label>
+              <button
+                type="button"
+                onClick={onAddProcessStep}
+                className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 transition-all duration-200 ease-out hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+              >
+                <Plus size={13} />
+                Add Step
+              </button>
+            </div>
+            <div className="space-y-3">
+              {(formData.process || []).map((step, index) => (
+                <div key={index} className="rounded-xl border border-slate-200 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-900/60">
+                  <div className="mb-2 grid gap-2 sm:grid-cols-[90px,1fr,auto]">
+                    <input
+                      type="number"
+                      min="1"
+                      value={step.step}
+                      onChange={(event) => onProcessChange(index, 'step', Number(event.target.value))}
+                      className="h-9 rounded-lg border border-slate-300 bg-white px-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-200/70 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-200"
+                    />
+                    <input
+                      type="text"
+                      value={step.title}
+                      onChange={(event) => onProcessChange(index, 'title', event.target.value)}
+                      placeholder="Step title"
+                      className="h-9 rounded-lg border border-slate-300 bg-white px-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-200/70 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-200"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => onRemoveProcessStep(index)}
+                      className="inline-flex h-9 items-center justify-center rounded-lg border border-red-200 bg-red-50 px-2 text-red-600 transition-all duration-200 ease-out hover:bg-red-100"
+                      aria-label="Remove step"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                  <textarea
+                    value={step.description}
+                    onChange={(event) => onProcessChange(index, 'description', event.target.value)}
+                    rows={3}
+                    placeholder="Step description"
+                    className="w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-200/70 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-200"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </form>
 
@@ -644,6 +787,35 @@ const ServiceManager = () => {
     }));
   };
 
+  const handleProcessChange = (index, field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      process: (prev.process || []).map((item, itemIndex) =>
+        itemIndex === index ? { ...item, [field]: value } : item
+      ),
+    }));
+  };
+
+  const addProcessStep = () => {
+    setFormData((prev) => ({
+      ...prev,
+      process: [
+        ...(prev.process || []),
+        { step: (prev.process?.length || 0) + 1, title: '', description: '' },
+      ],
+    }));
+  };
+
+  const removeProcessStep = (index) => {
+    setFormData((prev) => {
+      const next = (prev.process || []).filter((_, itemIndex) => itemIndex !== index);
+      return {
+        ...prev,
+        process: next.length > 0 ? next : [{ step: 1, title: '', description: '' }],
+      };
+    });
+  };
+
   const saveService = async (event) => {
     if (event?.preventDefault) {
       event.preventDefault();
@@ -655,14 +827,29 @@ const ServiceManager = () => {
       return;
     }
 
+    const slug = makeSlug(formData.slug || serviceName);
+    const longDescription = formData.longDescription.trim() || shortDescription;
+    const description = (formData.description || shortDescription).trim() || shortDescription;
+    const process = (formData.process || [])
+      .map((item, index) => ({
+        step: Number.isFinite(item?.step) ? item.step : index + 1,
+        title: String(item?.title || '').trim(),
+        description: String(item?.description || '').trim(),
+      }))
+      .filter((item) => item.title || item.description);
+
     const payload = {
       name: serviceName,
       title: serviceName,
-      slug: makeSlug(serviceName),
+      slug,
       category: formData.category,
       shortDescription,
-      longDescription: formData.longDescription.trim() || shortDescription,
-      description: shortDescription,
+      longDescription,
+      description,
+      overview: String(formData.overview || '').trim(),
+      typesOfCases: parseMultiline(formData.typesOfCasesText),
+      keyPoints: parseMultiline(formData.keyPointsText),
+      process,
       iconName: formData.iconName,
       order: Number.isFinite(formData.order) ? formData.order : 0,
     };
@@ -786,6 +973,15 @@ const ServiceManager = () => {
           onViewMode={setViewMode}
         />
 
+        <section className="mb-5 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-300">
+          <p className="rounded-full border border-white/20 bg-white/5 px-3 py-1.5">
+            Showing <span className="font-semibold text-white">{visibleServices.length}</span> service{visibleServices.length === 1 ? '' : 's'}
+          </p>
+          <p className="rounded-full border border-white/20 bg-white/5 px-3 py-1.5">
+            View mode: <span className="font-semibold text-white capitalize">{viewMode}</span>
+          </p>
+        </section>
+
         {loading ? (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, index) => (
@@ -839,6 +1035,9 @@ const ServiceManager = () => {
         formData={formData}
         isSaving={isSaving}
         onChange={handleFormChange}
+        onProcessChange={handleProcessChange}
+        onAddProcessStep={addProcessStep}
+        onRemoveProcessStep={removeProcessStep}
         onClose={closeDrawer}
         onSubmit={saveService}
       />

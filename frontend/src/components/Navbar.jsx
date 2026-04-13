@@ -29,7 +29,14 @@ const Navbar = () => {
       const response = await fetch(`${API_BASE_URL}/api/services`);
       const data = await response.json();
       if (data.success) {
-        setServices(data.data);
+        const sorted = [...(data.data || [])].sort((a, b) =>
+          String(a?.name || a?.title || '').localeCompare(
+            String(b?.name || b?.title || ''),
+            undefined,
+            { sensitivity: 'base' }
+          )
+        );
+        setServices(sorted);
       }
     } catch (error) {
       console.error('Error fetching services:', error);
@@ -160,22 +167,54 @@ const Navbar = () => {
                         : 'opacity-0 invisible -translate-y-2 pointer-events-none'
                     }`}
                   >
-                    <div className="bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden">
+                    <div
+                      className={`bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden ${
+                        link.dropdownType === 'services' ? 'max-h-[72vh]' : ''
+                      }`}
+                    >
                       {link.submenu.length > 0 ? (
-                        <div className={link.dropdownType === 'services' ? 'grid grid-cols-4 gap-1 p-3' : ''}>
-                          {link.submenu.map((sublink) => (
-                            <Link
-                              key={sublink.path}
-                              to={sublink.path}
-                              className={`block px-3 py-2.5 font-sans text-xs transition-colors rounded-md ${
-                                location.pathname === sublink.path
-                                  ? 'bg-gold/10 text-gold font-medium'
-                                  : 'text-gray-700 hover:bg-gray-100 hover:text-navy'
-                              }`}
+                        <div>
+                          {link.dropdownType === 'services' && (
+                            <div className="sticky top-0 z-10 border-b border-gray-100 bg-white/95 backdrop-blur px-3 py-2">
+                              <Link
+                                to="/services"
+                                className="block rounded-md px-3 py-2 text-sm font-semibold text-navy hover:bg-navy hover:text-white transition-colors"
+                              >
+                                View All Services ({link.submenu.length})
+                              </Link>
+                            </div>
+                          )}
+                          <div
+                            className={
+                              link.dropdownType === 'services'
+                                ? 'max-h-[56vh] overflow-y-auto services-sidebar-scroll p-3'
+                                : ''
+                            }
+                          >
+                            <div
+                              className={
+                                link.dropdownType === 'services'
+                                  ? 'grid grid-cols-1 lg:grid-cols-2 gap-1'
+                                  : ''
+                              }
                             >
-                              {sublink.name}
-                            </Link>
-                          ))}
+                              {link.submenu.map((sublink) => (
+                                <Link
+                                  key={sublink.path}
+                                  to={sublink.path}
+                                  className={`block px-3 py-2.5 font-sans transition-colors rounded-md ${
+                                    link.dropdownType === 'services' ? 'text-sm' : 'text-xs'
+                                  } ${
+                                    location.pathname === sublink.path
+                                      ? 'bg-gold/10 text-gold font-medium'
+                                      : 'text-gray-700 hover:bg-gray-100 hover:text-navy'
+                                  }`}
+                                >
+                                  {sublink.name}
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
                         </div>
                       ) : (
                         <div className="px-4 py-3 text-sm text-gray-500 font-sans">Loading services...</div>
@@ -257,7 +296,16 @@ const Navbar = () => {
                     </button>
                   </div>
                   {((link.dropdownType === 'about' && aboutDropdownOpen) || (link.dropdownType === 'services' && servicesDropdownOpen)) && (
-                    <div className={`pl-4 space-y-1 ${link.dropdownType === 'services' ? 'max-h-64 overflow-y-auto' : ''}`}>
+                    <div className={`pl-4 space-y-1 ${link.dropdownType === 'services' ? 'max-h-64 overflow-y-auto services-sidebar-scroll' : ''}`}>
+                      {link.dropdownType === 'services' && (
+                        <Link
+                          to="/services"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="block py-2 font-sans text-sm font-semibold text-gold hover:text-white"
+                        >
+                          View All Services ({link.submenu.length})
+                        </Link>
+                      )}
                       {link.submenu.length > 0 ? (
                         link.submenu.map((sublink) => (
                           <Link

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Users, Briefcase, MessageSquare, BookOpen, TrendingUp, Eye, Calendar, ArrowUpRight } from 'lucide-react';
+import { Users, Briefcase, MessageSquare, BookOpen, TrendingUp, Eye, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import API_BASE_URL from '../../config/api';
 
@@ -102,12 +102,6 @@ const AdminDashboard = () => {
     { title: 'Site Settings', description: 'Configure website settings', link: '/admin/settings', icon: TrendingUp, color: 'text-green-600' },
   ];
 
-  const recentActivity = [
-    { action: 'Blog post published', item: 'Understanding Corporate Law', time: '2 hours ago', icon: BookOpen },
-    { action: 'Team member added', item: 'Advocate Neha Kapoor', time: '1 day ago', icon: Users },
-    { action: 'Settings updated', item: 'Disclaimer text modified', time: '3 days ago', icon: TrendingUp },
-  ];
-
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
@@ -142,9 +136,9 @@ const AdminDashboard = () => {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {/* Quick Actions */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <h3 className="font-serif text-xl font-bold text-navy mb-6">Quick Actions</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {quickActions.map((action, index) => {
@@ -167,31 +161,6 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                 </Link>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <h3 className="font-serif text-xl font-bold text-navy mb-6">Recent Activity</h3>
-          <div className="space-y-4">
-            {recentActivity.map((activity, index) => {
-              const Icon = activity.icon;
-              return (
-                <div key={index} className="flex items-start space-x-3 pb-4 border-b border-gray-100 last:border-0 last:pb-0">
-                  <div className="flex-shrink-0 w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <Icon className="text-gray-600" size={16} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-sans text-sm text-gray-600">{activity.action}</p>
-                    <p className="font-sans text-sm font-medium text-navy truncate">{activity.item}</p>
-                    <div className="flex items-center space-x-1 mt-1">
-                      <Calendar size={12} className="text-gray-400" />
-                      <p className="font-sans text-xs text-gray-500">{activity.time}</p>
-                    </div>
-                  </div>
-                </div>
               );
             })}
           </div>

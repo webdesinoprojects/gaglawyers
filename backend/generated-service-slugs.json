@@ -1,0 +1,166 @@
+[
+  {
+    "service": "criminal lawyer",
+    "slug": "criminal-lawyer"
+  },
+  {
+    "service": "cheque bounce lawyer",
+    "slug": "cheque-bounce-lawyer"
+  },
+  {
+    "service": "family lawyer",
+    "slug": "family-lawyer"
+  },
+  {
+    "service": "civil lawyer",
+    "slug": "civil-lawyer"
+  },
+  {
+    "service": "mediation and arbitration lawyer",
+    "slug": "mediation-and-arbitration-lawyer"
+  },
+  {
+    "service": "corporate lawyer",
+    "slug": "corporate-lawyer"
+  },
+  {
+    "service": "child custody lawyer",
+    "slug": "child-custody-lawyer"
+  },
+  {
+    "service": "bail lawyer",
+    "slug": "bail-lawyer"
+  },
+  {
+    "service": "immigration lawyer",
+    "slug": "immigration-lawyer"
+  },
+  {
+    "service": "employment lawyer",
+    "slug": "employment-lawyer"
+  },
+  {
+    "service": "court marriage lawyer",
+    "slug": "court-marriage-lawyer"
+  },
+  {
+    "service": "labour lawyer",
+    "slug": "labour-lawyer"
+  },
+  {
+    "service": "human rights lawyer",
+    "slug": "human-rights-lawyer"
+  },
+  {
+    "service": "contract lawyer",
+    "slug": "contract-lawyer"
+  },
+  {
+    "service": "sports lawyer",
+    "slug": "sports-lawyer"
+  },
+  {
+    "service": "food and drug lawyer",
+    "slug": "food--drug-lawyer"
+  },
+  {
+    "service": "cat matters lawyer",
+    "slug": "cat-matters-lawyer"
+  },
+  {
+    "service": "dowry lawyer",
+    "slug": "dowry-lawyer"
+  },
+  {
+    "service": "media and broadcasting lawyer",
+    "slug": "media-and-broadcasting-lawyer"
+  },
+  {
+    "service": "environment lawyer",
+    "slug": "environment-lawyer"
+  },
+  {
+    "service": "military lawyer",
+    "slug": "military-lawyer"
+  },
+  {
+    "service": "sexual harassment lawyer",
+    "slug": "sexual-harassment-lawyer"
+  },
+  {
+    "service": "insolvency bankruptcy lawyer",
+    "slug": "insolvency-bankruptcy-lawyer"
+  },
+  {
+    "service": "divorce lawyer",
+    "slug": "divorce-lawyer"
+  },
+  {
+    "service": "consumer court lawyer",
+    "slug": "consumer-court-lawyer"
+  },
+  {
+    "service": "high court lawyer",
+    "slug": "high-court-lawyer"
+  },
+  {
+    "service": "supreme court lawyer",
+    "slug": "supreme-court-lawyer"
+  },
+  {
+    "service": "property lawyer",
+    "slug": "property-lawyer"
+  },
+  {
+    "service": "muslim lawyer",
+    "slug": "muslim-lawyer"
+  },
+  {
+    "service": "motor accident lawyer",
+    "slug": "motor-accident-lawyer"
+  },
+  {
+    "service": "medical negligence lawyer",
+    "slug": "medical-negligence-lawyer"
+  },
+  {
+    "service": "marriage registration lawyer",
+    "slug": "marriage-registration-lawyer"
+  },
+  {
+    "service": "will lawyer",
+    "slug": "will-lawyer"
+  },
+  {
+    "service": "landlord tenant lawyer",
+    "slug": "landlord-tenant-lawyer"
+  },
+  {
+    "service": "insurance lawyer",
+    "slug": "insurance-lawyer"
+  },
+  {
+    "service": "cyber crime lawyer",
+    "slug": "cyber-crime-lawyer"
+  },
+  {
+    "service": "armed force tribunal lawyer",
+    "slug": "armed-force-tribunal-lawyer"
+  },
+  {
+    "service": "right to information lawyer",
+    "slug": "right-to-information-lawyer"
+  },
+  {
+    "service": "firearms lawyer",
+    "slug": "firearms-lawyer"
+  },
+  {
+    "service": "writ petition lawyer",
+    "slug": "writ-petition-lawyer"
+  },
+  {
+    "service": "debt recovery drt lawyer",
+    "slug": "debt-recovery-lawyer-drt-lawyer"
+  }
+]

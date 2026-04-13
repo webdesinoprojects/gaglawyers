@@ -33,6 +33,7 @@ const AdminLayout = () => {
   const location = useLocation();
 
   const searchInputRef = useRef(null);
+  const searchRequestRef = useRef(0);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -71,19 +72,22 @@ const AdminLayout = () => {
   }, [searchQuery]);
 
   const performSearch = async (query) => {
+    const requestId = searchRequestRef.current + 1;
+    searchRequestRef.current = requestId;
     setIsSearching(true);
-    const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem('adminToken') || '';
+    const normalizedQuery = query.trim().toLowerCase();
     const results = [];
 
     try {
       const [servicesRes, teamRes, blogRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/services`, {
+        fetch(`${API_BASE_URL}/api/services?compact=1`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
         fetch(`${API_BASE_URL}/api/team`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch(`${API_BASE_URL}/api/blog`, {
+        fetch(`${API_BASE_URL}/api/blog?search=${encodeURIComponent(query)}&limit=10&page=1`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -92,14 +96,19 @@ const AdminLayout = () => {
       const teamData = await teamRes.json();
       const blogData = await blogRes.json();
 
-      const lowerQuery = query.toLowerCase();
+      if (requestId !== searchRequestRef.current) return;
 
-      if (servicesData.success && servicesData.data) {
-        servicesData.data
+      const services = Array.isArray(servicesData?.data) ? servicesData.data : [];
+      const teamMembers = Array.isArray(teamData?.data) ? teamData.data : [];
+      const blogPosts = Array.isArray(blogData?.data) ? blogData.data : [];
+
+      if (servicesData.success && services.length > 0) {
+        services
           .filter(item => 
-            item.name?.toLowerCase().includes(lowerQuery) ||
-            item.title?.toLowerCase().includes(lowerQuery) ||
-            item.shortDescription?.toLowerCase().includes(lowerQuery)
+            item.name?.toLowerCase().includes(normalizedQuery) ||
+            item.title?.toLowerCase().includes(normalizedQuery) ||
+            item.shortDescription?.toLowerCase().includes(normalizedQuery) ||
+            item.description?.toLowerCase().includes(normalizedQuery)
           )
           .slice(0, 5)
           .forEach(item => {
@@ -113,11 +122,14 @@ const AdminLayout = () => {
           });
       }
 
-      if (teamData.success && teamData.data) {
-        teamData.data
+      if (teamData.success && teamMembers.length > 0) {
+        teamMembers
           .filter(item => 
-            item.name?.toLowerCase().includes(lowerQuery) ||
-            item.position?.toLowerCase().includes(lowerQuery)
+            item.name?.toLowerCase().includes(normalizedQuery) ||
+            item.position?.toLowerCase().includes(normalizedQuery) ||
+            item.designation?.toLowerCase().includes(normalizedQuery) ||
+            item.specialization?.toLowerCase().includes(normalizedQuery) ||
+            item.bio?.toLowerCase().includes(normalizedQuery)
           )
           .slice(0, 5)
           .forEach(item => {
@@ -131,30 +143,42 @@ const AdminLayout = () => {
           });
       }
 
-      if (blogData.success && blogData.data) {
-        blogData.data
-          .filter(item => 
-            item.title?.toLowerCase().includes(lowerQuery) ||
-            item.excerpt?.toLowerCase().includes(lowerQuery)
-          )
+      if (blogData.success && blogPosts.length > 0) {
+        blogPosts
           .slice(0, 5)
           .forEach(item => {
             results.push({
               type: 'Blog Post',
               icon: BookOpen,
               title: item.title,
-              subtitle: item.author,
+              subtitle: item.author?.name || item.category || '',
               path: '/admin/blog',
             });
           });
       }
 
-      setSearchResults(results);
+      const deduped = [];
+      const seen = new Set();
+      results.forEach((item) => {
+        const key = `${item.type}|${item.title}|${item.path}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          deduped.push(item);
+        }
+      });
+
+      setSearchResults(deduped.slice(0, 12));
       setShowSearchResults(true);
     } catch (error) {
       console.error('Search error:', error);
+      if (requestId === searchRequestRef.current) {
+        setSearchResults([]);
+        setShowSearchResults(true);
+      }
     } finally {
-      setIsSearching(false);
+      if (requestId === searchRequestRef.current) {
+        setIsSearching(false);
+      }
     }
   };
 

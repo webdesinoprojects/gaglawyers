@@ -11,7 +11,7 @@ export const servicesData = {
     hero: {
       title: 'Best Bail Lawyers in Delhi',
       subtitle: 'Expert legal representation for bail, anticipatory bail, and parole cases across Delhi High Court and Supreme Court.',
-      cta: 'Get Free Consultation'
+      cta: 'Schedule Consultation'
     },
 
     about: {
@@ -170,7 +170,7 @@ export const servicesData = {
     hero: {
       title: 'Best Cheque Bounce Lawyers in Delhi',
       subtitle: 'Swift legal action for dishonoured cheques. We help you recover your money and hold defaulters accountable.',
-      cta: 'Get Free Consultation'
+      cta: 'Schedule Consultation'
     },
 
     about: {
@@ -285,7 +285,7 @@ export const servicesData = {
     hero: {
       title: 'Best Civil Lawyers in Delhi',
       subtitle: 'Protecting your rights in property disputes, contract breaches, torts, family matters and all civil litigation.',
-      cta: 'Get Free Consultation'
+      cta: 'Schedule Consultation'
     },
 
     about: {
@@ -435,7 +435,7 @@ export const servicesData = {
     hero: {
       title: 'Top Contract & Commercial Dispute Lawyers in Delhi',
       subtitle: 'Expert legal counsel for breach of contract, warranty disputes, and all commercial agreement matters.',
-      cta: 'Get Free Consultation'
+      cta: 'Schedule Consultation'
     },
 
     about: {
@@ -589,7 +589,7 @@ export const servicesData = {
     hero: {
       title: 'Best MACT Lawyers in Delhi | Motor Accident Compensation Experts',
       subtitle: 'Expert legal assistance for motor accident claims before the Motor Accident Claims Tribunal (MACT). We fight for the compensation you deserve.',
-      cta: 'Get Free Consultation'
+      cta: 'Schedule Consultation'
     },
 
     about: {
@@ -768,7 +768,7 @@ export const servicesData = {
     hero: {
       title: 'Best Property Lawyers in Delhi | Real Estate & Property Dispute Experts',
       subtitle: 'Expert legal advice for property disputes, buying and selling property, title verification, and real estate matters across Delhi.',
-      cta: 'Get Free Consultation'
+      cta: 'Schedule Consultation'
     },
 
     about: {
@@ -984,7 +984,7 @@ export const servicesData = {
     hero: {
       title: 'Best Sexual Harassment & Section 498A Lawyers in Delhi',
       subtitle: 'Expert legal representation for sexual harassment victims, domestic cruelty cases under Section 498A IPC, and POSH Act complaints.',
-      cta: 'Get Free Consultation'
+      cta: 'Schedule Consultation'
     },
 
     about: {
@@ -1172,7 +1172,7 @@ export const servicesData = {
     hero: {
       title: 'Best Supreme Court Lawyers in Delhi | Advocate on Record (AOR) Experts',
       subtitle: 'Experienced Supreme Court advocates for constitutional matters, criminal appeals, civil disputes, and all Supreme Court proceedings.',
-      cta: 'Get Free Consultation',
+      cta: 'Schedule Consultation',
       badge: 'Advocate on Record (AOR) Certified'
     },
 
@@ -1326,7 +1326,146 @@ export const servicesData = {
   },
 
   // ============================================================
-  // 25. WRIT PETITION / PIL LAWYER
+  // 25. ARMED FORCE TRIBUNAL LAWYER
+  // ============================================================
+  'armed-force-tribunal-lawyer-in-delhi': {
+    title: 'Armed Force Tribunal Lawyer in Delhi - GAG Lawyers',
+    subtitle: 'Expert legal representation in Armed Forces Tribunal (AFT) service disputes, pension claims, court-martial appeals, and related military matters.',
+    metaTitle: 'Armed Force Tribunal Lawyer in Delhi - GAG Lawyers',
+    metaDescription: 'Armed Force Tribunal Lawyer in Delhi - GAG Lawyers. We offer expert legal guidance and personalized attention to meet your specific legal needs in Delhi. Our dedicated team of experienced attorneys is committed to delivering exceptional and effective legal services to individuals, businesses, and corporations',
+    metaKeywords: 'Aft lawyer in Delhi, Advocate for aft matters in Delhi, Best aft Lawyers near me, aft lawyer fees in Delhi, Armed Force Tribunal Lawyer near me, Best Armed Force Tribunal Lawyers in Delhi, Best Armed Force Tribunal Lawyers near me, Top Armed Force Tribunal Lawyer in India, Best Advocates for Armed Force Tribunal Cases in Delhi, Best Lawyers for Armed Force Tribunal Cases in Delhi, Lawyer for Armed Force Tribunal Cases in Delhi, Lawyer for Armed Force Tribunal Matters in Delhi, Lawyer for Armed Force Tribunal Disputes in Delhi, Armed Force Tribunal Lawyer in High Court, Top Armed Force Tribunal Lawyer in Supreme Court',
+
+    hero: {
+      title: 'Armed Force Tribunal Lawyer in Delhi',
+      subtitle: 'Trusted advocacy for service disputes, wrongful termination, pension, promotion, and court-martial appeals before the Armed Forces Tribunal.',
+      cta: 'Schedule Consultation'
+    },
+
+    about: {
+      title: 'Armed Forces Tribunal Matters (AFT Matters)',
+      content: 'The Armed Forces Tribunal (AFT) is a specialised judicial body established under the Armed Forces Tribunal Act, 2007 to adjudicate disputes and complaints related to the armed forces. It handles service law matters such as recruitment, promotion, pay and allowances, termination or discharge from service, and appeals arising from court-martial proceedings. The tribunal can grant relief including reinstatement and compensation in appropriate cases.',
+      sections: [
+        {
+          heading: 'Why AFT Representation Matters',
+          points: [
+            'AFT practice requires focused knowledge of military service regulations and tribunal procedure',
+            'Proper pleadings and evidence planning can materially improve case outcomes',
+            'Serving and retired personnel often need urgent strategic relief in service and pension disputes',
+            'Experienced counsel helps protect rights at tribunal stage and in higher court appeals'
+          ]
+        }
+      ]
+    },
+
+    typesOfCases: {
+      title: 'Functions of Armed Forces Tribunal',
+      cases: [
+        {
+          name: 'Service Condition Disputes',
+          description: 'Recruitment, posting, transfer, promotion, seniority, pay fixation, allowances, and discharge-related disputes.'
+        },
+        {
+          name: 'Court-Martial Appeals',
+          description: 'Challenges to findings and punishment arising from court-martial proceedings before competent forums.'
+        },
+        {
+          name: 'Pension and Retirement Matters',
+          description: 'Pension revision, disability benefits, arrears, retirement dues, and denial of service-related monetary benefits.'
+        },
+        {
+          name: 'Wrongful Termination and Reinstatement',
+          description: 'Matters involving illegal dismissal, premature retirement, and claims for reinstatement or compensation.'
+        }
+      ]
+    },
+
+    rightsObligations: {
+      title: 'Rights & Remedies Available Under AFT Act',
+      rights: [
+        'Right to seek adjudication of service-related grievances before AFT',
+        'Right to claim compensation and appropriate relief for unlawful service actions',
+        'Right to challenge adverse tribunal orders before higher judicial forums, as permitted by law'
+      ],
+      obligations: [
+        'File complete and correctly sequenced documents with proper attribution and proofs',
+        'Observe limitation periods and procedural requirements under the applicable law',
+        'Present clear factual and legal grounds supported by relevant service records'
+      ]
+    },
+
+    filingProcedure: {
+      title: 'File Appeal With the Armed Forces Tribunal',
+      steps: [
+        'Prepare a detailed petition with all supporting records, affidavits, and legal documentation.',
+        'Arrange and file documents in proper sequence with signed and dated acknowledgements.',
+        'If relief is denied, file appropriate appellate or review motions within the prescribed time.',
+        'Pursue reconsideration and higher forum remedies where legally maintainable.',
+        'Ensure every filing is strategy-led, complete, and aligned with tribunal procedure.'
+      ]
+    },
+
+    documentsRequired: {
+      title: 'Document Required For Armed Forces Tribunal',
+      documents: [
+        'Memorandum/petition with clear grounds and prayer',
+        'Affidavit in support of petition',
+        'Service records, orders, communication, and relevant military documentation',
+        'Identity proof and authorization documents',
+        'Annexures, evidence sets, and certified copies as required',
+        'Applicable filing fee and procedural forms prescribed by AFT'
+      ]
+    },
+
+    roleOfLawyers: {
+      title: 'Role of Lawyer in Armed Forces Tribunal',
+      description: 'A lawyer in AFT matters assists in case strategy, drafting petitions, filing and procedural compliance, evidence presentation, and oral representation. Counsel also helps clients understand tribunal rules, protects procedural rights, and handles appeals before the High Court or Supreme Court where required.'
+    },
+
+    howWeHelp: {
+      title: 'How Grover & Grover, Advocates Help in AFT Cases',
+      description: 'Our team supports serving and retired personnel with end-to-end legal assistance: claim evaluation, document preparation, tribunal representation, compensation claims, and appellate strategy. We focus on practical, time-bound, and result-oriented advocacy in Armed Forces Tribunal matters.'
+    },
+
+    popularCases: {
+      title: 'Popular Cases of Supreme Court and High Court Related to AFT',
+      cases: [
+        'Service condition and pension benefit disputes involving armed forces personnel',
+        'Wrongful dismissal/retirement matters and reinstatement-linked claims',
+        'Court-martial appeal matters reviewed by constitutional courts',
+        'Jurisdictional and procedural challenges arising from tribunal orders'
+      ]
+    },
+
+    faqs: [
+      {
+        question: 'What is the Armed Forces Tribunal (AFT)?',
+        answer: 'The Armed Forces Tribunal is a quasi-judicial body established under the Armed Forces Tribunal Act, 2007 to decide service matters and related grievances of armed forces personnel.'
+      },
+      {
+        question: 'Who can approach the Armed Forces Tribunal?',
+        answer: 'Serving and retired personnel from the Army, Navy, and Air Force, including officers and other ranks, may approach AFT for service-related grievances.'
+      },
+      {
+        question: 'What kinds of cases are heard by AFT?',
+        answer: 'AFT commonly hears matters related to promotions, postings, transfers, pay, pensions, retirement benefits, and disciplinary proceedings including court-martial-related disputes.'
+      },
+      {
+        question: 'What is the time limit to file a case in AFT?',
+        answer: 'A common filing period is 3 months from the cause of action, though delay may be condoned where sufficient cause is shown, subject to applicable law.'
+      },
+      {
+        question: 'Can a lawyer represent me before AFT?',
+        answer: 'Yes. Legal representation is permitted and is generally advisable because AFT litigation involves technical service and procedural issues.'
+      },
+      {
+        question: 'Can I appeal an AFT decision?',
+        answer: 'Yes. Depending on the nature of the order and legal grounds, an AFT decision can be challenged before higher courts in accordance with law.'
+      }
+    ]
+  },
+
+  // ============================================================
+  // 26. WRIT PETITION / PIL LAWYER
   // ============================================================
   'writ-petition-lawyer-in-delhi': {
     title: 'Best Writ Petition & PIL Lawyers in Delhi',
@@ -1337,7 +1476,7 @@ export const servicesData = {
     hero: {
       title: 'Best Writ Petition & PIL Lawyers in Delhi | Constitutional Rights Experts',
       subtitle: 'Expert legal representation for writ petitions and Public Interest Litigation (PIL) to enforce your fundamental rights in High Court and Supreme Court.',
-      cta: 'Get Free Consultation'
+      cta: 'Schedule Consultation'
     },
 
     about: {
@@ -1548,7 +1687,7 @@ export const servicesData = {
   }
 
   // ADD MORE SERVICES HERE as needed
-  // Total services now: 8/25
+  // Total services now: 9/25
 };
 
 // Helper function to get service data by slug
@@ -1560,3 +1699,4 @@ export const getServiceBySlug = (slug) => {
 export const getAllServiceSlugs = () => {
   return Object.keys(servicesData);
 };
+

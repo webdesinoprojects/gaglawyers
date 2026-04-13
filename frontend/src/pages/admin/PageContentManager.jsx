@@ -695,7 +695,7 @@ const PageContentManager = () => {
                   }
                   className="w-full px-3 py-2 border rounded-sm font-sans text-sm"
                 />
-                <div className="grid md:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <input
                     type="text"
                     placeholder="Heading (white)"
@@ -736,7 +736,7 @@ const PageContentManager = () => {
                   rows={2}
                   className="w-full px-3 py-2 border rounded-sm font-sans text-sm"
                 />
-                <div className="grid md:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <input
                     type="text"
                     placeholder="Primary button text"
@@ -803,7 +803,7 @@ const PageContentManager = () => {
           </div>
 
           <h4 className="font-serif text-lg font-semibold text-navy mt-8 mb-3">Carousel trust strip (3 stats over image)</h4>
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[0, 1, 2].map((i) => (
               <div key={i} className="space-y-2 border border-gray-100 p-3 rounded-sm">
                 <label className="text-xs font-sans text-gray-600">Stat {i + 1} value</label>
@@ -839,7 +839,7 @@ const PageContentManager = () => {
 
         <div className="bg-white rounded-sm shadow-sm p-6">
           <h3 className="font-serif text-xl font-semibold text-navy mb-4">Consultation form (in hero)</h3>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block font-sans text-sm font-medium text-gray-700 mb-1">Form title</label>
               <input
@@ -860,7 +860,7 @@ const PageContentManager = () => {
             </div>
           </div>
           <p className="font-sans text-xs text-gray-500 mt-3 mb-2">Placeholders</p>
-          <div className="grid md:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {['name', 'email', 'phone', 'service', 'description'].map((k) => (
               <input
                 key={k}
@@ -872,7 +872,7 @@ const PageContentManager = () => {
               />
             ))}
           </div>
-          <div className="grid md:grid-cols-2 gap-4 mt-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
             <input
               type="text"
               placeholder="Submit button label"
@@ -1026,7 +1026,7 @@ const PageContentManager = () => {
           />
           {howSteps.map((step, idx) => (
             <div key={idx} className="border border-gray-100 p-3 rounded-sm mb-3 space-y-2">
-              <div className="grid md:grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <input
                   type="text"
                   value={step.number || ''}
@@ -1329,7 +1329,7 @@ const PageContentManager = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
+      <div className="flex items-center justify-center py-12 md:py-20">
         <div className="animate-spin w-12 h-12 border-4 border-navy border-t-transparent rounded-full"></div>
       </div>
     );

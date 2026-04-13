@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Paste legacy sitemap <url><loc>...</loc></url> entries here, then run:
+       npm run import-legacy-blogs:dry
+       npm run import-legacy-blogs:apply
+  -->
+</urlset>
+

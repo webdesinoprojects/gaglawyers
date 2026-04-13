@@ -23,6 +23,11 @@
     @apply font-sans text-gray-900 antialiased;
     margin: 0;
   }
+
+  html,
+  body {
+    overflow-x: hidden;
+  }
 }
 
 @layer utilities {
@@ -105,5 +110,28 @@
 
   .services-sidebar-scroll::-webkit-scrollbar-thumb:hover {
     background: rgba(201, 168, 76, 0.75);
+  }
+
+  .disclaimer-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f8fafc;
+  }
+
+  .disclaimer-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .disclaimer-scroll::-webkit-scrollbar-track {
+    background: #f8fafc;
+    border-radius: 9999px;
+  }
+
+  .disclaimer-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+  }
+
+  .disclaimer-scroll::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
   }
 }

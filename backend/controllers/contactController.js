@@ -41,9 +41,14 @@ const createContactInquiry = async (req, res) => {
           },
         });
 
+        const enquiryRecipients = [
+          'contact@gaglawyers.com',
+          'advocaterahulgrover@gmail.com',
+        ];
+
         await transporter.sendMail({
           from: process.env.EMAIL_FROM,
-          to: process.env.EMAIL_USER,
+          to: enquiryRecipients.join(','),
           subject: `New Contact Inquiry - ${serviceOfInterest}`,
           html: `
             <h2>New Contact Form Submission</h2>

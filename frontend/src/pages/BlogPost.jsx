@@ -79,7 +79,9 @@ const BlogPost = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-grey-light">
         <div className="text-center">
-          <h2 className="font-serif text-4xl font-bold text-navy mb-4">Article Not Found</h2>
+          <h2 className="mb-4 max-w-[90vw] font-serif text-2xl font-bold leading-snug text-navy md:text-4xl md:leading-tight">
+            Article Not Found
+          </h2>
           <p className="font-sans text-gray-600 mb-6">The article you're looking for doesn't exist.</p>
           <Link 
             to="/blog" 

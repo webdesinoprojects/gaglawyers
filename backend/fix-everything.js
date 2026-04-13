@@ -1,4 +1,4 @@
-require('dotenv').config();
+﻿require('dotenv').config();
 const mongoose = require('mongoose');
 const LocationPage = require('./models/LocationPage');
 const Service = require('./models/Service');
@@ -7,9 +7,9 @@ const { generateSlug, buildLocationPageSlug } = require('./utils/slugify');
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log('✅ MongoDB connected\n');
+    console.log('âœ… MongoDB connected\n');
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
+    console.error('âŒ MongoDB connection error:', error);
     process.exit(1);
   }
 };
@@ -17,7 +17,7 @@ const connectDB = async () => {
 // EXACTLY 25 services - no more, no less
 const EXACT_25_SERVICES = [
   "Armed Forces Tribunal (AFT) Cases",
-  "Bail & Anticipatory Bail Cases",
+  "Bail Lawyer",
   "CAT (Central Administrative Tribunal) Matters",
   "Cheque Bounce Cases",
   "Civil Law & Civil Disputes",
@@ -45,19 +45,19 @@ const EXACT_25_SERVICES = [
 
 const fixEverything = async () => {
   try {
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🔧 FIX EVERYTHING - Clean Database & Regenerate');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
+    console.log('ðŸ”§ FIX EVERYTHING - Clean Database & Regenerate');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
 
     await connectDB();
 
     // STEP 1: Delete ALL location pages
-    console.log('🗑️  Step 1: Deleting ALL location pages...');
+    console.log('ðŸ—‘ï¸  Step 1: Deleting ALL location pages...');
     const deletedPages = await LocationPage.deleteMany({});
-    console.log(`   ✅ Deleted ${deletedPages.deletedCount} pages\n`);
+    console.log(`   âœ… Deleted ${deletedPages.deletedCount} pages\n`);
 
     // STEP 2: Clean up services - keep ONLY the 25 we want
-    console.log('🧹 Step 2: Cleaning services (keeping only 25)...');
+    console.log('ðŸ§¹ Step 2: Cleaning services (keeping only 25)...');
     const allServices = await Service.find({});
     console.log(`   Found ${allServices.length} services in database`);
     
@@ -69,15 +69,15 @@ const fixEverything = async () => {
       const serviceName = service.name || service.title;
       if (!servicesToKeep.has(serviceName)) {
         await Service.deleteOne({ _id: service._id });
-        console.log(`   ❌ Deleted: ${serviceName}`);
+        console.log(`   âŒ Deleted: ${serviceName}`);
         deletedServices++;
       }
     }
     
-    console.log(`   ✅ Deleted ${deletedServices} extra services\n`);
+    console.log(`   âœ… Deleted ${deletedServices} extra services\n`);
 
     // STEP 3: Ensure all 25 services exist
-    console.log('📝 Step 3: Ensuring all 25 services exist...');
+    console.log('ðŸ“ Step 3: Ensuring all 25 services exist...');
     const serviceMap = new Map();
     
     for (const serviceName of EXACT_25_SERVICES) {
@@ -94,26 +94,26 @@ const fixEverything = async () => {
           description: `Professional ${serviceName.toLowerCase()} services by GAG Lawyers.`,
           iconName: 'Scale'
         });
-        console.log(`   ✅ Created: ${serviceName}`);
+        console.log(`   âœ… Created: ${serviceName}`);
       } else {
-        console.log(`   ✓ Exists: ${serviceName}`);
+        console.log(`   âœ“ Exists: ${serviceName}`);
       }
       
       serviceMap.set(serviceName, service);
     }
     
     const finalServiceCount = await Service.countDocuments();
-    console.log(`\n   📊 Final service count: ${finalServiceCount}`);
+    console.log(`\n   ðŸ“Š Final service count: ${finalServiceCount}`);
     
     if (finalServiceCount !== 25) {
-      console.log(`   ⚠️  WARNING: Expected 25 services, got ${finalServiceCount}!`);
+      console.log(`   âš ï¸  WARNING: Expected 25 services, got ${finalServiceCount}!`);
       process.exit(1);
     }
     
-    console.log(`   ✅ Perfect! Exactly 25 services\n`);
+    console.log(`   âœ… Perfect! Exactly 25 services\n`);
 
     // STEP 4: Load and clean locations
-    console.log('📍 Step 4: Loading locations...');
+    console.log('ðŸ“ Step 4: Loading locations...');
     const { locations } = require('./seed-1702-locations');
     const uniqueLocations = [...new Set(locations)];
     
@@ -122,9 +122,9 @@ const fixEverything = async () => {
     console.log(`   Duplicates removed: ${locations.length - uniqueLocations.length}\n`);
 
     // STEP 5: Generate ALL location pages
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🔨 Step 5: Generating location pages...');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
+    console.log('ðŸ”¨ Step 5: Generating location pages...');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
     console.log(`   Services: ${EXACT_25_SERVICES.length}`);
     console.log(`   Locations: ${uniqueLocations.length}`);
     console.log(`   Total to generate: ${EXACT_25_SERVICES.length * uniqueLocations.length}\n`);
@@ -179,7 +179,7 @@ const fixEverything = async () => {
         if (locationPages.length >= BATCH_SIZE) {
           await LocationPage.insertMany(locationPages);
           totalCreated += locationPages.length;
-          process.stdout.write(`\r   ✅ Progress: ${totalCreated}/${EXACT_25_SERVICES.length * uniqueLocations.length} pages`);
+          process.stdout.write(`\r   âœ… Progress: ${totalCreated}/${EXACT_25_SERVICES.length * uniqueLocations.length} pages`);
           locationPages.length = 0;
         }
       }
@@ -191,24 +191,24 @@ const fixEverything = async () => {
       totalCreated += locationPages.length;
     }
 
-    console.log('\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('✅ COMPLETE!');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('\n\nâ”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
+    console.log('âœ… COMPLETE!');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
 
     const finalPageCount = await LocationPage.countDocuments();
     const finalServices = await Service.countDocuments();
     const uniqueCities = await LocationPage.distinct('city');
 
-    console.log('📊 FINAL SUMMARY:');
+    console.log('ðŸ“Š FINAL SUMMARY:');
     console.log(`   Services in DB: ${finalServices}`);
     console.log(`   Unique locations: ${uniqueCities.length}`);
     console.log(`   Total pages: ${finalPageCount}`);
-    console.log(`   Expected: ${finalServices} × ${uniqueCities.length} = ${finalServices * uniqueCities.length}`);
+    console.log(`   Expected: ${finalServices} Ã— ${uniqueCities.length} = ${finalServices * uniqueCities.length}`);
     
     if (finalPageCount === finalServices * uniqueCities.length && finalServices === 25) {
-      console.log('\n   ✅ PERFECT! Everything is correct!\n');
+      console.log('\n   âœ… PERFECT! Everything is correct!\n');
     } else {
-      console.log('\n   ⚠️  Something is wrong:\n');
+      console.log('\n   âš ï¸  Something is wrong:\n');
       if (finalServices !== 25) {
         console.log(`   - Services: Expected 25, got ${finalServices}`);
       }
@@ -217,13 +217,15 @@ const fixEverything = async () => {
       }
     }
 
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
 
     process.exit(0);
   } catch (error) {
-    console.error('\n❌ Error:', error);
+    console.error('\nâŒ Error:', error);
     process.exit(1);
   }
 };
 
 fixEverything();
+
+

@@ -676,7 +676,7 @@ const LocationManager = () => {
             <div className="p-8 overflow-y-auto max-h-[calc(90vh-180px)]">
               <div className="space-y-6">
                 {/* Basic Information */}
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
                     <label className="block font-sans text-sm font-semibold text-gray-800 mb-3">
                       Service <span className="text-red-500">*</span>
@@ -796,7 +796,7 @@ const LocationManager = () => {
                                     className="w-full h-48 object-cover"
                                   />
                                 </div>
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                                   <input
                                     type="text"
                                     value={image.alt}
@@ -999,7 +999,7 @@ const LocationManager = () => {
             <div className="p-8 overflow-y-auto max-h-[calc(90vh-180px)]">
               <div className="space-y-6">
                 {/* Basic Information */}
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
                     <label className="block font-sans text-sm font-semibold text-gray-800 mb-3">
                       Service <span className="text-red-500">*</span>
@@ -1118,7 +1118,7 @@ const LocationManager = () => {
                                     className="w-full h-48 object-cover"
                                   />
                                 </div>
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                                   <input
                                     type="text"
                                     value={image.alt}

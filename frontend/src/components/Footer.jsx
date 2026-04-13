@@ -53,7 +53,7 @@ const normalizeCity = (value = '') => value.toString().trim().toLowerCase();
 const FOOTER_LOCATION_LIMIT = 200;
 const FOOTER_FETCH_LIMIT = 1000;
 /** Bump when API slug shape changes (e.g. `*-lawyer-in-*`) so clients refetch. */
-const FOOTER_LOCATIONS_CACHE_KEY = 'gag-footer-locations-v4';
+const FOOTER_LOCATIONS_CACHE_KEY = 'gag-footer-locations-v5';
 let footerLocationsCache = null;
 
 const isStaleFooterSlug = (slug) =>
@@ -102,7 +102,13 @@ const Footer = () => {
         const res = await fetch(`${API_BASE_URL}/api/services`);
         const data = await res.json();
         if (data.success && Array.isArray(data.data) && !cancelled) {
-          setPracticeServices(data.data.slice(0, 10));
+          const sorted = [...data.data].sort((a, b) => {
+            const orderA = Number.isFinite(a?.order) ? a.order : Number.MAX_SAFE_INTEGER;
+            const orderB = Number.isFinite(b?.order) ? b.order : Number.MAX_SAFE_INTEGER;
+            if (orderA !== orderB) return orderA - orderB;
+            return String(a?.name || a?.title || '').localeCompare(String(b?.name || b?.title || ''));
+          });
+          setPracticeServices(sorted.slice(0, 10));
         }
       } catch {
         /* optional */
@@ -418,7 +424,7 @@ const Footer = () => {
                   Browse Our Service Locations
                 </h4>
                 <p className="font-sans text-sm text-gray-400 mt-2">
-                  200 live location pages, arranged to stay useful and pleasantly scrollable.
+                  Explore our legal services across cities and regions.
                 </p>
               </div>
               <div className="rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.03] p-4 md:p-5 shadow-[0_24px_60px_rgba(0,0,0,0.18)]">

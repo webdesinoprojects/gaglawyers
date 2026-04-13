@@ -106,56 +106,86 @@ const Home = () => {
   }, [location.hash, loading]);
 
   const fetchDynamicContent = async () => {
-    try {
-      const [servicesRes, reviewsRes, pageRes, blogRes, teamRes, awardsRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/services`),
-        fetch(`${API_BASE_URL}/api/reviews?featured=true`),
-        fetch(`${API_BASE_URL}/api/pages/home`),
-        fetch(`${API_BASE_URL}/api/blog?limit=6`),
-        fetch(`${API_BASE_URL}/api/team?limit=20`),
-        fetch(`${API_BASE_URL}/api/awards`),
-      ]);
+    const parseJson = async (url) => {
+      const res = await fetch(url);
+      return res.json();
+    };
 
-      const servicesData = await servicesRes.json();
-      const reviewsData = await reviewsRes.json();
-      const pageData = await pageRes.json();
-      const blogData = await blogRes.json();
-      const teamData = await teamRes.json();
-      const awardsData = await awardsRes.json();
+    const servicesPromise = parseJson(`${API_BASE_URL}/api/services?compact=1&limit=8`)
+      .then((servicesData) => {
+        if (servicesData.success && servicesData.data.length > 0) {
+          setServices(servicesData.data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching services:', error);
+      });
 
-      if (servicesData.success && servicesData.data.length > 0) {
-        setServices(servicesData.data);
-      }
+    const reviewsPromise = parseJson(`${API_BASE_URL}/api/reviews?featured=true`)
+      .then((reviewsData) => {
+        if (reviewsData.success && reviewsData.data.length > 0) {
+          setReviews(reviewsData.data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching reviews:', error);
+      });
 
-      if (reviewsData.success && reviewsData.data.length > 0) {
-        setReviews(reviewsData.data);
-      }
+    const pagePromise = parseJson(`${API_BASE_URL}/api/pages/home`)
+      .then((pageData) => {
+        if (pageData.success) {
+          setPageContent(pageData.data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching home page content:', error);
+      });
 
-      if (pageData.success) {
-        setPageContent(pageData.data);
-      }
+    const blogPromise = parseJson(`${API_BASE_URL}/api/blog?limit=6`)
+      .then((blogData) => {
+        if (blogData.success && blogData.data.length > 0) {
+          setBlogPosts(blogData.data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching blog posts:', error);
+      });
 
-      if (blogData.success && blogData.data.length > 0) {
-        setBlogPosts(blogData.data);
-      }
+    const teamPromise = parseJson(`${API_BASE_URL}/api/team?limit=20`)
+      .then((teamData) => {
+        if (teamData.success && teamData.data.length > 0) {
+          setTeamMembers(teamData.data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching team members:', error);
+      });
 
-      if (teamData.success && teamData.data.length > 0) {
-        setTeamMembers(teamData.data);
-      }
+    const awardsPromise = parseJson(`${API_BASE_URL}/api/awards`)
+      .then((awardsData) => {
+        if (awardsData.success && Array.isArray(awardsData.data)) {
+          const pub = awardsData.data.filter((a) => a.isPublished !== false);
+          const sorted = [...pub].sort((a, b) => {
+            if (b.year !== a.year) return b.year - a.year;
+            return (a.order || 0) - (b.order || 0);
+          });
+          setAwards(sorted.slice(0, 16));
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching awards:', error);
+      });
 
-      if (awardsData.success && Array.isArray(awardsData.data)) {
-        const pub = awardsData.data.filter((a) => a.isPublished !== false);
-        const sorted = [...pub].sort((a, b) => {
-          if (b.year !== a.year) return b.year - a.year;
-          return (a.order || 0) - (b.order || 0);
-        });
-            setAwards(sorted.slice(0, 16));
-      }
-    } catch (error) {
-      console.error('Error fetching dynamic content:', error);
-    } finally {
-      setLoading(false);
-    }
+    await Promise.allSettled([
+      servicesPromise,
+      reviewsPromise,
+      pagePromise,
+      blogPromise,
+      teamPromise,
+      awardsPromise,
+    ]);
+
+    setLoading(false);
   };
 
   const scroll = (direction) => {
@@ -373,7 +403,7 @@ const Home = () => {
   const bookAppointmentForm = (formId = 'book-appointment') => (
     <div
       id={formId}
-      className="scroll-mt-[var(--site-header-height)] rounded-2xl shadow-2xl border border-white/25 bg-white/95 backdrop-blur-md max-h-[min(75vh,640px)] overflow-y-auto overscroll-contain"
+      className="scroll-mt-[var(--site-header-height)] rounded-2xl shadow-2xl border border-white/25 bg-white/95 backdrop-blur-md lg:max-h-[min(75vh,640px)] lg:overflow-y-auto lg:overscroll-contain"
     >
       <div className="p-6 lg:p-7">
         <div className="text-center mb-6">
@@ -551,18 +581,18 @@ const Home = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
               <div className="lg:col-span-7 space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  {services.map((service, index) => (
+                  {services.slice(0, 8).map((service, index) => (
                     <Link
                       key={service._id || index}
                       to={`/services/${service.slug}`}
-                      className="group bg-[#112240] rounded-xl border border-gold/30 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-gold/10 hover:border-gold/60 flex flex-col h-full"
+                      className="group bg-[#112240] rounded-xl border border-gold/30 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-gold/10 hover:border-gold/60 flex flex-col h-full min-h-[18rem]"
                     >
                       <ServiceCard
                         title={service.name || service.title}
                         description={service.shortDescription || service.description}
                         iconName={service.iconName}
                       />
-                      <span className="mt-4 inline-flex items-center gap-1.5 font-sans text-sm font-semibold text-gold group-hover:gap-2 transition-all">
+                      <span className="mt-auto pt-4 inline-flex items-center gap-1.5 font-sans text-sm font-semibold text-gold group-hover:gap-2 transition-all">
                         Learn more
                         <ArrowRight size={16} />
                       </span>
@@ -929,7 +959,7 @@ const Home = () => {
             <h2 className="font-serif text-2xl lg:text-3xl font-bold text-white text-center mb-12">
               Our experience in numbers
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-8">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4 md:gap-8">
               <div className="text-center">
                 <p className="font-serif text-3xl lg:text-5xl font-semibold text-white mb-2 tabular-nums">
                   <AnimatedStatValue value={home.stats.casesRepresented} duration={1900} />
@@ -1070,15 +1100,17 @@ const Home = () => {
                 <span className="inline-block px-4 py-1.5 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
                   {home.awardsHome.eyebrow}
                 </span>
-                <h2 className="font-serif text-4xl lg:text-5xl font-bold text-white mb-4">{home.awardsHome.title}</h2>
+                <h2 className="mb-4 max-w-[90vw] mx-auto font-serif text-xl font-bold leading-snug text-white md:text-3xl lg:text-4xl md:leading-normal">
+                  {home.awardsHome.title}
+                </h2>
                 <p className="font-sans text-base lg:text-lg text-[#E6D5B8] max-w-2xl mx-auto">{home.awardsHome.subtitle}</p>
               </div>
 
-              <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4 scroll-smooth snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-visible">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {awards.map((a) => (
                   <div
                     key={a._id}
-                    className="flex-shrink-0 w-[min(100%,320px)] md:w-auto snap-start rounded-xl bg-[#0B1F3A] border-l-4 border-gold p-5 flex gap-4 shadow-lg hover:shadow-xl hover:shadow-gold/10 transition-all"
+                    className="flex gap-4 rounded-xl border-l-4 border-gold bg-[#0B1F3A] p-5 shadow-lg transition-all hover:shadow-xl hover:shadow-gold/10"
                   >
                     <div className="w-20 h-20 flex-shrink-0 rounded-lg bg-gold/10 overflow-hidden flex items-center justify-center">
                       {a.imageUrl ? (

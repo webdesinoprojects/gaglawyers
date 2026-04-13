@@ -2,7 +2,21 @@ const Service = require('../models/Service');
 
 const getAllServices = async (req, res) => {
   try {
-    const services = await Service.find().sort({ order: 1 });
+    const compact = req.query.compact === '1' || req.query.compact === 'true';
+    const limitRaw = Number.parseInt(req.query.limit, 10);
+    const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? limitRaw : null;
+
+    const projection = compact
+      ? 'name slug title category shortDescription description iconName order'
+      : null;
+
+    let query = Service.find({}, projection).sort({ order: 1 }).lean();
+    if (limit) {
+      query = query.limit(limit);
+    }
+
+    const services = await query;
+
     res.status(200).json({
       success: true,
       count: services.length,

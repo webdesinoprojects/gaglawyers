@@ -121,14 +121,43 @@ const getFooterLocationLinks = async (req, res) => {
           isActive: true,
           city: { $exists: true, $ne: '' },
           slug: { $exists: true, $ne: '' },
-          serviceName: { $exists: true, $ne: '' },
+          service: { $exists: true, $ne: null },
+        },
+      },
+      {
+        $lookup: {
+          from: 'services',
+          localField: 'service',
+          foreignField: '_id',
+          as: 'serviceInfo',
+        },
+      },
+      {
+        $unwind: {
+          path: '$serviceInfo',
+          preserveNullAndEmptyArrays: true,
         },
       },
       {
         $project: {
           city: { $trim: { input: '$city' } },
-          serviceName: { $trim: { input: '$serviceName' } },
+          serviceName: {
+            $trim: {
+              input: {
+                $ifNull: [
+                  '$serviceInfo.name',
+                  { $ifNull: ['$serviceInfo.title', '$serviceName'] },
+                ],
+              },
+            },
+          },
           slug: 1,
+          createdAt: 1,
+        },
+      },
+      {
+        $match: {
+          serviceName: { $exists: true, $ne: '' },
         },
       },
       {

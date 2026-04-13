@@ -56,7 +56,7 @@ const LogoGenerator = () => {
     <div className="min-h-screen bg-gray-100 py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="font-serif text-4xl font-bold text-navy mb-3">
+          <h1 className="mb-3 font-serif text-2xl font-bold leading-snug text-navy md:text-4xl md:leading-tight">
             Logo Generator
           </h1>
           <p className="font-sans text-gray-600">

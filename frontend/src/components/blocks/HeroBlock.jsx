@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 
 const HeroBlock = ({ content }) => {
   return (
-    <section className="relative bg-navy text-white py-24 overflow-hidden">
+    <section className="relative overflow-hidden bg-navy py-10 text-white md:py-16 lg:py-24">
       {/* Background Image with Overlay */}
       {content.backgroundImage && (
         <div className="absolute inset-0 z-0">
@@ -26,7 +26,7 @@ const HeroBlock = ({ content }) => {
             </p>
           )}
           
-          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+          <h1 className="font-serif text-2xl font-bold leading-snug md:text-4xl md:leading-tight lg:text-5xl xl:text-6xl">
             {content.heading}
             {content.headingAccent && (
               <>

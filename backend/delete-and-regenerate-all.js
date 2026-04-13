@@ -1,4 +1,4 @@
-require('dotenv').config();
+﻿require('dotenv').config();
 const mongoose = require('mongoose');
 const LocationPage = require('./models/LocationPage');
 const Service = require('./models/Service');
@@ -7,9 +7,9 @@ const { generateSlug, buildLocationPageSlug } = require('./utils/slugify');
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log('✅ MongoDB connected');
+    console.log('âœ… MongoDB connected');
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
+    console.error('âŒ MongoDB connection error:', error);
     process.exit(1);
   }
 };
@@ -20,7 +20,7 @@ const { locations: locationsRaw } = require('./seed-1702-locations-data');
 // All 25 services
 const services25 = [
   "Armed Forces Tribunal (AFT) Cases",
-  "Bail & Anticipatory Bail Cases",
+  "Bail Lawyer",
   "CAT (Central Administrative Tribunal) Matters",
   "Cheque Bounce Cases",
   "Civil Law & Civil Disputes",
@@ -98,31 +98,31 @@ const generateSEO = (city, serviceName) => {
 
 const regenerateAll = async () => {
   try {
-    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🔄 DELETE & REGENERATE ALL LOCATION PAGES');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('\nâ”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
+    console.log('ðŸ”„ DELETE & REGENERATE ALL LOCATION PAGES');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
 
     await connectDB();
 
     // Step 1: Delete all existing location pages
-    console.log('🗑️  Step 1: Deleting existing location pages...\n');
+    console.log('ðŸ—‘ï¸  Step 1: Deleting existing location pages...\n');
     const deleteResult = await LocationPage.deleteMany({});
-    console.log(`   ✅ Deleted ${deleteResult.deletedCount} existing pages\n`);
+    console.log(`   âœ… Deleted ${deleteResult.deletedCount} existing pages\n`);
 
     // Step 2: Remove duplicates from locations
-    console.log('🧹 Step 2: Cleaning locations array...\n');
+    console.log('ðŸ§¹ Step 2: Cleaning locations array...\n');
     const uniqueLocations = [...new Set(locationsRaw)];
     console.log(`   Original locations: ${locationsRaw.length}`);
     console.log(`   Unique locations: ${uniqueLocations.length}`);
     console.log(`   Duplicates removed: ${locationsRaw.length - uniqueLocations.length}\n`);
 
     if (uniqueLocations.length !== 1702) {
-      console.log(`   ⚠️  WARNING: Expected 1702 locations, got ${uniqueLocations.length}`);
+      console.log(`   âš ï¸  WARNING: Expected 1702 locations, got ${uniqueLocations.length}`);
       console.log(`   Missing: ${1702 - uniqueLocations.length} locations\n`);
     }
 
     // Step 3: Ensure all services exist
-    console.log('📝 Step 3: Processing services...\n');
+    console.log('ðŸ“ Step 3: Processing services...\n');
     const serviceMap = new Map();
 
     for (const serviceName of services25) {
@@ -139,23 +139,23 @@ const regenerateAll = async () => {
           description: `Professional ${serviceName.toLowerCase()} services by GAG Lawyers - Grover & Grover Advocates.`,
           iconName: 'Scale'
         });
-        console.log(`   ✅ Created service: ${serviceName}`);
+        console.log(`   âœ… Created service: ${serviceName}`);
       } else {
-        console.log(`   ✓ Found service: ${serviceName}`);
+        console.log(`   âœ“ Found service: ${serviceName}`);
       }
       
       serviceMap.set(serviceName, service);
     }
 
-    console.log(`\n✅ ${serviceMap.size} services ready\n`);
+    console.log(`\nâœ… ${serviceMap.size} services ready\n`);
 
     // Step 4: Generate all location pages
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🔨 Step 4: Generating location pages...\n');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
+    console.log('ðŸ”¨ Step 4: Generating location pages...\n');
     console.log(`   Services: ${services25.length}`);
     console.log(`   Locations: ${uniqueLocations.length}`);
     console.log(`   Total pages to generate: ${services25.length * uniqueLocations.length}\n`);
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
 
     let totalCreated = 0;
     const BATCH_SIZE = 100;
@@ -164,7 +164,7 @@ const regenerateAll = async () => {
     for (const serviceName of services25) {
       const serviceDoc = serviceMap.get(serviceName);
       const serviceId = serviceDoc._id;
-      console.log(`   📍 Processing: ${serviceName}`);
+      console.log(`   ðŸ“ Processing: ${serviceName}`);
       
       for (const city of uniqueLocations) {
         const slug = buildLocationPageSlug(serviceDoc.slug, city);
@@ -186,7 +186,7 @@ const regenerateAll = async () => {
         if (locationPages.length >= BATCH_SIZE) {
           await LocationPage.insertMany(locationPages, { ordered: false });
           totalCreated += locationPages.length;
-          process.stdout.write(`\r   ✅ Progress: ${totalCreated} pages created`);
+          process.stdout.write(`\r   âœ… Progress: ${totalCreated} pages created`);
           locationPages.length = 0;
         }
       }
@@ -198,31 +198,33 @@ const regenerateAll = async () => {
       totalCreated += locationPages.length;
     }
 
-    console.log('\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('✅ REGENERATION COMPLETE!');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('\n\nâ”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
+    console.log('âœ… REGENERATION COMPLETE!');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
     
-    console.log('📊 SUMMARY:');
-    console.log(`   ✅ Created: ${totalCreated} pages`);
-    console.log(`   📍 Unique locations: ${uniqueLocations.length}`);
-    console.log(`   🔧 Services: ${services25.length}`);
-    console.log(`   📈 Total in database: ${await LocationPage.countDocuments()}`);
-    console.log(`   🎯 Expected: ${services25.length} × ${uniqueLocations.length} = ${services25.length * uniqueLocations.length}`);
+    console.log('ðŸ“Š SUMMARY:');
+    console.log(`   âœ… Created: ${totalCreated} pages`);
+    console.log(`   ðŸ“ Unique locations: ${uniqueLocations.length}`);
+    console.log(`   ðŸ”§ Services: ${services25.length}`);
+    console.log(`   ðŸ“ˆ Total in database: ${await LocationPage.countDocuments()}`);
+    console.log(`   ðŸŽ¯ Expected: ${services25.length} Ã— ${uniqueLocations.length} = ${services25.length * uniqueLocations.length}`);
     
     const finalCount = await LocationPage.countDocuments();
     if (finalCount === services25.length * uniqueLocations.length) {
-      console.log('\n   ✅ Perfect! All pages generated successfully!\n');
+      console.log('\n   âœ… Perfect! All pages generated successfully!\n');
     } else {
-      console.log(`\n   ⚠️  Mismatch: Expected ${services25.length * uniqueLocations.length}, got ${finalCount}\n`);
+      console.log(`\n   âš ï¸  Mismatch: Expected ${services25.length * uniqueLocations.length}, got ${finalCount}\n`);
     }
 
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
 
     process.exit(0);
   } catch (error) {
-    console.error('\n❌ Fatal error:', error);
+    console.error('\nâŒ Fatal error:', error);
     process.exit(1);
   }
 };
 
 regenerateAll();
+
+

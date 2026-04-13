@@ -9,6 +9,10 @@ import {
   WIDGET_SETTINGS_CACHE_KEY,
 } from '../utils/widgetSettingsCache';
 
+const TAWK_ENABLED = String(import.meta.env.VITE_TAWK_ENABLED || 'false').toLowerCase() === 'true';
+const TAWK_PROPERTY_ID = (import.meta.env.VITE_TAWK_PROPERTY_ID || '').trim();
+const TAWK_WIDGET_ID = (import.meta.env.VITE_TAWK_WIDGET_ID || '').trim();
+
 const FloatingWidgets = () => {
   const location = useLocation();
   const [settings, setSettings] = useState({
@@ -19,6 +23,8 @@ const FloatingWidgets = () => {
   const [showChat, setShowChat] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [phoneVariant, setPhoneVariant] = useState('dark');
+  const [isTawkLoaded, setIsTawkLoaded] = useState(false);
+  const hasTawkConfig = TAWK_ENABLED && Boolean(TAWK_PROPERTY_ID) && Boolean(TAWK_WIDGET_ID);
   const hasWhatsApp = settings.whatsappEnabled && settings.whatsappNumber;
   const hasPhone = Boolean(settings.phoneNumber);
 
@@ -213,6 +219,42 @@ const FloatingWidgets = () => {
     };
   }, [location.pathname, showChat, hasPhone, isAdminPanel]);
 
+  useEffect(() => {
+    if (isAdminPanel || !hasTawkConfig) return undefined;
+
+    if (window.Tawk_API && typeof window.Tawk_API.maximize === 'function') {
+      setIsTawkLoaded(true);
+      return undefined;
+    }
+
+    const scriptId = 'gag-tawk-script';
+    if (document.getElementById(scriptId)) {
+      return undefined;
+    }
+
+    window.Tawk_API = window.Tawk_API || {};
+    window.Tawk_LoadStart = new Date();
+
+    const script = document.createElement('script');
+    script.id = scriptId;
+    script.async = true;
+    script.src = `https://embed.tawk.to/${TAWK_PROPERTY_ID}/${TAWK_WIDGET_ID}`;
+    script.charset = 'UTF-8';
+    script.setAttribute('crossorigin', '*');
+    script.onload = () => {
+      setIsTawkLoaded(true);
+      if (typeof window.Tawk_API?.hideWidget === 'function') {
+        window.Tawk_API.hideWidget();
+      }
+    };
+    script.onerror = () => {
+      setIsTawkLoaded(false);
+    };
+
+    document.body.appendChild(script);
+    return undefined;
+  }, [hasTawkConfig, isAdminPanel]);
+
   const handleWhatsAppClick = useCallback(() => {
     if (settings.whatsappNumber) {
       const cleanNumber = settings.whatsappNumber.replace(/[^0-9]/g, '');
@@ -228,6 +270,15 @@ const FloatingWidgets = () => {
   };
 
   const handleChatClick = () => {
+    if (hasTawkConfig && isTawkLoaded && window.Tawk_API) {
+      if (typeof window.Tawk_API.showWidget === 'function') {
+        window.Tawk_API.showWidget();
+      }
+      if (typeof window.Tawk_API.maximize === 'function') {
+        window.Tawk_API.maximize();
+      }
+      return;
+    }
     setShowChat(!showChat);
   };
 
@@ -251,15 +302,15 @@ const FloatingWidgets = () => {
           className="group relative w-14 h-14 bg-gold hover:bg-gold/90 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center hover:scale-110"
           title="GAG Assistant"
         >
-          {showChat ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+          {!hasTawkConfig && showChat ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
           
           {/* Tooltip */}
           <span className="absolute right-full mr-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-            {showChat ? 'Close' : 'Help & options'}
+            {hasTawkConfig ? 'Live chat' : showChat ? 'Close' : 'Help & options'}
           </span>
 
           {/* Notification Badge */}
-          {!showChat && (
+          {(!showChat || hasTawkConfig) && (
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
           )}
         </button>
@@ -321,7 +372,7 @@ const FloatingWidgets = () => {
         </div>
       )}
 
-      {showChat && (
+      {!hasTawkConfig && showChat && (
         <GuidedChatbotPanel
           messages={guidedChatbot.messages}
           currentOptions={guidedChatbot.currentOptions}

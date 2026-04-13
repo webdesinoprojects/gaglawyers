@@ -30,22 +30,21 @@ export const services = [
   },
   {
     id: 2,
-    name: "Bail & Anticipatory Bail Cases",
-    slug: "bail-anticipatory-bail",
+    name: "Bail Lawyer",
+    slug: "bail-lawyer",
     category: "criminal",
-    shortDescription: "Urgent bail assistance and anticipatory bail petitions in criminal matters.",
-    longDescription: "We provide immediate legal assistance for bail and anticipatory bail applications. Our criminal law experts prepare compelling petitions to secure bail for clients facing criminal charges, ensuring their rights are protected throughout the judicial process.",
-    overview: "Bail and anticipatory bail are critical safeguards in criminal proceedings. Our firm provides immediate, expert assistance in preparing and presenting bail applications, with a focus on protecting your personal liberty and ensuring fair judicial process.",
+    shortDescription: "Urgent bail assistance in criminal matters.",
+    longDescription: "We provide immediate legal assistance for bail applications. Our criminal law experts prepare compelling petitions to secure bail for clients facing criminal charges, ensuring their rights are protected throughout the judicial process.",
+    overview: "Bail is a critical safeguard in criminal proceedings. Our firm provides immediate, expert assistance in preparing and presenting bail applications, with a focus on protecting personal liberty and ensuring fair judicial process.",
     typesOfCases: [
       "Regular Bail Applications",
-      "Anticipatory Bail Petitions",
       "Bail Modification & Cancellation",
       "Bail in NDPS Cases",
       "Bail in Serious Crimes"
     ],
     process: [
       { step: 1, title: "Urgent Consultation", description: "Immediate assessment of charges and circumstances" },
-      { step: 2, title: "Petition Drafting", description: "Compelling anticipatory bail or bail application preparation" },
+      { step: 2, title: "Petition Drafting", description: "Compelling bail application preparation" },
       { step: 3, title: "Documentation", description: "Gathering supporting documents and character certificates" },
       { step: 4, title: "Court Representation", description: "Arguing bail petition before the presiding judge" },
       { step: 5, title: "Conditions Management", description: "Handling bail conditions and compliance matters" }

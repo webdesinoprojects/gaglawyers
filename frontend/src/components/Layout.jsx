@@ -10,8 +10,8 @@ const Layout = () => {
     <div className="flex flex-col min-h-screen">
       <DynamicNavbar />
       <SiteHeaderHeightSync />
-      {/* Header is position:sticky in normal flow — no extra padding-top on main (avoids double offset). */}
-      <main className="flex-grow">
+      {/* Header is fixed; reserve space so content starts below it. */}
+      <main className="flex-grow" style={{ paddingTop: 'var(--site-header-height, 7.25rem)' }}>
         <Outlet />
       </main>
       <Footer />

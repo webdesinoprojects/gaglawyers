@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+﻿const mongoose = require('mongoose');
 require('dotenv').config();
 const Service = require('./models/Service');
 const connectDB = require('./config/db');
@@ -33,8 +33,8 @@ const services25 = [
     ]
   },
   {
-    name: "Bail & Anticipatory Bail Cases",
-    slug: "bail-anticipatory-bail",
+    name: "Bail Lawyer",
+    slug: "bail-lawyer",
     category: "criminal",
     shortDescription: "Urgent bail assistance and anticipatory bail petitions in criminal matters.",
     longDescription: "We provide immediate legal assistance for bail and anticipatory bail applications. Our criminal law experts prepare compelling petitions to secure bail for clients facing criminal charges, ensuring their rights are protected throughout the judicial process.",
@@ -722,16 +722,18 @@ const seedServices = async () => {
     console.log(`Successfully added ${result.length} services`);
 
     // Display summary
-    console.log('\n✅ Services seeded successfully!');
+    console.log('\nâœ… Services seeded successfully!');
     console.log(`\nTotal services in database: ${await Service.countDocuments()}`);
     
     mongoose.disconnect();
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error seeding services:', error);
+    console.error('âŒ Error seeding services:', error);
     mongoose.disconnect();
     process.exit(1);
   }
 };
 
 seedServices();
+
+

@@ -16,11 +16,20 @@ const HOME_ANCHOR_LINKS = [
   { label: 'Consultation', hash: 'consultation' },
 ];
 
+const DEFAULT_MENU_ITEMS = [
+  { label: 'Home', url: '/' },
+  { label: 'About', url: '/about' },
+  { label: 'Services', url: '/services' },
+  { label: 'Blog', url: '/blog' },
+  { label: 'Contact', url: '/contact' },
+];
+
 const DynamicNavbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
+  const [homeAnchorsOpen, setHomeAnchorsOpen] = useState(false);
   const [homePageNavOpen, setHomePageNavOpen] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
   const [services, setServices] = useState([]);
@@ -34,6 +43,22 @@ const DynamicNavbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setAboutDropdownOpen(false);
+    setServicesDropdownOpen(false);
+    setHomeAnchorsOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isMobileMenuOpen]);
 
   useEffect(() => {
     fetchNavigation();
@@ -52,14 +77,7 @@ const DynamicNavbar = () => {
       }
     } catch (error) {
       console.error('Error fetching navigation:', error);
-      // Fallback to default menu
-      setMenuItems([
-        { label: 'Home', url: '/' },
-        { label: 'About', url: '/about' },
-        { label: 'Services', url: '/services' },
-        { label: 'Blog', url: '/blog' },
-        { label: 'Contact', url: '/contact' },
-      ]);
+      setMenuItems(DEFAULT_MENU_ITEMS);
     }
   };
 
@@ -68,7 +86,14 @@ const DynamicNavbar = () => {
       const response = await fetch(`${API_BASE_URL}/api/services`);
       const data = await response.json();
       if (data.success) {
-        setServices(data.data);
+        const sorted = [...(data.data || [])].sort((a, b) =>
+          String(a?.name || a?.title || '').localeCompare(
+            String(b?.name || b?.title || ''),
+            undefined,
+            { sensitivity: 'base' }
+          )
+        );
+        setServices(sorted);
       }
     } catch (error) {
       console.error('Error fetching services:', error);
@@ -88,7 +113,8 @@ const DynamicNavbar = () => {
   };
 
   // Build nav links with dropdowns
-  const navLinks = menuItems.map(item => {
+  const menuItemsToRender = menuItems.length > 0 ? menuItems : DEFAULT_MENU_ITEMS;
+  const navLinks = menuItemsToRender.map(item => {
     if (item.label === 'About') {
       return {
         ...item,
@@ -119,7 +145,7 @@ const DynamicNavbar = () => {
   return (
     <header
       id="site-header"
-      className={`sticky top-0 left-0 right-0 z-50 w-full transition-shadow duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-[70] w-full transition-shadow duration-300 ${
         isScrolled ? 'shadow-lg shadow-black/20' : ''
       }`}
     >
@@ -132,20 +158,21 @@ const DynamicNavbar = () => {
         }`}
       >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-[72px]">
-          <Link to="/" className="flex items-center gap-4 py-3">
-            {/* Logo Image - Enlarged */}
-            <img 
-              src="/logo.png" 
-              alt="GAG Lawyers" 
-              className="h-14 w-auto lg:h-16"
+        <div className="flex min-h-[56px] items-center justify-between md:h-[72px]">
+          <Link to="/" className="flex max-w-[min(100%,calc(100vw-4rem))] items-center gap-2 py-2 md:gap-4 md:py-3">
+            <img
+              src="/logo.png"
+              alt="GAG Lawyers"
+              className="h-8 w-auto md:h-10 lg:h-12"
             />
-            {/* Text Logo */}
-            <div className="flex flex-col justify-center gap-0.5 items-center">
-              <span className="text-[22px] lg:text-[26px] font-bold text-white leading-none tracking-tight" style={{ fontFamily: '"Baskerville", "Times New Roman", Georgia, serif' }}>
+            <div className="flex min-w-0 flex-col items-center justify-center gap-0.5 text-center">
+              <span
+                className="truncate text-base font-bold leading-none tracking-tight text-white md:text-[22px] lg:text-[22px]"
+                style={{ fontFamily: '"Baskerville", "Times New Roman", Georgia, serif' }}
+              >
                 Grover & Grover
               </span>
-              <span className="font-sans text-[11px] lg:text-[12px] text-gold tracking-wide font-normal leading-none">
+              <span className="font-sans text-[11px] font-normal leading-none tracking-wide text-gold">
                 Advocates and Solicitors
               </span>
             </div>
@@ -219,25 +246,56 @@ const DynamicNavbar = () => {
                         : 'opacity-0 invisible -translate-y-2 pointer-events-none'
                     }`}
                   >
-                    <div className="bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden">
+                    <div
+                      className={`bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden ${
+                        link.dropdownType === 'services' ? 'max-h-[72vh]' : ''
+                      }`}
+                    >
                       {link.submenu && link.submenu.length > 0 ? (
-                        <div className={link.dropdownType === 'services' ? 'grid grid-cols-4 gap-1 p-3' : ''}>
-                          {link.submenu.map((sublink) => (
-                            <Link
-                              key={sublink.path}
-                              to={sublink.path}
-                              className={`group relative block px-3 py-2.5 font-sans text-xs transition-all duration-200 rounded-md ${
-                                location.pathname === sublink.path
-                                  ? 'bg-gold/15 text-gold font-semibold shadow-sm'
-                                  : 'text-gray-700 hover:text-white hover:bg-navy hover:shadow-md font-medium'
-                              }`}
+                        <div>
+                          {link.dropdownType === 'services' && (
+                            <div className="sticky top-0 z-10 border-b border-gray-100 bg-white/95 backdrop-blur px-3 py-2">
+                              <Link
+                                to="/services"
+                                className="block rounded-md px-3 py-2 text-sm font-semibold text-navy hover:bg-navy hover:text-white transition-colors"
+                              >
+                                View All Services ({link.submenu.length})
+                              </Link>
+                            </div>
+                          )}
+                          <div
+                            className={
+                              link.dropdownType === 'services'
+                                ? 'max-h-[56vh] overflow-y-auto services-sidebar-scroll p-3'
+                                : ''
+                            }
+                          >
+                            <div
+                              className={
+                                link.dropdownType === 'services'
+                                  ? 'grid grid-cols-1 lg:grid-cols-2 gap-1'
+                                  : ''
+                              }
                             >
-                              {/* Content */}
-                              <span className="relative z-10 group-hover:translate-x-0.5 transition-transform duration-200">
-                                {sublink.name}
-                              </span>
-                            </Link>
-                          ))}
+                              {link.submenu.map((sublink) => (
+                                <Link
+                                  key={sublink.path}
+                                  to={sublink.path}
+                                  className={`group relative block px-3 py-2.5 font-sans transition-all duration-200 rounded-md ${
+                                    link.dropdownType === 'services' ? 'text-sm' : 'text-xs'
+                                  } ${
+                                    location.pathname === sublink.path
+                                      ? 'bg-gold/15 text-gold font-semibold shadow-sm'
+                                      : 'text-gray-700 hover:text-white hover:bg-navy hover:shadow-md font-medium'
+                                  }`}
+                                >
+                                  <span className="relative z-10 group-hover:translate-x-0.5 transition-transform duration-200">
+                                    {sublink.name}
+                                  </span>
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
                         </div>
                       ) : (
                         <div className="px-4 py-3 text-sm text-gray-500 font-sans">Loading...</div>
@@ -315,47 +373,72 @@ const DynamicNavbar = () => {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
           <button
+            type="button"
+            aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isMobileMenuOpen}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden text-white p-2"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-white md:hidden hover:bg-white/10"
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-navy border-t border-white/10">
-          <div className="px-4 pt-2 pb-4 space-y-1">
+        <>
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-hidden
+            className="absolute left-0 right-0 top-full z-[60] h-[calc(100dvh-var(--site-header-height,7.25rem))] bg-black/50 md:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          <div
+            className="absolute left-0 right-0 top-full z-[61] max-h-[calc(100dvh-var(--site-header-height,7.25rem))] overflow-y-auto border-t border-white/15 bg-navy shadow-2xl md:hidden"
+          >
+            <div className="mx-auto max-w-7xl space-y-0 px-4 py-4 pb-safe">
             {location.pathname === '/' && (
               <div className="border-b border-white/10 pb-2 mb-2">
-                <p className="py-2 font-sans text-xs font-semibold uppercase tracking-wider text-gold/90">
-                  On this page
-                </p>
-                <div className="space-y-0.5">
-                  {HOME_ANCHOR_LINKS.map((item) => (
-                    <a
-                      key={item.hash}
-                      href={`/#${item.hash}`}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="block py-1.5 font-sans text-sm text-gray-300 hover:text-gold"
-                    >
-                      {item.label}
-                    </a>
-                  ))}
-                </div>
+                <button
+                  type="button"
+                  aria-expanded={homeAnchorsOpen}
+                  aria-label="Toggle on this page links"
+                  className="flex min-h-[44px] w-full items-center justify-between py-2 text-left"
+                  onClick={() => setHomeAnchorsOpen((o) => !o)}
+                >
+                  <span className="font-sans text-xs font-semibold uppercase tracking-wider text-gold/90">
+                    On this page
+                  </span>
+                  <ChevronDown
+                    size={16}
+                    className={`text-gold transition-transform duration-200 ${homeAnchorsOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {homeAnchorsOpen && (
+                  <div className="space-y-0.5">
+                    {HOME_ANCHOR_LINKS.map((item) => (
+                      <a
+                        key={item.hash}
+                        href={`/#${item.hash}`}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block min-h-[44px] py-3 font-sans text-sm text-gray-300 hover:text-gold"
+                      >
+                        {item.label}
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
             {navLinks.map((link) => (
               link.hasDropdown ? (
                 <div key={link.label}>
-                  <div className="flex items-center justify-between gap-2 py-2">
+                  <div className="flex min-h-[44px] items-center justify-between gap-2 py-1">
                     <Link
                       to={link.url}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex-1 font-sans text-base font-medium transition-colors ${
+                      className={`flex min-h-[44px] flex-1 items-center font-sans text-base font-medium transition-colors ${
                         location.pathname === link.url
                           ? 'text-gold'
                           : 'text-white hover:text-gold'
@@ -370,7 +453,7 @@ const DynamicNavbar = () => {
                         (link.dropdownType === 'services' && servicesDropdownOpen)
                       }
                       aria-label={`Toggle ${link.label} submenu`}
-                      className="p-2 text-white hover:text-gold transition-colors flex-shrink-0"
+                      className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg text-white transition-colors hover:bg-white/10 hover:text-gold"
                       onClick={() =>
                         link.dropdownType === 'about'
                           ? setAboutDropdownOpen(!aboutDropdownOpen)
@@ -389,16 +472,25 @@ const DynamicNavbar = () => {
                     </button>
                   </div>
                   {((link.dropdownType === 'about' && aboutDropdownOpen) || (link.dropdownType === 'services' && servicesDropdownOpen)) && (
-                    <div className={`pl-4 space-y-1 ${link.dropdownType === 'services' ? 'max-h-64 overflow-y-auto' : ''}`}>
+                    <div className={`pl-4 space-y-1 ${link.dropdownType === 'services' ? 'max-h-64 overflow-y-auto services-sidebar-scroll' : ''}`}>
+                      {link.dropdownType === 'services' && (
+                        <Link
+                          to="/services"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="block py-2 font-sans text-sm font-semibold text-gold hover:text-white"
+                        >
+                          View All Services ({link.submenu.length})
+                        </Link>
+                      )}
                       {link.submenu && link.submenu.length > 0 ? (
                         link.submenu.map((sublink) => (
                           <Link
                             key={sublink.path}
                             to={sublink.path}
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className={`block py-2 font-sans text-sm transition-colors ${
+                            className={`block min-h-[44px] py-3 font-sans text-sm transition-colors ${
                               location.pathname === sublink.path
-                                ? 'text-gold font-medium'
+                                ? 'font-medium text-gold'
                                 : 'text-gray-300 hover:text-gold'
                             }`}
                           >
@@ -420,7 +512,7 @@ const DynamicNavbar = () => {
                   target={link.openInNewTab ? '_blank' : undefined}
                   rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block py-2 font-sans text-base font-medium transition-colors ${
+                  className={`flex min-h-[44px] items-center py-3 font-sans text-base font-medium transition-colors ${
                     location.pathname === link.url
                       ? 'text-gold'
                       : 'text-white hover:text-gold'
@@ -431,20 +523,21 @@ const DynamicNavbar = () => {
               )
             ))}
             {location.pathname === '/' ? (
-              <a href="/#consultation" onClick={() => setIsMobileMenuOpen(false)} className="block mt-2">
-                <Button variant="gold" size="sm" className="w-full">
+              <a href="/#consultation" onClick={() => setIsMobileMenuOpen(false)} className="mt-3 block">
+                <Button variant="gold" size="sm" className="min-h-[48px] w-full">
                   Book consultation
                 </Button>
               </a>
             ) : (
-              <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button variant="gold" size="sm" className="w-full mt-2">
+              <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="mt-3 block">
+                <Button variant="gold" size="sm" className="min-h-[48px] w-full">
                   Get Consultation
                 </Button>
               </Link>
             )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </nav>
     </header>

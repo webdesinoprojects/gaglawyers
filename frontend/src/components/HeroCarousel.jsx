@@ -148,7 +148,7 @@ const HeroCarousel = ({
   return (
     <div
       id="hero"
-      className="relative w-full h-[calc(100dvh-var(--site-header-height))] min-h-[560px] max-h-[800px] overflow-hidden scroll-mt-0"
+      className="relative h-[min(100dvh-var(--site-header-height),800px)] min-h-[280px] w-full overflow-hidden scroll-mt-0 sm:min-h-[360px] md:min-h-[480px] lg:min-h-[560px]"
     >
       {slides.map((s, index) => (
         <div
@@ -196,20 +196,20 @@ const HeroCarousel = ({
                 {slide.tagline}
               </p>
 
-              <h1 className="font-serif text-4xl md:text-5xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-bold leading-[1.1] tracking-tight mb-6 animate-slide-down">
+              <h1 className="mb-6 max-w-[90vw] animate-slide-down font-serif text-2xl font-bold leading-snug tracking-tight text-white md:text-4xl md:leading-normal lg:text-5xl xl:text-6xl 2xl:text-7xl">
                 <span className="text-white">{slide.heading}</span>
                 <br />
                 <span style={{ color: HERO_GOLD_ACCENT }}>{slide.headingAccent}</span>
               </h1>
 
-              <p className="font-sans text-base lg:text-lg text-gray-200 leading-relaxed mb-8 max-w-2xl animate-slide-down">
+              <p className="mb-8 max-w-prose animate-slide-down font-sans text-sm leading-normal text-gray-200 md:text-base md:leading-relaxed lg:max-w-2xl lg:text-lg">
                 {slide.description}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 animate-slide-down">
                 <CtaLink to={slide.ctaPrimary.link}>
                   <span
-                    className="inline-flex items-center justify-center gap-2.5 w-full sm:w-auto cursor-pointer rounded-md px-8 py-4 font-sans text-sm font-bold text-[#0B1526] shadow-lg transition-all duration-200 hover:scale-[1.02] hover:brightness-105 hover:shadow-xl"
+                    className="inline-flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2.5 rounded-md px-6 py-3 font-sans text-sm font-bold text-[#0B1526] shadow-lg transition-all duration-200 hover:scale-[1.02] hover:brightness-105 hover:shadow-xl sm:w-auto md:px-8 md:py-4"
                     style={{ backgroundColor: HERO_GOLD_ACCENT, boxShadow: '0 12px 40px rgba(201,168,76,0.25)' }}
                   >
                     {slide.ctaPrimary.text}
@@ -217,7 +217,7 @@ const HeroCarousel = ({
                   </span>
                 </CtaLink>
                 <CtaLink to={slide.ctaSecondary.link}>
-                  <span className="inline-block px-8 py-4 bg-transparent text-white font-sans text-sm font-semibold rounded-md border-2 border-white/55 transition-all duration-200 hover:bg-white/10 hover:border-[#C9A84C]/80 w-full sm:w-auto text-center cursor-pointer">
+                  <span className="inline-flex min-h-[48px] w-full cursor-pointer items-center justify-center rounded-md border-2 border-white/55 bg-transparent px-6 py-3 text-center font-sans text-sm font-semibold text-white transition-all duration-200 hover:border-[#C9A84C]/80 hover:bg-white/10 sm:w-auto md:px-8 md:py-4">
                     {slide.ctaSecondary.text}
                   </span>
                 </CtaLink>
@@ -290,7 +290,7 @@ const HeroCarousel = ({
               <React.Fragment key={`${item.label}-${idx}`}>
                 {idx > 0 && <div className="w-px h-12 bg-white/30 hidden sm:block" />}
                 <div className="text-center lg:text-left">
-                  <p className="font-serif text-3xl lg:text-4xl font-bold text-white tabular-nums">
+                  <p className="font-serif text-2xl font-bold tabular-nums text-white md:text-3xl lg:text-4xl">
                     <AnimatedStatValue value={item.value} duration={1600 + idx * 200} />
                   </p>
                   <p className="font-sans text-xs lg:text-sm text-gray-300 mt-1">{item.label}</p>

@@ -1,4 +1,4 @@
-require('dotenv').config();
+﻿require('dotenv').config();
 const mongoose = require('mongoose');
 const LocationPage = require('./models/LocationPage');
 const Service = require('./models/Service');
@@ -7,9 +7,9 @@ const { buildLocationPageSlug } = require('./utils/slugify');
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log('✅ MongoDB connected\n');
+    console.log('âœ… MongoDB connected\n');
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
+    console.error('âŒ MongoDB connection error:', error);
     process.exit(1);
   }
 };
@@ -17,7 +17,7 @@ const connectDB = async () => {
 // Service name to new slug mapping
 const serviceNameToNewSlug = {
   'Armed Forces Tribunal (AFT) Cases': 'armed-force-tribunal',
-  'Bail & Anticipatory Bail Cases': 'bail',
+  'Bail Lawyer': 'bail',
   'CAT (Central Administrative Tribunal) Matters': 'cat-matters',
   'Contract Dispute Cases': 'contract',
   'Civil Law & Civil Disputes': 'civil',
@@ -47,19 +47,19 @@ const migrateLocationSlugs = async () => {
   try {
     await connectDB();
 
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🔄 LOCATION SLUG MIGRATION');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
+    console.log('ðŸ”„ LOCATION SLUG MIGRATION');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
 
     // Get all services
     const services = await Service.find({}).sort({ order: 1 });
-    console.log(`📋 Found ${services.length} services\n`);
+    console.log(`ðŸ“‹ Found ${services.length} services\n`);
 
     // Get all location pages
     const totalLocations = await LocationPage.countDocuments();
-    console.log(`📍 Found ${totalLocations} location pages to migrate\n`);
+    console.log(`ðŸ“ Found ${totalLocations} location pages to migrate\n`);
 
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
 
     let totalUpdated = 0;
     let totalSkipped = 0;
@@ -67,18 +67,18 @@ const migrateLocationSlugs = async () => {
 
     // Get unique service names from location pages
     const uniqueServiceNames = await LocationPage.distinct('serviceName');
-    console.log(`📝 Found ${uniqueServiceNames.length} unique service names in location pages\n`);
+    console.log(`ðŸ“ Found ${uniqueServiceNames.length} unique service names in location pages\n`);
 
     // Process each service name
     for (const serviceName of uniqueServiceNames) {
       const newSlug = serviceNameToNewSlug[serviceName];
 
       if (!newSlug) {
-        console.log(`⚠️  No mapping found for service: ${serviceName}`);
+        console.log(`âš ï¸  No mapping found for service: ${serviceName}`);
         continue;
       }
 
-      console.log(`\n🔄 Processing: ${serviceName}`);
+      console.log(`\nðŸ”„ Processing: ${serviceName}`);
       console.log(`   New slug pattern: ${newSlug}-lawyer-in-{city}`);
 
       // Get all location pages for this service name
@@ -109,7 +109,7 @@ const migrateLocationSlugs = async () => {
           });
 
           if (existing) {
-            console.log(`   ⚠️  Duplicate slug would be created for ${page.city}, skipping`);
+            console.log(`   âš ï¸  Duplicate slug would be created for ${page.city}, skipping`);
             serviceErrors++;
             totalErrors++;
             continue;
@@ -126,40 +126,40 @@ const migrateLocationSlugs = async () => {
 
           // Show progress every 200 updates
           if (serviceUpdated % 200 === 0) {
-            process.stdout.write(`\r   ✅ Updated: ${serviceUpdated}/${locationPages.length}`);
+            process.stdout.write(`\r   âœ… Updated: ${serviceUpdated}/${locationPages.length}`);
           }
         } catch (error) {
-          console.error(`\n   ❌ Error updating ${page.city}:`, error.message);
+          console.error(`\n   âŒ Error updating ${page.city}:`, error.message);
           serviceErrors++;
           totalErrors++;
         }
       }
 
       if (serviceUpdated > 0) {
-        console.log(`\r   ✅ Updated: ${serviceUpdated}/${locationPages.length}`);
+        console.log(`\r   âœ… Updated: ${serviceUpdated}/${locationPages.length}`);
       }
       if (serviceSkipped > 0) {
-        console.log(`   ⏭️  Skipped: ${serviceSkipped} (already correct)`);
+        console.log(`   â­ï¸  Skipped: ${serviceSkipped} (already correct)`);
       }
       if (serviceErrors > 0) {
-        console.log(`   ⚠️  Errors: ${serviceErrors}`);
+        console.log(`   âš ï¸  Errors: ${serviceErrors}`);
       }
     }
 
-    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('✅ MIGRATION COMPLETE!');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-    console.log(`📊 SUMMARY:`);
-    console.log(`   ✅ Updated: ${totalUpdated} location pages`);
-    console.log(`   ⏭️  Skipped: ${totalSkipped} location pages (no change needed)`);
+    console.log('\nâ”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
+    console.log('âœ… MIGRATION COMPLETE!');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
+    console.log(`ðŸ“Š SUMMARY:`);
+    console.log(`   âœ… Updated: ${totalUpdated} location pages`);
+    console.log(`   â­ï¸  Skipped: ${totalSkipped} location pages (no change needed)`);
     if (totalErrors > 0) {
-      console.log(`   ❌ Errors: ${totalErrors} location pages`);
+      console.log(`   âŒ Errors: ${totalErrors} location pages`);
     }
-    console.log(`\n🎉 Location slugs have been migrated!\n`);
+    console.log(`\nðŸŽ‰ Location slugs have been migrated!\n`);
 
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('📝 EXAMPLES OF NEW SLUGS:');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
+    console.log('ðŸ“ EXAMPLES OF NEW SLUGS:');
+    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
 
     // Show some examples
     const samplePages = await LocationPage.find({ city: 'Delhi' }).limit(5);
@@ -167,14 +167,16 @@ const migrateLocationSlugs = async () => {
       console.log(`   ${page.slug}`);
     });
 
-    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('\nâ”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n');
 
     process.exit(0);
   } catch (error) {
-    console.error('❌ Fatal error:', error);
+    console.error('âŒ Fatal error:', error);
     process.exit(1);
   }
 };
 
 // Run the migration
 migrateLocationSlugs();
+
+

@@ -101,7 +101,7 @@ const HomeDynamic = () => {
       <AppointmentSection />
 
       {/* Practice Areas Section */}
-      <section className="bg-white py-20">
+      <section className="bg-white py-10 md:py-16 lg:py-24">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="font-serif text-3xl lg:text-4xl font-bold text-navy">

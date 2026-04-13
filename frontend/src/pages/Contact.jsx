@@ -106,7 +106,7 @@ const Contact = () => {
   };
 
   const inputClass =
-    'w-full rounded-md bg-[#0B1526] px-4 py-3 font-sans text-white placeholder:text-gray-500 border border-white/15 transition-colors duration-200 focus:border-[#C9A84C] focus:outline-none focus:ring-1 focus:ring-[#C9A84C]/40';
+    'w-full rounded-md border border-white/15 bg-[#0B1526] px-4 py-3 font-sans text-base text-white placeholder:text-gray-500 transition-colors duration-200 focus:border-[#C9A84C] focus:outline-none focus:ring-1 focus:ring-[#C9A84C]/40';
 
   const labelClass = 'mb-2 block font-sans text-xs font-medium uppercase tracking-wider text-[#8FA3B8]';
 
@@ -121,10 +121,10 @@ const Contact = () => {
       <section className="bg-[#0B1526] text-white">
         {/* Header banner — flows into main contact area */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10 md:pt-14 md:pb-12 lg:pt-16 lg:pb-14 text-center">
-          <h1 className="font-serif text-4xl md:text-5xl lg:text-[2.75rem] font-bold text-white tracking-tight">
+          <h1 className="mx-auto max-w-[90vw] font-serif text-2xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl">
             Get In Touch
           </h1>
-          <p className="mt-4 font-sans text-lg md:text-xl text-[#B8B5A8] max-w-2xl mx-auto leading-relaxed">
+          <p className="mx-auto mt-4 max-w-prose font-sans text-sm leading-normal text-[#B8B5A8] md:text-lg md:leading-relaxed lg:text-xl">
             Let&apos;s discuss how we can help you with your legal needs
           </p>
           <div className="mt-6 flex justify-center" aria-hidden>
@@ -372,7 +372,7 @@ const Contact = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting || !captchaToken}
-                    className="w-full rounded-md bg-[#C9A84C] py-3.5 px-6 font-sans text-base font-bold text-[#0B1526] shadow-md transition-all duration-200 hover:bg-[#B08A3E] hover:scale-[1.01] disabled:opacity-60 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                    className="w-full rounded-md bg-[#C9A84C] px-6 py-3.5 font-sans text-base font-bold text-[#0B1526] shadow-md transition-all duration-200 hover:bg-[#B08A3E] hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 min-h-[48px] md:w-auto md:min-w-[200px]"
                   >
                     {isSubmitting ? 'Submitting...' : 'Submit Inquiry →'}
                   </button>

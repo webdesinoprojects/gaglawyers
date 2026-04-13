@@ -52,7 +52,7 @@ const Awards = () => {
       />
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-navy via-[#0a1628] to-navy text-white pt-8 pb-20 md:pt-10 lg:pt-12 lg:pb-28 overflow-hidden">
+      <section className="relative overflow-hidden bg-gradient-to-br from-navy via-[#0a1628] to-navy py-10 text-white md:py-16 lg:py-24">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiIHN0cm9rZT0iI0M5QTg2QSIgc3Ryb2tlLW9wYWNpdHk9Ii4xIi8+PC9nPjwvc3ZnPg==')] opacity-10"></div>
         <div className="absolute top-20 right-10 w-72 h-72 bg-gold/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 left-10 w-96 h-96 bg-gold/5 rounded-full blur-3xl"></div>
@@ -65,27 +65,27 @@ const Awards = () => {
                 Recognition & Excellence
               </span>
             </div>
-            <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
+            <h1 className="mx-auto max-w-[90vw] font-serif text-2xl font-bold leading-snug md:text-4xl lg:text-5xl md:leading-tight">
               Awards &
               <br />
               <span className="text-gold">Achievements</span>
             </h1>
-            <p className="font-sans text-xl lg:text-2xl text-gray-300 leading-relaxed max-w-3xl mx-auto">
+            <p className="mx-auto max-w-prose font-sans text-sm leading-normal text-gray-300 md:text-xl md:leading-relaxed lg:text-2xl">
               A testament to our unwavering commitment to excellence, integrity, and client satisfaction.
             </p>
             
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto pt-8">
+            <div className="mx-auto grid max-w-2xl grid-cols-1 gap-6 pt-8 sm:grid-cols-3">
               <div className="text-center">
-                <div className="text-4xl font-bold text-gold mb-2">{awards.length}</div>
+                <div className="mb-2 text-2xl font-bold text-gold md:text-3xl lg:text-4xl">{awards.length}</div>
                 <div className="font-sans text-sm text-gray-400">Awards Won</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold text-gold mb-2">{years.length - 1}</div>
+                <div className="mb-2 text-2xl font-bold text-gold md:text-3xl lg:text-4xl">{years.length - 1}</div>
                 <div className="font-sans text-sm text-gray-400">Years Recognized</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold text-gold mb-2">25+</div>
+                <div className="mb-2 text-2xl font-bold text-gold md:text-3xl lg:text-4xl">25+</div>
                 <div className="font-sans text-sm text-gray-400">Years Experience</div>
               </div>
             </div>
@@ -95,15 +95,16 @@ const Awards = () => {
 
       {/* Year Filter */}
       {years.length > 2 && (
-        <section className="bg-white py-8 border-b border-gray-200 sticky top-36 z-40 shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-center gap-3 flex-wrap">
-              <span className="font-sans text-sm font-medium text-gray-600 mr-2">Filter by Year:</span>
+        <section className="sticky top-[var(--site-header-height,7.25rem)] z-40 border-b border-gray-200 bg-white py-4 shadow-sm md:py-6">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-0">
+            <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3">
+              <span className="mr-2 font-sans text-sm font-medium text-gray-600">Filter by Year:</span>
               {years.map(year => (
                 <button
                   key={year}
+                  type="button"
                   onClick={() => setSelectedYear(year)}
-                  className={`px-5 py-2 rounded-full font-sans text-sm font-medium transition-all duration-200 ${
+                  className={`min-h-[44px] rounded-full px-4 py-2 font-sans text-sm font-medium transition-all duration-200 md:px-5 ${
                     selectedYear === year
                       ? 'bg-gold text-white shadow-lg scale-105'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -118,29 +119,29 @@ const Awards = () => {
       )}
 
       {/* Awards Grid Section */}
-      <section className="bg-gradient-to-br from-grey-light via-white to-grey-light py-20 lg:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-3 mb-6">
-              <Sparkles className="w-8 h-8 text-gold" />
-              <h2 className="font-serif text-4xl lg:text-5xl font-bold text-navy">
+      <section className="bg-gradient-to-br from-grey-light via-white to-grey-light py-10 md:py-16 lg:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-0">
+          <div className="mb-10 text-center md:mb-16">
+            <div className="mb-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Sparkles className="h-8 w-8 shrink-0 text-gold" />
+              <h2 className="font-serif text-xl font-bold leading-snug text-navy md:text-3xl lg:text-4xl md:leading-normal">
                 Our Journey of Excellence
               </h2>
-              <Sparkles className="w-8 h-8 text-gold" />
+              <Sparkles className="hidden h-8 w-8 shrink-0 text-gold sm:block" />
             </div>
-            <div className="h-1 w-24 bg-gradient-to-r from-gold to-gold/50 mx-auto rounded-full mb-6"></div>
-            <p className="font-sans text-xl text-gray-600 max-w-3xl mx-auto">
+            <div className="mx-auto mb-6 h-1 w-24 rounded-full bg-gradient-to-r from-gold to-gold/50" />
+            <p className="mx-auto max-w-prose font-sans text-sm leading-normal text-gray-600 md:text-xl md:leading-relaxed">
               Each award represents our dedication to delivering exceptional legal services
             </p>
           </div>
 
           {loading ? (
-            <div className="text-center py-20">
+            <div className="py-12 text-center md:py-16">
               <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-gold border-t-transparent"></div>
               <p className="font-sans text-gray-600 mt-4">Loading awards...</p>
             </div>
           ) : filteredAwards.length === 0 ? (
-            <div className="text-center py-20">
+            <div className="py-12 text-center md:py-16">
               <Award className="w-20 h-20 text-gray-300 mx-auto mb-6" />
               <p className="font-sans text-xl text-gray-600">No awards found for the selected year.</p>
             </div>
@@ -212,30 +213,30 @@ const Awards = () => {
       </section>
 
       {/* Commitment Section */}
-      <section className="relative bg-gradient-to-br from-navy via-navy/95 to-navy text-white py-20 lg:py-28 overflow-hidden">
+      <section className="relative overflow-hidden bg-gradient-to-br from-navy via-navy/95 to-navy py-10 text-white md:py-16 lg:py-24">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiIHN0cm9rZT0iI0M5QTg2QSIgc3Ryb2tlLW9wYWNpdHk9Ii4xIi8+PC9nPjwvc3ZnPg==')] opacity-10"></div>
         
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gold/20 rounded-2xl mb-6 backdrop-blur-sm border border-gold/30">
-              <Star className="w-10 h-10 text-gold" />
+        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 md:px-8 lg:px-0">
+          <div className="mb-10 text-center md:mb-12">
+            <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-2xl border border-gold/30 bg-gold/20 backdrop-blur-sm">
+              <Star className="h-10 w-10 text-gold" />
             </div>
-            <h2 className="font-serif text-4xl lg:text-5xl font-bold mb-6">
+            <h2 className="mb-6 font-serif text-xl font-bold leading-snug md:text-3xl lg:text-4xl md:leading-normal">
               Commitment to Excellence
             </h2>
-            <div className="h-1 w-24 bg-gold mx-auto rounded-full"></div>
+            <div className="mx-auto h-1 w-24 rounded-full bg-gold" />
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-10 lg:p-14 border border-white/20">
-            <div className="space-y-6 font-sans text-xl text-gray-200 leading-relaxed">
+          <div className="rounded-3xl border border-white/20 bg-white/10 p-6 backdrop-blur-sm md:p-10 lg:p-14">
+            <div className="space-y-6 font-sans text-sm leading-normal text-gray-200 md:text-lg md:leading-relaxed lg:text-xl">
               <p>
                 Awards are <span className="font-semibold text-gold">milestones, not destinations</span>. They reflect the trust placed in us by clients and peers alike, and they remind us of the responsibility we carry as legal advisors.
               </p>
               <p>
                 At GAG Lawyers, we view every matter—whether a sensitive family dispute or a high-value commercial negotiation—as an opportunity to uphold the values that have earned us recognition.
               </p>
-              <div className="pt-6 border-t border-white/20">
-                <p className="text-2xl font-medium text-white">
+              <div className="border-t border-white/20 pt-6">
+                <p className="text-base font-medium leading-snug text-white md:text-xl md:leading-normal lg:text-2xl">
                   Through these accolades, we aim not only to celebrate achievements but also to reinforce our commitment to being a law firm that combines expert legal solutions with integrity, reliability, and a client-first approach.
                 </p>
               </div>
@@ -245,31 +246,31 @@ const Awards = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-white py-20 lg:py-24">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-br from-navy to-navy/90 rounded-3xl p-10 lg:p-14 text-white relative overflow-hidden shadow-2xl">
+      <section className="bg-white py-10 md:py-16 lg:py-24">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 md:px-8 lg:px-0">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-navy to-navy/90 p-6 text-white shadow-2xl md:p-10 lg:p-14">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiIHN0cm9rZT0iI0M5QTg2QSIgc3Ryb2tlLW9wYWNpdHk9Ii4xIi8+PC9nPjwvc3ZnPg==')] opacity-10"></div>
             <div className="absolute top-10 right-10 w-40 h-40 bg-gold/20 rounded-full blur-3xl"></div>
             
             <div className="relative z-10 text-center">
               <Trophy className="w-16 h-16 text-gold mx-auto mb-6" />
-              <h2 className="font-serif text-3xl lg:text-4xl font-bold mb-6">
+              <h2 className="mb-4 font-serif text-xl font-bold leading-snug md:mb-6 md:text-3xl lg:text-4xl md:leading-normal">
                 Experience Award-Winning Legal Services
               </h2>
-              <p className="font-sans text-lg text-gray-300 leading-relaxed mb-8 max-w-2xl mx-auto">
+              <p className="mx-auto mb-8 max-w-2xl font-sans text-sm leading-normal text-gray-300 md:text-lg md:leading-relaxed">
                 Let our recognized expertise work for you. Contact us today for a consultation with our award-winning legal team.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <div className="flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:gap-4">
                 <a
                   href="/contact"
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-gold text-navy font-sans font-semibold rounded-lg hover:brightness-110 transition-all duration-300 hover:scale-105 shadow-xl"
+                  className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg bg-gold px-6 py-3 font-sans text-base font-semibold text-navy shadow-xl transition-all duration-300 hover:scale-105 hover:brightness-110 sm:w-auto md:px-8 md:py-4"
                 >
                   Schedule Consultation
                   <ArrowRight size={20} />
                 </a>
                 <a
                   href="/about"
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-white text-navy font-sans font-semibold rounded-lg hover:bg-gray-100 transition-all duration-300"
+                  className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg bg-white px-6 py-3 font-sans text-base font-semibold text-navy transition-all duration-300 hover:bg-gray-100 sm:w-auto md:px-8 md:py-4"
                 >
                   Learn More About Us
                 </a>

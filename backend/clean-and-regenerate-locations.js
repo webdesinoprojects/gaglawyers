@@ -1,4 +1,4 @@
-require('dotenv').config();
+﻿require('dotenv').config();
 const mongoose = require('mongoose');
 const LocationPage = require('./models/LocationPage');
 const Service = require('./models/Service');
@@ -7,9 +7,9 @@ const { generateSlug } = require('./utils/slugify');
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log('✅ MongoDB connected');
+    console.log('âœ… MongoDB connected');
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
+    console.error('âŒ MongoDB connection error:', error);
     process.exit(1);
   }
 };
@@ -17,7 +17,7 @@ const connectDB = async () => {
 // All 25 services
 const services25 = [
   "Armed Forces Tribunal (AFT) Cases",
-  "Bail & Anticipatory Bail Cases",
+  "Bail Lawyer",
   "CAT (Central Administrative Tribunal) Matters",
   "Cheque Bounce Cases",
   "Civil Law & Civil Disputes",
@@ -45,3 +45,5 @@ const services25 = [
 
 // Import locations from seed file
 const locationsRaw = [
+
+

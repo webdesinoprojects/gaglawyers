@@ -22,7 +22,7 @@ const ServiceDetail = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="font-serif text-4xl font-bold text-[#1a2744] mb-4">
+          <h1 className="mb-4 max-w-[90vw] font-serif text-2xl font-bold leading-snug text-[#1a2744] md:text-4xl md:leading-tight">
             Service Not Found
           </h1>
           <Link to="/services" className="text-[#c9a84c] hover:underline">
@@ -53,23 +53,23 @@ const ServiceDetail = () => {
       </div>
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-[#1a2744] to-[#1a2744]/90 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="bg-gradient-to-br from-[#1a2744] to-[#1a2744]/90 py-10 text-white md:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-0">
           <div className="max-w-4xl">
             {service.hero.badge && (
-              <div className="inline-block bg-[#c9a84c] text-[#1a2744] px-4 py-2 rounded-full font-sans font-bold text-sm mb-4">
+              <div className="mb-4 inline-block rounded-full bg-[#c9a84c] px-4 py-2 font-sans text-sm font-bold text-[#1a2744]">
                 {service.hero.badge}
               </div>
             )}
-            <h1 className="font-serif text-5xl font-bold mb-4">
+            <h1 className="mb-4 max-w-[90vw] font-serif text-2xl font-bold leading-snug md:text-4xl md:leading-tight lg:text-5xl">
               {service.hero.title}
             </h1>
-            <p className="font-sans text-xl text-white/90 mb-8">
+            <p className="mb-8 font-sans text-sm leading-normal text-white/90 md:text-lg md:leading-relaxed lg:text-xl">
               {service.hero.subtitle}
             </p>
             <a
               href="#consultation-form"
-              className="inline-block bg-[#c9a84c] text-[#1a2744] font-sans font-bold py-4 px-8 rounded-lg hover:bg-[#b89840] transition-all shadow-lg hover:shadow-xl"
+              className="inline-flex min-h-[48px] w-full items-center justify-center rounded-lg bg-[#c9a84c] px-6 py-3 font-sans text-base font-bold text-[#1a2744] shadow-lg transition-all hover:bg-[#b89840] hover:shadow-xl sm:w-auto md:px-8 md:py-4"
             >
               {service.hero.cta}
             </a>
@@ -368,7 +368,7 @@ const ServiceDetail = () => {
                     {service.propertyServices.title}
                   </h2>
                 </div>
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   {service.propertyServices.services.map((svc, index) => (
                     <div key={index} className="p-4 bg-gray-50 rounded-lg border-l-4 border-[#c9a84c]">
                       <h3 className="font-serif text-lg font-bold text-[#1a2744] mb-2">
