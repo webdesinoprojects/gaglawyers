@@ -26,6 +26,7 @@
     "import-legacy-blogs:dry": "node import-legacy-blogs-from-sitemap.js --dry-run",
     "import-legacy-blogs:apply": "node import-legacy-blogs-from-sitemap.js --apply",
     "generate-service-slugs": "node generate-service-slugs.js",
+    "add-writ-petition": "node add-writ-petition-content.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

@@ -620,6 +620,146 @@ const CONTRACT_OVERRIDES = {
   ],
 };
 
+const AGREEMENT_SLUGS = new Set([
+  'agreement-to-sell',
+  'agreement-to-sell-lawyer',
+  'agreement-to-sell-property',
+  'agreement-to-sell-property-lawyer',
+]);
+
+const AGREEMENT_KEYWORDS = [
+  'Agreement to Sell',
+  'Lawyer for agreement to sell property',
+  'Agreement to sell flat lawyer',
+  'Agreement to sell resale flat',
+  'Agreement to sell under construction property',
+  'Agreement to sell immovable property',
+  'Agreement to sell vehicle',
+  'Property agreement lawyer',
+  'Draft agreement to sell property',
+  'Draft agreement to sell a car',
+  'Property lawyer fee',
+  'Stamp duty on agreement to sell',
+  'Leave and license agreement stamp duty',
+  'Property lawyer near me',
+];
+
+const AGREEMENT_OVERRIDES = {
+  title: 'Agreement to Sell Property Lawyer - GAG Lawyers',
+  description:
+    'Agreement to Sell property services by GAG Lawyers. We draft, review, and negotiate legally enforceable agreements for flats, resale property, under-construction projects, land, buildings, and vehicles.',
+  subtitle:
+    'An agreement to sell property is the first and most important document in a real estate transaction. Our team helps ensure every clause accurately protects your rights and financial interests.',
+  contentBlocks: [
+    {
+      heading: 'Agreement to Sell',
+      paragraphs: [
+        'An agreement to sell property is the first and most important document for any real estate transaction. This legally binding document sets out the terms and conditions under which property is to be transferred from seller to buyer.',
+        'Whether it is an agreement to sell flat, land, or even an agreement to sell vehicle, the terms should be drafted accurately to reflect the transaction and reduce future legal risk.',
+      ],
+    },
+    {
+      heading: 'Types of Agreements We Handle',
+      paragraphs: [
+        'With complex property transactions, engaging a knowledgeable lawyer for agreement to sell property is crucial. We handle drafting, review, negotiation, and risk control to protect both buyers and sellers.',
+        'Our team handles agreement to sell flat, resale flat, under-construction property, immovable property, and vehicle sale agreements with transaction-specific protections.',
+      ],
+    },
+    {
+      heading: 'The Importance of Legal Expertise',
+      paragraphs: [
+        'Professional legal review helps ensure compliance with law, protection of financial interests, prevention of disputes, and proper interpretation of complex property rules.',
+        'A well-drafted agreement significantly improves enforceability and helps secure a smoother transaction process.',
+      ],
+    },
+    {
+      heading: 'Agreement Formats and Considerations',
+      paragraphs: [
+        "A robust agreement to sell format generally includes parties' details, accurate property description, consideration amount and payment terms, possession date, rights and obligations, breach consequences, and dispute resolution mechanism.",
+        'For resale flat transactions, additional care is required for occupancy status, transaction history, and fixtures/fittings clauses.',
+      ],
+    },
+    {
+      heading: 'Drafting Specialized Agreements',
+      paragraphs: [
+        'We prepare draft agreement to sell property documents tailored to transaction type and risk profile, including clauses for timelines, title assurances, default events, and remedy structure.',
+        'Our drafting support also extends to draft agreement to sell a car and other movable-property transactions.',
+      ],
+    },
+    {
+      heading: 'Legal Fees and Consultation',
+      paragraphs: [
+        'Property lawyer fees are kept transparent and generally depend on property type/value, complexity, degree of customization, and level of representation needed.',
+        'We provide consultation-based estimates so you can assess scope and cost before execution.',
+      ],
+    },
+    {
+      heading: 'Stamp Duty Considerations in Agreements to Sell',
+      paragraphs: [
+        'Stamp duty implications vary by state and transaction structure. In many jurisdictions, an agreement to sell may attract stamp duty even before final sale deed execution.',
+        'We guide clients on applicable rates, state-level computation differences, lawful optimization, and compliance with local stamp-duty regulations, including related leave and license contexts where relevant.',
+      ],
+    },
+    {
+      heading: 'Landmark Cases in Property Law',
+      paragraphs: [
+        'Important precedents shape drafting strategy: Suraj Lamp & Industries Pvt. Ltd. v. State of Haryana (2012), Narne Construction P. Ltd. v. Union of India (2012), and K.P. Varghese v. Income Tax Officer (1981).',
+        'These rulings reinforce the need for careful drafting, proper documentation, and legally sustainable transfer structures.',
+      ],
+    },
+    {
+      heading: 'Contact Us for Expert Property Transaction Assistance',
+      paragraphs: [
+        'If you need a lawyer for agreement to sell property, or want review of an existing draft, our team can assist at every stage from term-sheet clarity to final execution readiness.',
+        'We help you navigate complex property law details while protecting your interests in each deed and transfer step.',
+      ],
+    },
+  ],
+  documentChecklist: [
+    'Identity and address proof of buyer and seller',
+    'Property title chain and ownership documents',
+    'Accurate property description with survey/flat details',
+    'Consideration amount terms, payment schedule, and receipts',
+    'Possession timeline and obligation clauses',
+    'Existing occupancy and previous transaction details (for resale)',
+    'Fixtures and fittings list (where applicable)',
+    'Draft cancellation, default, and dispute-resolution clauses',
+    'Stamp duty and registration-related supporting records',
+  ],
+  popularCases: [
+    'Suraj Lamp & Industries Pvt. Ltd. v. State of Haryana (2012)',
+    'Narne Construction P. Ltd. v. Union of India (2012)',
+    'K.P. Varghese v. Income Tax Officer (1981)',
+  ],
+  faqs: [
+    {
+      question: 'What is the difference between an agreement to sell and a sale deed?',
+      answer:
+        'An agreement to sell creates a promise to transfer property in the future, while a sale deed is the final instrument that completes legal transfer.',
+    },
+    {
+      question: 'How is stamp duty calculated for an agreement to sell?',
+      answer:
+        'Stamp duty varies by state and is usually linked to property value/consideration and local rules. A location-specific legal check is recommended before execution.',
+    },
+    {
+      question: 'Can an agreement to sell be cancelled?',
+      answer:
+        'Yes, cancellation can be done under agreed contractual conditions and applicable law, subject to drafted cancellation/default clauses.',
+    },
+    {
+      question: 'Is an agreement to sell legally binding?',
+      answer:
+        'Yes, it is a legally binding contract, though enforcement may require further legal steps depending on breach and relief sought.',
+    },
+    {
+      question: 'How long is an agreement to sell valid?',
+      answer:
+        'Validity is generally based on timelines written in the agreement, including performance deadlines and long-stop dates.',
+    },
+  ],
+};
+
 const AFT_OVERRIDES = {
   title: 'Armed Force Tribunal Lawyer - GAG Lawyers',
   description:
@@ -803,7 +943,12 @@ const ServicePage = () => {
     /contract lawyer|contract dispute/i.test(service.name || '') ||
     normalizedSlug.includes('contract-lawyer') ||
     normalizedSlug.includes('contract-disputes');
-  const hasSpecialService = isAftService || isBailService || isCatService || isChequeService || isCivilService || isContractService;
+  const isAgreementService =
+    AGREEMENT_SLUGS.has(normalizedSlug) ||
+    /agreement to sell/i.test(service.name || '') ||
+    normalizedSlug.includes('agreement-to-sell');
+  const hasSpecialService =
+    isAftService || isBailService || isCatService || isChequeService || isCivilService || isContractService || isAgreementService;
 
   const heroImage = isAftService ? AFT_OVERRIDES.image : (CATEGORY_IMAGES[service.category] || CATEGORY_IMAGES.civil);
 
@@ -819,6 +964,8 @@ const ServicePage = () => {
     ? CIVIL_OVERRIDES.title
     : isContractService
     ? CONTRACT_OVERRIDES.title
+    : isAgreementService
+    ? AGREEMENT_OVERRIDES.title
     : `${service.name} - Expert Legal Services | Grover & Grover Advocates`;
   const seoDescription = isAftService
     ? AFT_OVERRIDES.description
@@ -832,6 +979,8 @@ const ServicePage = () => {
     ? CIVIL_OVERRIDES.description
     : isContractService
     ? CONTRACT_OVERRIDES.description
+    : isAgreementService
+    ? AGREEMENT_OVERRIDES.description
     : (service.longDescription || service.shortDescription || service.overview);
   const seoKeywords = isAftService
     ? `${AFT_KEYWORDS.join(', ')}, ${AFT_KEYWORDS.join(', ')}`
@@ -845,6 +994,8 @@ const ServicePage = () => {
     ? `${CIVIL_KEYWORDS.join(', ')}, ${CIVIL_KEYWORDS.join(', ')}`
     : isContractService
     ? `${CONTRACT_KEYWORDS.join(', ')}, ${CONTRACT_KEYWORDS.join(', ')}`
+    : isAgreementService
+    ? `${AGREEMENT_KEYWORDS.join(', ')}, ${AGREEMENT_KEYWORDS.join(', ')}`
     : `${service.name}, legal services, ${service.category}, advocates, lawyers`;
 
   // FAQ data for the service
@@ -882,6 +1033,8 @@ const ServicePage = () => {
     ? CIVIL_OVERRIDES.faqs
     : isContractService
     ? CONTRACT_OVERRIDES.faqs
+    : isAgreementService
+    ? AGREEMENT_OVERRIDES.faqs
     : faqs;
   const specialContentBlocks = isAftService
     ? AFT_OVERRIDES.contentBlocks
@@ -895,6 +1048,8 @@ const ServicePage = () => {
     ? CIVIL_OVERRIDES.contentBlocks
     : isContractService
     ? CONTRACT_OVERRIDES.contentBlocks
+    : isAgreementService
+    ? AGREEMENT_OVERRIDES.contentBlocks
     : [];
   const specialDocChecklist = isAftService
     ? AFT_OVERRIDES.documentChecklist
@@ -908,6 +1063,8 @@ const ServicePage = () => {
     ? CIVIL_OVERRIDES.documentChecklist
     : isContractService
     ? CONTRACT_OVERRIDES.documentChecklist
+    : isAgreementService
+    ? AGREEMENT_OVERRIDES.documentChecklist
     : [];
   const specialPopularCases = isBailService
     ? BAIL_OVERRIDES.popularCases
@@ -919,6 +1076,8 @@ const ServicePage = () => {
     ? CIVIL_OVERRIDES.popularCases
     : isContractService
     ? CONTRACT_OVERRIDES.popularCases
+    : isAgreementService
+    ? AGREEMENT_OVERRIDES.popularCases
     : [];
 
   return (
@@ -959,6 +1118,8 @@ const ServicePage = () => {
                 ? 'Civil Lawyer'
                 : isContractService
                 ? 'Contract Lawyer'
+                : isAgreementService
+                ? 'Agreement to Sell'
                 : service.name}
             </h1>
             
@@ -975,6 +1136,8 @@ const ServicePage = () => {
                 ? CIVIL_OVERRIDES.subtitle
                 : isContractService
                 ? CONTRACT_OVERRIDES.subtitle
+                : isAgreementService
+                ? AGREEMENT_OVERRIDES.subtitle
                 : service.shortDescription}
             </p>
 
@@ -1025,6 +1188,8 @@ const ServicePage = () => {
                 ? 'Civil Law'
                 : isContractService
                 ? 'Contract Dispute Cases'
+                : isAgreementService
+                ? 'Agreement to Sell'
                 : 'Overview'}
             </h2>
             <p className="font-sans text-lg text-gray-700 leading-relaxed mb-8">
@@ -1040,6 +1205,8 @@ const ServicePage = () => {
                 ? CIVIL_OVERRIDES.contentBlocks[0].paragraphs[0]
                 : isContractService
                 ? CONTRACT_OVERRIDES.contentBlocks[0].paragraphs[0]
+                : isAgreementService
+                ? AGREEMENT_OVERRIDES.contentBlocks[0].paragraphs[0]
                 : service.overview}
             </p>
             {hasSpecialService && (
@@ -1139,9 +1306,11 @@ const ServicePage = () => {
                   ? 'CAT Filing Toolkit'
                   : isChequeService
                   ? 'Cheque Bounce Filing Toolkit'
-                  : isCivilService
-                  ? 'Civil Filing Toolkit'
-                  : 'Contract Filing Toolkit'}
+                : isCivilService
+                ? 'Civil Filing Toolkit'
+                : isAgreementService
+                ? 'Agreement Drafting Toolkit'
+                : 'Contract Filing Toolkit'}
               </p>
               <h2 className="font-serif text-4xl md:text-5xl font-bold text-white mb-4">
                 {isAftService
@@ -1152,9 +1321,11 @@ const ServicePage = () => {
                   ? 'Documents Required for CAT Matters'
                   : isChequeService
                   ? 'Documents Required for Cheque Bounce Cases'
-                  : isCivilService
-                  ? 'Documents Required for Civil Cases'
-                  : 'Documents Required for Contract Disputes'}
+                : isCivilService
+                ? 'Documents Required for Civil Cases'
+                : isAgreementService
+                ? 'Documents Required for Agreement to Sell'
+                : 'Documents Required for Contract Disputes'}
               </h2>
               <p className="font-sans text-slate-300 text-lg max-w-3xl">
                 Keep these records ready before filing. Complete documentation improves filing quality and reduces procedural delays.
@@ -1183,6 +1354,8 @@ const ServicePage = () => {
                     ? 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80'
                     : isCivilService
                     ? 'https://images.unsplash.com/photo-1436450412740-6b988f486c6b?auto=format&fit=crop&w=800&q=80'
+                    : isAgreementService
+                    ? 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80'
                     : 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80'}
                   alt={isAftService
                     ? 'Legal case documents prepared for AFT filing'
@@ -1194,6 +1367,8 @@ const ServicePage = () => {
                     ? 'Legal case documents prepared for cheque bounce filing'
                     : isCivilService
                     ? 'Legal case documents prepared for civil filing'
+                    : isAgreementService
+                    ? 'Property transaction documents prepared for agreement to sell'
                     : 'Legal case documents prepared for contract dispute filing'}
                   className="h-48 w-full object-cover"
                 />
@@ -1210,7 +1385,7 @@ const ServicePage = () => {
       )}
 
       {/* BAIL POPULAR CASES */}
-      {(isBailService || isCatService || isChequeService || isCivilService || isContractService) && specialPopularCases.length > 0 && (
+      {(isBailService || isCatService || isChequeService || isCivilService || isContractService || isAgreementService) && specialPopularCases.length > 0 && (
         <section className="bg-white py-16 md:py-24">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="font-serif text-4xl md:text-5xl font-bold text-navy mb-12">
@@ -1222,6 +1397,8 @@ const ServicePage = () => {
                 ? 'Popular Cases in Supreme Court and High Court Related To Civil Law Matters'
                 : isContractService
                 ? 'Popular Cases of Supreme Court and High Court Related To Contract Dispute Cases'
+                : isAgreementService
+                ? 'Landmark Cases Related to Agreement to Sell and Property Transactions'
                 : 'Popular Cases in Supreme Court and High Court'}
             </h2>
             <div className="space-y-4">
