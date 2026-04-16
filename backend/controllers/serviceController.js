@@ -7,7 +7,7 @@ const getAllServices = async (req, res) => {
     const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? limitRaw : null;
 
     const projection = compact
-      ? 'name slug title category shortDescription description iconName order'
+      ? 'name slug title category shortDescription description iconName order heroTitle heroDescription metaDescription seoTitle'
       : null;
 
     let query = Service.find({}, projection).sort({ order: 1 }).lean();

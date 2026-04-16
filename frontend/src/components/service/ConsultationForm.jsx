@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Phone, Mail, MapPin, Send, CheckCircle, AlertCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import ReCaptcha from '../ReCaptcha';
 import API_BASE_URL from '../../config/api';
 
@@ -14,6 +15,23 @@ const ConsultationForm = ({ serviceName }) => {
   const [submitting, setSubmitting] = useState(false);
   const [notification, setNotification] = useState(null);
   const [captchaToken, setCaptchaToken] = useState(null);
+  const [officeDetails, setOfficeDetails] = useState(null);
+
+  // Fetch office details from database
+  useEffect(() => {
+    const fetchOfficeDetails = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/settings/global`);
+        const data = await response.json();
+        if (data.success && data.data) {
+          setOfficeDetails(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching office details:', error);
+      }
+    };
+    fetchOfficeDetails();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -195,7 +213,7 @@ const ConsultationForm = ({ serviceName }) => {
             <div>
               <p className="font-sans text-sm font-semibold text-gray-900 mb-1">Address</p>
               <p className="font-sans text-sm text-gray-600">
-                Supreme Court of India, New Delhi
+                {officeDetails?.officeAddress || 'Supreme Court of India, New Delhi'}
               </p>
             </div>
           </div>
@@ -204,8 +222,11 @@ const ConsultationForm = ({ serviceName }) => {
             <Phone size={20} className="text-[#c9a84c] flex-shrink-0 mt-1" />
             <div>
               <p className="font-sans text-sm font-semibold text-gray-900 mb-1">Phone</p>
-              <a href="tel:+919996263370" className="font-sans text-sm text-gray-600 hover:text-[#c9a84c]">
-                +91 99962 63370
+              <a 
+                href={`tel:${officeDetails?.phone || '+919996263370'}`} 
+                className="font-sans text-sm text-gray-600 hover:text-[#c9a84c] transition-colors"
+              >
+                {officeDetails?.phone || '+91 99962 63370'}
               </a>
             </div>
           </div>
@@ -214,8 +235,11 @@ const ConsultationForm = ({ serviceName }) => {
             <Mail size={20} className="text-[#c9a84c] flex-shrink-0 mt-1" />
             <div>
               <p className="font-sans text-sm font-semibold text-gray-900 mb-1">Email</p>
-              <a href="mailto:info@gaglawyers.com" className="font-sans text-sm text-gray-600 hover:text-[#c9a84c]">
-                info@gaglawyers.com
+              <a 
+                href={`mailto:${officeDetails?.email || 'info@gaglawyers.com'}`} 
+                className="font-sans text-sm text-gray-600 hover:text-[#c9a84c] transition-colors"
+              >
+                {officeDetails?.email || 'info@gaglawyers.com'}
               </a>
             </div>
           </div>
@@ -228,15 +252,36 @@ const ConsultationForm = ({ serviceName }) => {
           Quick Links
         </h3>
         <div className="space-y-2">
-          {['About Us', 'Our Team', 'All Services', 'Contact Us', 'FAQs'].map((link, index) => (
-            <a
-              key={index}
-              href="#"
-              className="block font-sans text-sm text-gray-600 hover:text-[#c9a84c] hover:pl-2 transition-all"
-            >
-              → {link}
-            </a>
-          ))}
+          <Link
+            to="/about"
+            className="block font-sans text-sm text-gray-600 hover:text-[#c9a84c] hover:pl-2 transition-all"
+          >
+            → About Us
+          </Link>
+          <Link
+            to="/team"
+            className="block font-sans text-sm text-gray-600 hover:text-[#c9a84c] hover:pl-2 transition-all"
+          >
+            → Our Team
+          </Link>
+          <Link
+            to="/services"
+            className="block font-sans text-sm text-gray-600 hover:text-[#c9a84c] hover:pl-2 transition-all"
+          >
+            → All Services
+          </Link>
+          <Link
+            to="/contact"
+            className="block font-sans text-sm text-gray-600 hover:text-[#c9a84c] hover:pl-2 transition-all"
+          >
+            → Contact Us
+          </Link>
+          <Link
+            to="/services"
+            className="block font-sans text-sm text-gray-600 hover:text-[#c9a84c] hover:pl-2 transition-all"
+          >
+            → FAQs
+          </Link>
         </div>
       </div>
     </div>

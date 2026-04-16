@@ -114,6 +114,10 @@ const baseForm = {
   longDescription: '',
   description: '',
   overview: '',
+  heroTitle: '',
+  heroDescription: '',
+  metaDescription: '',
+  seoTitle: '',
   typesOfCasesText: '',
   keyPointsText: '',
   process: [{ step: 1, title: '', description: '' }],
@@ -150,6 +154,10 @@ const formFromService = (service) => {
     longDescription: normalized.longDescription,
     description: service?.description || normalized.shortDescription,
     overview: service?.overview || '',
+    heroTitle: String(service?.heroTitle || '').trim(),
+    heroDescription: String(service?.heroDescription || '').trim(),
+    metaDescription: String(service?.metaDescription || '').trim(),
+    seoTitle: String(service?.seoTitle || '').trim(),
     typesOfCasesText: toMultilineText(service?.typesOfCases),
     keyPointsText: toMultilineText(service?.keyPoints),
     process,
@@ -483,6 +491,56 @@ const DrawerForm = ({
               placeholder="Ex: corporate-lawyer"
               className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 shadow-sm transition-all duration-200 ease-out placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-200/70 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-100"
             />
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-900/50">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Service page hero and SEO
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Hero title</label>
+                <input
+                  name="heroTitle"
+                  value={formData.heroTitle}
+                  onChange={onChange}
+                  placeholder="Optional — defaults to service title or name on the website"
+                  className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 shadow-sm transition-all duration-200 ease-out placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-200/70 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-100"
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Hero description</label>
+                <textarea
+                  name="heroDescription"
+                  value={formData.heroDescription}
+                  onChange={onChange}
+                  rows={3}
+                  placeholder="Optional — defaults to short description on the website"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 shadow-sm transition-all duration-200 ease-out placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-200/70 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-200"
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">SEO title (browser tab)</label>
+                <input
+                  name="seoTitle"
+                  value={formData.seoTitle}
+                  onChange={onChange}
+                  placeholder="Optional — used for the page title tag when set"
+                  className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 shadow-sm transition-all duration-200 ease-out placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-200/70 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-100"
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Meta description</label>
+                <textarea
+                  name="metaDescription"
+                  value={formData.metaDescription}
+                  onChange={onChange}
+                  rows={3}
+                  placeholder="Optional — used for meta description when set"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 shadow-sm transition-all duration-200 ease-out placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-200/70 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-200"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -847,6 +905,10 @@ const ServiceManager = () => {
       longDescription,
       description,
       overview: String(formData.overview || '').trim(),
+      heroTitle: String(formData.heroTitle || '').trim(),
+      heroDescription: String(formData.heroDescription || '').trim(),
+      metaDescription: String(formData.metaDescription || '').trim(),
+      seoTitle: String(formData.seoTitle || '').trim(),
       typesOfCases: parseMultiline(formData.typesOfCasesText),
       keyPoints: parseMultiline(formData.keyPointsText),
       process,

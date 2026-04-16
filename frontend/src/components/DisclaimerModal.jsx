@@ -13,6 +13,13 @@ const DisclaimerModal = () => {
   }, []);
 
   const fetchDisclaimerSettings = async () => {
+    // Check if user already accepted disclaimer
+    const hasAccepted = localStorage.getItem('gaglawyers-disclaimer-accepted');
+    if (hasAccepted === 'true') {
+      setIsOpen(false);
+      return;
+    }
+
     try {
       const [enabledRes, textRes] = await Promise.all([
         fetch(`${API_BASE_URL}/api/settings/disclaimerEnabled`),

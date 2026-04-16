@@ -14,6 +14,7 @@ import Gallery from './pages/Gallery';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
 import ServicePage from './pages/ServicePage';
+import ServicePageDynamic from './pages/ServicePageDynamic';
 import LocationPage from './pages/LocationPage';
 import LocationPageDynamic from './pages/LocationPageDynamic';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -80,7 +81,7 @@ function App() {
             <Route path="awards" element={<Awards />} />
             <Route path="gallery" element={<Gallery />} />
             <Route path="services" element={<Services />} />
-            <Route path="services/:slug" element={<ServicePage />} />
+            <Route path="services/:slug" element={<ServicePageDynamic />} />
             <Route path="blog" element={<Blog />} />
             <Route path="blog/:slug" element={<BlogPost />} />
             <Route path="contact" element={<Contact />} />

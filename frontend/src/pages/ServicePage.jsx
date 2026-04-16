@@ -7,6 +7,26 @@ import API_BASE_URL from '../config/api';
 
 const FALLBACK_PHONE = '+919996263370';
 
+/** Display-only: trim trailing "– GAG Lawyers" style suffixes from CMS titles (does not mutate API data). */
+const stripGagLawyersTitleSuffix = (value) => {
+  if (typeof value !== 'string') return '';
+  let s = value.trim();
+  if (!s) return '';
+  const patterns = [
+    /\s*[–—-]\s*GAG\s+Lawyers\s*$/i,
+    /\s*\|\s*GAG\s+Lawyers\s*$/i,
+    /\s*,\s*GAG\s+Lawyers\s*$/i,
+  ];
+  let prev;
+  do {
+    prev = s;
+    for (const re of patterns) {
+      s = s.replace(re, '').trim();
+    }
+  } while (s !== prev);
+  return s.trim();
+};
+
 const CATEGORY_IMAGES = {
   military: 'https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&w=1600&q=80',
   criminal: 'https://images.unsplash.com/photo-1589578527966-fdac0f44566c?auto=format&fit=crop&w=1600&q=80',
@@ -952,7 +972,19 @@ const ServicePage = () => {
 
   const heroImage = isAftService ? AFT_OVERRIDES.image : (CATEGORY_IMAGES[service.category] || CATEGORY_IMAGES.civil);
 
-  const seoTitle = isAftService
+  const heroHeadingRaw = [service.heroTitle, service.title, service.name]
+    .map((v) => (typeof v === 'string' ? v.trim() : ''))
+    .find((v) => v.length > 0) || '';
+  const heroHeading = stripGagLawyersTitleSuffix(heroHeadingRaw) || heroHeadingRaw;
+
+  const heroSubtext = [service.heroDescription, service.shortDescription]
+    .map((v) => (typeof v === 'string' ? v.trim() : ''))
+    .find((v) => v.length > 0) || '';
+
+  const cmsSeoTitle = typeof service.seoTitle === 'string' ? service.seoTitle.trim() : '';
+  const seoTitleRaw = cmsSeoTitle
+    ? cmsSeoTitle
+    : isAftService
     ? AFT_OVERRIDES.title
     : isBailService
     ? BAIL_OVERRIDES.title
@@ -966,8 +998,17 @@ const ServicePage = () => {
     ? CONTRACT_OVERRIDES.title
     : isAgreementService
     ? AGREEMENT_OVERRIDES.title
-    : `${service.name} - Expert Legal Services | Grover & Grover Advocates`;
-  const seoDescription = isAftService
+    : `${stripGagLawyersTitleSuffix(service.name || '') || service.name} - Expert Legal Services | Grover & Grover Advocates`;
+  const seoTitle = stripGagLawyersTitleSuffix(seoTitleRaw) || seoTitleRaw;
+
+  const breadcrumbServiceName =
+    stripGagLawyersTitleSuffix(typeof service.name === 'string' ? service.name.trim() : '') ||
+    (typeof service.name === 'string' ? service.name.trim() : '');
+
+  const cmsMetaDescription = typeof service.metaDescription === 'string' ? service.metaDescription.trim() : '';
+  const seoDescription = cmsMetaDescription
+    ? cmsMetaDescription
+    : isAftService
     ? AFT_OVERRIDES.description
     : isBailService
     ? BAIL_OVERRIDES.description
@@ -1102,43 +1143,15 @@ const ServicePage = () => {
               <ChevronRight size={16} />
               <Link to="/services" className="hover:text-gold transition">Services</Link>
               <ChevronRight size={16} />
-              <span className="text-gold">{service.name}</span>
+              <span className="text-gold">{breadcrumbServiceName}</span>
             </div>
 
             <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-              {isAftService
-                ? 'Armed Force Tribunal Lawyer'
-                : isBailService
-                ? 'Bail Lawyer'
-                : isCatService
-                ? 'CAT Matters Lawyer'
-                : isChequeService
-                ? 'Cheque Bounce Lawyer'
-                : isCivilService
-                ? 'Civil Lawyer'
-                : isContractService
-                ? 'Contract Lawyer'
-                : isAgreementService
-                ? 'Agreement to Sell'
-                : service.name}
+              {heroHeading}
             </h1>
             
             <p className="font-sans text-lg md:text-xl text-gray-300 mb-8 leading-relaxed">
-              {isAftService
-                ? AFT_OVERRIDES.subtitle
-                : isBailService
-                ? BAIL_OVERRIDES.subtitle
-                : isCatService
-                ? CAT_OVERRIDES.subtitle
-                : isChequeService
-                ? CHEQUE_OVERRIDES.subtitle
-                : isCivilService
-                ? CIVIL_OVERRIDES.subtitle
-                : isContractService
-                ? CONTRACT_OVERRIDES.subtitle
-                : isAgreementService
-                ? AGREEMENT_OVERRIDES.subtitle
-                : service.shortDescription}
+              {heroSubtext}
             </p>
 
             <a href={`tel:${FALLBACK_PHONE}`}>

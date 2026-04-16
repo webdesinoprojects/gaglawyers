@@ -17,6 +17,31 @@ const serviceSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+  /** Optional: shown as the service page hero H1 when set (falls back to title, then name). */
+  heroTitle: {
+    type: String,
+    trim: true,
+  },
+  /** Optional: hero subtitle under the H1 (falls back to shortDescription). */
+  heroDescription: {
+    type: String,
+    trim: true,
+  },
+  /** Optional: hero background image URL */
+  heroImage: {
+    type: String,
+    trim: true,
+  },
+  /** Optional: `<meta name="description">` / SEO description when set. */
+  metaDescription: {
+    type: String,
+    trim: true,
+  },
+  /** Optional: document `<title>` when set (falls back to legacy SEO logic on the frontend). */
+  seoTitle: {
+    type: String,
+    trim: true,
+  },
   category: {
     type: String,
     required: true,
