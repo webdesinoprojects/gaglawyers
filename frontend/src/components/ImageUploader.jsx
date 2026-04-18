@@ -1,11 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Upload, X, Loader } from 'lucide-react';
 import API_BASE_URL from '../config/api';
 
-const ImageUploader = ({ onImageUploaded, currentImage = '', label = 'Upload Image' }) => {
+const ImageUploader = ({
+  onImageUploaded,
+  currentImage = '',
+  label = 'Upload Image',
+  showOptionalLink = true,
+  optionalLinkLabel = 'Optional image link',
+}) => {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(currentImage);
+  const [linkValue, setLinkValue] = useState(currentImage);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    setPreview(currentImage || '');
+    setLinkValue(currentImage || '');
+  }, [currentImage]);
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
@@ -62,7 +74,14 @@ const ImageUploader = ({ onImageUploaded, currentImage = '', label = 'Upload Ima
 
   const handleRemove = () => {
     setPreview('');
+    setLinkValue('');
     onImageUploaded('', '');
+  };
+
+  const handleOptionalLinkChange = (value) => {
+    setLinkValue(value);
+    setPreview(value);
+    onImageUploaded(value, '');
   };
 
   return (
@@ -120,6 +139,21 @@ const ImageUploader = ({ onImageUploaded, currentImage = '', label = 'Upload Ima
             disabled={uploading}
           />
         </label>
+      )}
+
+      {showOptionalLink && (
+        <div className="mt-3">
+          <label className="block font-sans text-xs font-medium text-gray-600 mb-1">
+            {optionalLinkLabel}
+          </label>
+          <input
+            type="text"
+            value={linkValue}
+            onChange={(e) => handleOptionalLinkChange(e.target.value)}
+            placeholder="Paste image URL only if needed"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+          />
+        </div>
       )}
     </div>
   );

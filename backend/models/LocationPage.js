@@ -24,6 +24,11 @@ const locationPageSchema = new mongoose.Schema({
     index: true,
   },
   content: {
+    templateMode: {
+      type: String,
+      enum: ['service', 'custom'],
+      default: 'service',
+    },
     heading: { type: String, required: true },
     intro: { type: String, required: true },
     sections: [{
@@ -31,6 +36,12 @@ const locationPageSchema = new mongoose.Schema({
       content: String,
     }],
   },
+  images: [{
+    url: { type: String, default: '' },
+    alt: { type: String, default: '' },
+    caption: { type: String, default: '' },
+    publicId: { type: String, default: '' },
+  }],
   seo: {
     title: { type: String, required: true },
     description: { type: String, required: true },

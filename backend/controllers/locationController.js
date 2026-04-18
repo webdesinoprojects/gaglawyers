@@ -1,4 +1,5 @@
 const LocationPage = require('../models/LocationPage');
+const Service = require('../models/Service');
 
 const escapeRegExp = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -6,6 +7,10 @@ const getAllLocationPages = async (req, res) => {
   try {
     const { service, city, active, page = 1, limit = 20, skip = 0, search, missingMeta } = req.query;
     const andConditions = [];
+    const validServiceIds = await Service.distinct('_id');
+
+    // Strictly include only pages linked to existing services
+    andConditions.push({ service: { $in: validServiceIds } });
 
     if (active === 'true') {
       andConditions.push({ isActive: true });
@@ -78,10 +83,10 @@ const getAllLocationPages = async (req, res) => {
 const getLocationPageBySlug = async (req, res) => {
   try {
     const page = await LocationPage.findOne({ slug: req.params.slug, isActive: true })
-      .populate('service', 'title description')
+      .populate('service', 'name slug')
       .lean();
 
-    if (!page) {
+    if (!page || !page.service) {
       return res.status(404).json({
         success: false,
         message: 'Page not found',
@@ -133,22 +138,14 @@ const getFooterLocationLinks = async (req, res) => {
         },
       },
       {
-        $unwind: {
-          path: '$serviceInfo',
-          preserveNullAndEmptyArrays: true,
-        },
+        $unwind: '$serviceInfo',
       },
       {
         $project: {
           city: { $trim: { input: '$city' } },
           serviceName: {
             $trim: {
-              input: {
-                $ifNull: [
-                  '$serviceInfo.name',
-                  { $ifNull: ['$serviceInfo.title', '$serviceName'] },
-                ],
-              },
+              input: '$serviceInfo.name',
             },
           },
           slug: 1,
@@ -184,6 +181,15 @@ const getFooterLocationLinks = async (req, res) => {
 
 const createLocationPage = async (req, res) => {
   try {
+    const serviceId = req.body?.service;
+    const serviceExists = serviceId ? await Service.exists({ _id: serviceId }) : null;
+    if (!serviceExists) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid service selected',
+      });
+    }
+
     const page = await LocationPage.create(req.body);
     res.status(201).json({
       success: true,
@@ -200,6 +206,15 @@ const createLocationPage = async (req, res) => {
 
 const updateLocationPage = async (req, res) => {
   try {
+    const serviceId = req.body?.service;
+    const serviceExists = serviceId ? await Service.exists({ _id: serviceId }) : null;
+    if (!serviceExists) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid service selected',
+      });
+    }
+
     const page = await LocationPage.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
@@ -317,6 +332,27 @@ const bulkCreateLocationPages = async (req, res) => {
       });
     }
 
+    const uniqueServiceIds = [
+      ...new Set(
+        pages
+          .map((page) => String(page?.service || '').trim())
+          .filter(Boolean)
+      ),
+    ];
+
+    const validServices = await Service.find({ _id: { $in: uniqueServiceIds } })
+      .select('_id')
+      .lean();
+    const validServiceIdSet = new Set(validServices.map((service) => String(service._id)));
+    const hasInvalidService = uniqueServiceIds.some((id) => !validServiceIdSet.has(id));
+
+    if (hasInvalidService) {
+      return res.status(400).json({
+        success: false,
+        message: 'One or more pages have invalid service references',
+      });
+    }
+
     const createdPages = await LocationPage.insertMany(pages, { ordered: false });
 
     res.status(201).json({
@@ -344,11 +380,17 @@ const bulkCreateLocationPages = async (req, res) => {
 
 const getLocationStats = async (req, res) => {
   try {
+    const validServiceIds = await Service.distinct('_id');
+    const validFilter = { service: { $in: validServiceIds } };
+
     const [total, active, inactive, byService] = await Promise.all([
-      LocationPage.countDocuments(),
-      LocationPage.countDocuments({ isActive: true }),
-      LocationPage.countDocuments({ isActive: false }),
+      LocationPage.countDocuments(validFilter),
+      LocationPage.countDocuments({ ...validFilter, isActive: true }),
+      LocationPage.countDocuments({ ...validFilter, isActive: false }),
       LocationPage.aggregate([
+        {
+          $match: validFilter,
+        },
         {
           $group: {
             _id: '$service',
@@ -368,7 +410,7 @@ const getLocationStats = async (req, res) => {
         },
         {
           $project: {
-            serviceName: '$serviceInfo.title',
+            serviceName: '$serviceInfo.name',
             count: 1,
           },
         },

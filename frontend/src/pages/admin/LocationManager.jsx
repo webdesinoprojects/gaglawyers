@@ -4,6 +4,49 @@ import Button from '../../components/Button';
 import API_BASE_URL from '../../config/api';
 import { buildLocationPageSlug } from '../../utils/slugs';
 
+const DEFAULT_SECTIONS = [
+  { title: 'Why Choose Our Services', content: 'We provide comprehensive legal solutions tailored to your specific needs. Our experienced team of advocates delivers expert guidance and representation.' },
+  { title: 'Our Approach', content: 'We understand that every legal matter is unique. Our approach combines deep legal expertise with practical insight, ensuring you receive advice that is not only legally sound but also commercially viable.' },
+  { title: 'Contact Our Legal Team', content: 'If you need legal assistance, our team is ready to help. We offer initial consultations to understand your situation and provide clear guidance on the best path forward.' }
+];
+
+const createEmptyImageSlot = () => ({
+  url: '',
+  alt: '',
+  caption: '',
+  publicId: '',
+});
+
+const normalizeImages = (images, minSlots = 3) => {
+  const normalized = Array.isArray(images)
+    ? images.map((image) => ({
+      ...createEmptyImageSlot(),
+      ...(image || {}),
+    }))
+    : [];
+
+  while (normalized.length < minSlots) {
+    normalized.push(createEmptyImageSlot());
+  }
+
+  return normalized;
+};
+
+const createInitialFormData = () => ({
+  service: '',
+  city: '',
+  slug: '',
+  templateMode: 'service',
+  heading: '',
+  intro: '',
+  sections: DEFAULT_SECTIONS.map((section) => ({ ...section })),
+  images: normalizeImages([]),
+  seoTitle: '',
+  seoDescription: '',
+  seoKeywords: '',
+  isActive: true,
+});
+
 const LocationManager = () => {
   const [pages, setPages] = useState([]);
   const [services, setServices] = useState([]);
@@ -13,27 +56,7 @@ const LocationManager = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingPageId, setEditingPageId] = useState(null);
-  const [formData, setFormData] = useState({
-    service: '',
-    city: '',
-    slug: '',
-    heading: '',
-    intro: '',
-    sections: [
-      { title: 'Why Choose Our Services', content: 'We provide comprehensive legal solutions tailored to your specific needs. Our experienced team of advocates delivers expert guidance and representation.' },
-      { title: 'Our Approach', content: 'We understand that every legal matter is unique. Our approach combines deep legal expertise with practical insight, ensuring you receive advice that is not only legally sound but also commercially viable.' },
-      { title: 'Contact Our Legal Team', content: 'If you need legal assistance, our team is ready to help. We offer initial consultations to understand your situation and provide clear guidance on the best path forward.' }
-    ],
-    images: [
-      { url: '', alt: '', caption: '' },
-      { url: '', alt: '', caption: '' },
-      { url: '', alt: '', caption: '' }
-    ],
-    seoTitle: '',
-    seoDescription: '',
-    seoKeywords: '',
-    isActive: true,
-  });
+  const [formData, setFormData] = useState(createInitialFormData);
   
   const [filters, setFilters] = useState({
     service: '',
@@ -205,10 +228,12 @@ const LocationManager = () => {
       city: formData.city,
       slug,
       content: {
+        templateMode: formData.templateMode || 'service',
         heading: formData.heading || `${selectedService.name || selectedService.title} in ${formData.city}`,
         intro: formData.intro || `Expert ${(selectedService.name || selectedService.title).toLowerCase()} services in ${formData.city}.`,
         sections: formData.sections.filter(s => s.title && s.content),
       },
+      images: formData.images,
       seo: {
         title: formData.seoTitle || `${selectedService.name || selectedService.title} in ${formData.city} | GAG Lawyers`,
         description: formData.seoDescription || `Expert ${(selectedService.name || selectedService.title).toLowerCase()} services in ${formData.city}. Contact GAG Lawyers for professional legal assistance.`,
@@ -233,27 +258,7 @@ const LocationManager = () => {
       if (data.success) {
         alert('Page created successfully');
         setShowCreateModal(false);
-        setFormData({
-          service: '',
-          city: '',
-          slug: '',
-          heading: '',
-          intro: '',
-          sections: [
-            { title: 'Why Choose Our Services', content: 'We provide comprehensive legal solutions tailored to your specific needs. Our experienced team of advocates delivers expert guidance and representation.' },
-            { title: 'Our Approach', content: 'We understand that every legal matter is unique. Our approach combines deep legal expertise with practical insight, ensuring you receive advice that is not only legally sound but also commercially viable.' },
-            { title: 'Contact Our Legal Team', content: 'If you need legal assistance, our team is ready to help. We offer initial consultations to understand your situation and provide clear guidance on the best path forward.' }
-          ],
-          images: [
-            { url: '', alt: '', caption: '' },
-            { url: '', alt: '', caption: '' },
-            { url: '', alt: '', caption: '' }
-          ],
-          seoTitle: '',
-          seoDescription: '',
-          seoKeywords: '',
-          isActive: true,
-        });
+        setFormData(createInitialFormData());
         fetchPages();
         fetchStats();
       } else {
@@ -271,18 +276,11 @@ const LocationManager = () => {
       service: page.service?._id || page.service,
       city: page.city,
       slug: page.slug || '',
+      templateMode: page.content?.templateMode || 'service',
       heading: page.content?.heading || '',
       intro: page.content?.intro || '',
-      sections: page.content?.sections || [
-        { title: 'Why Choose Our Services', content: '' },
-        { title: 'Our Approach', content: '' },
-        { title: 'Contact Our Legal Team', content: '' }
-      ],
-      images: page.images || [
-        { url: '', alt: '', caption: '' },
-        { url: '', alt: '', caption: '' },
-        { url: '', alt: '', caption: '' }
-      ],
+      sections: page.content?.sections || DEFAULT_SECTIONS.map((section) => ({ ...section, content: '' })),
+      images: normalizeImages(page.images),
       seoTitle: page.seo?.title || '',
       seoDescription: page.seo?.description || '',
       seoKeywords: page.seo?.keywords || '',
@@ -313,6 +311,7 @@ const LocationManager = () => {
       city: formData.city,
       slug,
       content: {
+        templateMode: formData.templateMode || 'service',
         heading: formData.heading,
         intro: formData.intro,
         sections: formData.sections.filter(s => s.title && s.content),
@@ -343,26 +342,7 @@ const LocationManager = () => {
         alert('Page updated successfully');
         setShowEditModal(false);
         setEditingPageId(null);
-        setFormData({
-          service: '',
-          city: '',
-          heading: '',
-          intro: '',
-          sections: [
-            { title: 'Why Choose Our Services', content: 'We provide comprehensive legal solutions tailored to your specific needs. Our experienced team of advocates delivers expert guidance and representation.' },
-            { title: 'Our Approach', content: 'We understand that every legal matter is unique. Our approach combines deep legal expertise with practical insight, ensuring you receive advice that is not only legally sound but also commercially viable.' },
-            { title: 'Contact Our Legal Team', content: 'If you need legal assistance, our team is ready to help. We offer initial consultations to understand your situation and provide clear guidance on the best path forward.' }
-          ],
-          images: [
-            { url: '', alt: '', caption: '' },
-            { url: '', alt: '', caption: '' },
-            { url: '', alt: '', caption: '' }
-          ],
-          seoTitle: '',
-          seoDescription: '',
-          seoKeywords: '',
-          isActive: true,
-        });
+        setFormData(createInitialFormData());
         fetchPages();
         fetchStats();
       } else {
@@ -442,6 +422,13 @@ const LocationManager = () => {
     updateImage(index, 'publicId', '');
     updateImage(index, 'alt', '');
     updateImage(index, 'caption', '');
+  };
+
+  const addImageSlot = () => {
+    setFormData((prev) => ({
+      ...prev,
+      images: [...normalizeImages(prev.images, 0), createEmptyImageSlot()],
+    }));
   };
 
   const handleServiceCityChange = (field, value) => {
@@ -740,6 +727,40 @@ const LocationManager = () => {
                   <div className="space-y-4">
                     <div>
                       <label className="block font-sans text-sm font-semibold text-gray-800 mb-2">
+                        Layout Source
+                      </label>
+                      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                        <label className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="templateModeCreate"
+                            checked={formData.templateMode !== 'custom'}
+                            onChange={() => setFormData(prev => ({ ...prev, templateMode: 'service' }))}
+                            className="mt-1"
+                          />
+                          <span className="text-sm text-gray-700">
+                            <span className="block font-semibold text-gray-900">Centralized Service Template</span>
+                            Uses Service Manager template for all location pages of this service.
+                          </span>
+                        </label>
+                        <label className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="templateModeCreate"
+                            checked={formData.templateMode === 'custom'}
+                            onChange={() => setFormData(prev => ({ ...prev, templateMode: 'custom' }))}
+                            className="mt-1"
+                          />
+                          <span className="text-sm text-gray-700">
+                            <span className="block font-semibold text-gray-900">Custom Location Template</span>
+                            This page will use its own section content from Location Manager.
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-2">
                         Main Heading
                       </label>
                       <input
@@ -764,9 +785,18 @@ const LocationManager = () => {
 
                     {/* Image Upload */}
                     <div>
-                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-3">
-                        Images (Upload to Cloudinary)
-                      </label>
+                      <div className="flex items-center justify-between mb-3">
+                        <label className="block font-sans text-sm font-semibold text-gray-800">
+                          Images (Upload to Cloudinary)
+                        </label>
+                        <button
+                          type="button"
+                          onClick={addImageSlot}
+                          className="text-sm text-navy hover:text-navy/80 font-sans font-medium"
+                        >
+                          + Add Image Slot
+                        </button>
+                      </div>
                       <div className="space-y-3">
                         {formData.images.map((image, index) => (
                           <div key={index} className="p-4 bg-gray-50 rounded-lg border-2 border-gray-300">
@@ -841,49 +871,56 @@ const LocationManager = () => {
                     </div>
 
                     {/* Content Sections */}
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <label className="block font-sans text-sm font-semibold text-gray-800">
-                          Content Sections
-                        </label>
-                        <button
-                          onClick={addSection}
-                          className="text-sm text-navy hover:text-navy/80 font-sans font-medium"
-                        >
-                          + Add Section
-                        </button>
-                      </div>
-                      
-                      {formData.sections.map((section, index) => (
-                        <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-sm font-semibold text-gray-600">Section {index + 1}</span>
-                            {formData.sections.length > 1 && (
-                              <button
-                                onClick={() => removeSection(index)}
-                                className="text-red-500 hover:text-red-700 text-sm"
-                              >
-                                Remove
-                              </button>
-                            )}
-                          </div>
-                          <input
-                            type="text"
-                            value={section.title}
-                            onChange={(e) => updateSection(index, 'title', e.target.value)}
-                            placeholder="Section title"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 font-sans text-sm"
-                          />
-                          <textarea
-                            value={section.content}
-                            onChange={(e) => updateSection(index, 'content', e.target.value)}
-                            placeholder="Section content"
-                            rows="3"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm resize-none"
-                          />
+                    {formData.templateMode === 'custom' ? (
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <label className="block font-sans text-sm font-semibold text-gray-800">
+                            Content Sections
+                          </label>
+                          <button
+                            onClick={addSection}
+                            className="text-sm text-navy hover:text-navy/80 font-sans font-medium"
+                          >
+                            + Add Section
+                          </button>
                         </div>
-                      ))}
-                    </div>
+                        
+                        {formData.sections.map((section, index) => (
+                          <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-sm font-semibold text-gray-600">Section {index + 1}</span>
+                              {formData.sections.length > 1 && (
+                                <button
+                                  onClick={() => removeSection(index)}
+                                  className="text-red-500 hover:text-red-700 text-sm"
+                                >
+                                  Remove
+                                </button>
+                              )}
+                            </div>
+                            <input
+                              type="text"
+                              value={section.title}
+                              onChange={(e) => updateSection(index, 'title', e.target.value)}
+                              placeholder="Section title"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 font-sans text-sm"
+                            />
+                            <textarea
+                              value={section.content}
+                              onChange={(e) => updateSection(index, 'content', e.target.value)}
+                              placeholder="Section content"
+                              rows="3"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm resize-none"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                        Section layout/content is controlled centrally from Service Manager for this service.
+                        Switch to <strong>Custom Location Template</strong> if you want this location page to override sections.
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1062,6 +1099,40 @@ const LocationManager = () => {
                   <div className="space-y-4">
                     <div>
                       <label className="block font-sans text-sm font-semibold text-gray-800 mb-2">
+                        Layout Source
+                      </label>
+                      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                        <label className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="templateModeEdit"
+                            checked={formData.templateMode !== 'custom'}
+                            onChange={() => setFormData(prev => ({ ...prev, templateMode: 'service' }))}
+                            className="mt-1"
+                          />
+                          <span className="text-sm text-gray-700">
+                            <span className="block font-semibold text-gray-900">Centralized Service Template</span>
+                            Uses Service Manager template for all location pages of this service.
+                          </span>
+                        </label>
+                        <label className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="templateModeEdit"
+                            checked={formData.templateMode === 'custom'}
+                            onChange={() => setFormData(prev => ({ ...prev, templateMode: 'custom' }))}
+                            className="mt-1"
+                          />
+                          <span className="text-sm text-gray-700">
+                            <span className="block font-semibold text-gray-900">Custom Location Template</span>
+                            This page will use its own section content from Location Manager.
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-2">
                         Main Heading
                       </label>
                       <input
@@ -1086,9 +1157,18 @@ const LocationManager = () => {
 
                     {/* Image Upload */}
                     <div>
-                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-3">
-                        Images (Upload to Cloudinary)
-                      </label>
+                      <div className="flex items-center justify-between mb-3">
+                        <label className="block font-sans text-sm font-semibold text-gray-800">
+                          Images (Upload to Cloudinary)
+                        </label>
+                        <button
+                          type="button"
+                          onClick={addImageSlot}
+                          className="text-sm text-navy hover:text-navy/80 font-sans font-medium"
+                        >
+                          + Add Image Slot
+                        </button>
+                      </div>
                       <div className="space-y-3">
                         {formData.images.map((image, index) => (
                           <div key={index} className="p-4 bg-gray-50 rounded-lg border-2 border-gray-300">
@@ -1163,49 +1243,56 @@ const LocationManager = () => {
                     </div>
 
                     {/* Content Sections */}
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <label className="block font-sans text-sm font-semibold text-gray-800">
-                          Content Sections
-                        </label>
-                        <button
-                          onClick={addSection}
-                          className="text-sm text-navy hover:text-navy/80 font-sans font-medium"
-                        >
-                          + Add Section
-                        </button>
-                      </div>
-                      
-                      {formData.sections.map((section, index) => (
-                        <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-sm font-semibold text-gray-600">Section {index + 1}</span>
-                            {formData.sections.length > 1 && (
-                              <button
-                                onClick={() => removeSection(index)}
-                                className="text-red-500 hover:text-red-700 text-sm"
-                              >
-                                Remove
-                              </button>
-                            )}
-                          </div>
-                          <input
-                            type="text"
-                            value={section.title}
-                            onChange={(e) => updateSection(index, 'title', e.target.value)}
-                            placeholder="Section title"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 font-sans text-sm"
-                          />
-                          <textarea
-                            value={section.content}
-                            onChange={(e) => updateSection(index, 'content', e.target.value)}
-                            placeholder="Section content"
-                            rows="3"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm resize-none"
-                          />
+                    {formData.templateMode === 'custom' ? (
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <label className="block font-sans text-sm font-semibold text-gray-800">
+                            Content Sections
+                          </label>
+                          <button
+                            onClick={addSection}
+                            className="text-sm text-navy hover:text-navy/80 font-sans font-medium"
+                          >
+                            + Add Section
+                          </button>
                         </div>
-                      ))}
-                    </div>
+                        
+                        {formData.sections.map((section, index) => (
+                          <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-sm font-semibold text-gray-600">Section {index + 1}</span>
+                              {formData.sections.length > 1 && (
+                                <button
+                                  onClick={() => removeSection(index)}
+                                  className="text-red-500 hover:text-red-700 text-sm"
+                                >
+                                  Remove
+                                </button>
+                              )}
+                            </div>
+                            <input
+                              type="text"
+                              value={section.title}
+                              onChange={(e) => updateSection(index, 'title', e.target.value)}
+                              placeholder="Section title"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 font-sans text-sm"
+                            />
+                            <textarea
+                              value={section.content}
+                              onChange={(e) => updateSection(index, 'content', e.target.value)}
+                              placeholder="Section content"
+                              rows="3"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm resize-none"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                        Section layout/content is controlled centrally from Service Manager for this service.
+                        Switch to <strong>Custom Location Template</strong> if you want this location page to override sections.
+                      </div>
+                    )}
                   </div>
                 </div>
 

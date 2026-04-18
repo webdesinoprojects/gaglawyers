@@ -13,7 +13,6 @@ import Awards from './pages/Awards';
 import Gallery from './pages/Gallery';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
-import ServicePage from './pages/ServicePage';
 import ServicePageDynamic from './pages/ServicePageDynamic';
 import LocationPage from './pages/LocationPage';
 import LocationPageDynamic from './pages/LocationPageDynamic';
@@ -33,6 +32,7 @@ import ReviewManager from './pages/admin/ReviewManager';
 import AwardManager from './pages/admin/AwardManager';
 import GalleryManager from './pages/admin/GalleryManager';
 import ServiceManager from './pages/admin/ServiceManager';
+import ServiceImport from './pages/admin/ServiceImport';
 import PageContentManager from './pages/admin/PageContentManager';
 import LocationManager from './pages/admin/LocationManager';
 import SEOManager from './pages/admin/SEOManager';
@@ -62,6 +62,7 @@ function App() {
             <Route path="pages" element={<PageContentManager />} />
             <Route path="team" element={<TeamManager />} />
             <Route path="services" element={<ServiceManager />} />
+            <Route path="services/import" element={<ServiceImport />} />
             <Route path="gallery" element={<GalleryManager />} />
             <Route path="awards" element={<AwardManager />} />
             <Route path="reviews" element={<ReviewManager />} />

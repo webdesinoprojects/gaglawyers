@@ -1,0 +1,139 @@
+{
+  "slug": "bail-lawyer",
+  "name": "Bail Lawyer",
+  "sections": [
+    {
+      "type": "hero",
+      "heading": "Expert Bail Lawyers in Delhi",
+      "visible": true,
+      "order": 0,
+      "background": "dark",
+      "content": {
+        "subheading": "Get immediate legal assistance for bail applications. Our experienced lawyers ensure swift action and maximum chances of bail approval.",
+        "ctaText": "Schedule Consultation",
+        "ctaLink": "/contact",
+        "backgroundImageUrl": ""
+      }
+    },
+    {
+      "type": "overview",
+      "heading": "Professional Bail Legal Services",
+      "visible": true,
+      "order": 1,
+      "background": "light",
+      "content": {
+        "body": "Bail is a fundamental right under Indian law, allowing an accused person to be released from custody while their case is pending. Our experienced bail lawyers in Delhi specialize in securing bail for clients across all types of criminal cases.\n\nWe understand the urgency and stress involved in bail matters. Our team works round the clock to prepare strong bail applications, present compelling arguments in court, and ensure the best possible outcome for our clients."
+      }
+    },
+    {
+      "type": "benefits",
+      "heading": "Why Choose Our Bail Lawyers",
+      "visible": true,
+      "order": 2,
+      "background": "light",
+      "content": {
+        "items": [
+          {
+            "icon": "CheckCircle",
+            "title": "24/7 Availability",
+            "description": "We understand bail matters are urgent. Our lawyers are available round the clock to assist you immediately."
+          },
+          {
+            "icon": "CheckCircle",
+            "title": "High Success Rate",
+            "description": "With years of experience, we have successfully secured bail for hundreds of clients across various case types."
+          },
+          {
+            "icon": "CheckCircle",
+            "title": "Expert Court Representation",
+            "description": "Our lawyers are skilled in presenting strong arguments and ensuring proper documentation for bail applications."
+          },
+          {
+            "icon": "CheckCircle",
+            "title": "Transparent Process",
+            "description": "We keep you informed at every step and explain all legal procedures in simple terms."
+          }
+        ]
+      }
+    },
+    {
+      "type": "process",
+      "heading": "Our Bail Application Process",
+      "visible": true,
+      "order": 3,
+      "background": "dark",
+      "content": {
+        "steps": [
+          {
+            "stepNumber": 1,
+            "title": "Case Evaluation",
+            "description": "We review your case details, charges, and circumstances to determine the best bail strategy."
+          },
+          {
+            "stepNumber": 2,
+            "title": "Documentation",
+            "description": "Our team prepares all necessary documents, affidavits, and supporting evidence for the bail application."
+          },
+          {
+            "stepNumber": 3,
+            "title": "Court Filing",
+            "description": "We file the bail application in the appropriate court with proper legal grounds and precedents."
+          },
+          {
+            "stepNumber": 4,
+            "title": "Court Hearing",
+            "description": "Our experienced lawyers represent you in court, presenting strong arguments for bail approval."
+          },
+          {
+            "stepNumber": 5,
+            "title": "Bail Execution",
+            "description": "Once bail is granted, we assist with completing all formalities for your release."
+          }
+        ]
+      }
+    },
+    {
+      "type": "faq",
+      "heading": "Frequently Asked Questions",
+      "visible": true,
+      "order": 4,
+      "background": "light",
+      "content": {
+        "items": [
+          {
+            "question": "What is the difference between regular bail and anticipatory bail?",
+            "answer": "Regular bail is applied for after arrest, while anticipatory bail is sought before arrest when someone anticipates being arrested. Both serve to secure release from custody."
+          },
+          {
+            "question": "How long does it take to get bail?",
+            "answer": "The timeline varies depending on the case type and court. In some cases, bail can be granted within 24-48 hours, while complex cases may take longer."
+          },
+          {
+            "question": "Can bail be denied?",
+            "answer": "Yes, bail can be denied in serious offenses or if the court believes the accused may flee, tamper with evidence, or pose a threat to society."
+          },
+          {
+            "question": "What happens if bail conditions are violated?",
+            "answer": "Violating bail conditions can result in bail cancellation and re-arrest. It's crucial to strictly follow all conditions set by the court."
+          }
+        ]
+      }
+    },
+    {
+      "type": "cta_banner",
+      "heading": "Ready to Get Started?",
+      "visible": true,
+      "order": 5,
+      "background": "dark",
+      "content": {
+        "body": "Contact our expert legal team today for professional assistance",
+        "buttonText": "Schedule Consultation",
+        "buttonLink": "/contact"
+      }
+    }
+  ],
+  "seo": {
+    "title": "Expert Bail Lawyers in Delhi | Immediate Legal Assistance",
+    "metaDescription": "Get professional bail legal services in Delhi. Our experienced lawyers provide 24/7 assistance for bail applications with high success rates. Contact us now."
+  }
+}

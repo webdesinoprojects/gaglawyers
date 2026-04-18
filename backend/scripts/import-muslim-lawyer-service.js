@@ -1,0 +1,442 @@
+require('dotenv').config();
+const mongoose = require('mongoose');
+const Service = require('../models/Service');
+const ServiceSection = require('../models/ServiceSection');
+
+const serviceData = {
+  slug: 'muslim-lawyer',
+  name: 'Muslim Lawyer',
+  sections: [
+    {
+      type: 'hero',
+      heading: 'Muslim Lawyer',
+      visible: true,
+      order: 0,
+      background: 'dark',
+      content: {
+        subheading: 'Expert Legal Services for Muslim Personal Law Cases in India',
+        ctaText: 'Call Us Now',
+        ctaLink: '/contact',
+        backgroundImageUrl: ''
+      }
+    },
+    {
+      type: 'overview',
+      heading: 'Muslim Law',
+      visible: true,
+      order: 1,
+      background: 'light',
+      content: {
+        body: 'A Muslim lawyer is a legal professional who specialises in providing legal advice and representation to individuals and organizations within the Muslim community on a range of legal matters, including family law, immigration, and civil rights.\n\nMuslim law in India is derived from the Quran and the Hadith, which are the two primary sources of Islamic law. The Quran is the holy book of Islam which contains the teachings and instructions of Allah, while the Hadith is a collection of the sayings and deeds of the Prophet Muhammad (peace be upon him). Other sources of Muslim law include the Sunnah, which is the practice of the Prophet, and the Ijma, which is the consensus of the Muslim community.'
+      }
+    },
+    {
+      type: 'benefits',
+      heading: 'Key Areas of Muslim Law in India',
+      visible: true,
+      order: 2,
+      background: 'light',
+      content: {
+        items: [
+          {
+            icon: 'CheckCircle',
+            title: 'Marriage (Nikah)',
+            description: 'Under Muslim law in India, marriage is considered to be a contract between two individuals and is regulated by the Muslim Personal Law (Shariat) Application Act of 1937. The consent of both parties is required for a valid marriage, and the marriage must be registered with the local authorities.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Divorce (Talaq)',
+            description: 'Divorce is regulated by the Muslim Personal Law, and the husband has to issue a talaq, or a written declaration of divorce, to his wife in order for it to be valid. The process must comply with legal requirements and constitutional provisions.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Inheritance',
+            description: 'All Muslims are entitled to a share of the inheritance from their parents upon their death. The distribution of inheritance depends on the Sharia law, and the deceased\'s wishes may also be taken into consideration.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Adoption',
+            description: 'Adoption is not recognised as a legal form of relationship under Muslim law, and no legal rights are conferred upon the adopted child. However, an adopted child is allowed to take on the name of adoptive parents and use the same inheritance rights as a biological child in certain circumstances.'
+          }
+        ]
+      }
+    },
+    {
+      type: 'benefits',
+      heading: 'Types of Acts Under Muslim Law',
+      visible: true,
+      order: 3,
+      background: 'dark',
+      content: {
+        items: [
+          {
+            icon: 'CheckCircle',
+            title: 'Contract of Marriage (Nikah)',
+            description: 'The most important contract under Muslim law governing the relationship between husband and wife. It involves various obligations and rights of each spouse, including the payment of mahr (dower) by the husband to the wife at the time of marriage.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Waqf',
+            description: 'A legal arrangement whereby a person dedicates a portion of their property for a charitable purpose. It is generally irrevocable and the property is managed by a waqif (trustee).'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Will (Wasiyat)',
+            description: 'A legal document in which a Muslim can bequeath his or her property to relatives, friends or charities. It is revocable and has to be attested by at least two witnesses.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Gift (Hibah)',
+            description: 'A voluntary transfer of property from one person to another, usually for a specific purpose. It is revocable and does not require the presence of witnesses.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Endowment (Waqf)',
+            description: 'A charitable trust in which the donor gives a portion of their property for religious or charitable purposes. The waqf is managed by a trustee, and the beneficiary normally receives a share of the income generated by the trust.'
+          }
+        ]
+      }
+    },
+    {
+      type: 'benefits',
+      heading: 'Provisions Under Muslim Law',
+      visible: true,
+      order: 4,
+      background: 'light',
+      content: {
+        items: [
+          {
+            icon: 'CheckCircle',
+            title: 'Right to Property',
+            description: 'Muslim law recognizes the right of a person to own and dispose of property. This includes the right to bequeath property through a will and to make gifts.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Inheritance',
+            description: 'Muslim law lays down specific rules for inheritance which are based on the Quran and Sunnah. According to these rules, a person\'s heirs are given a fixed share of their estate.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Divorce',
+            description: 'Muslim law recognizes the right of a husband or wife to divorce each other. Divorce can be initiated through the courts or through an agreement between both parties.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Maintenance',
+            description: 'Muslim law provides for the payment of maintenance to a divorced or widowed spouse or to children of a deceased parent. This includes food, clothing and shelter.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Adoption',
+            description: 'Muslim law allows a person to adopt a child and treats the adopted child as if they were the natural child of the adopter. The adopted child is entitled to the same rights as a natural child.'
+          }
+        ]
+      }
+    },
+    {
+      type: 'benefits',
+      heading: 'Rights and Obligations Under Muslim Law',
+      visible: true,
+      order: 5,
+      background: 'light',
+      content: {
+        items: [
+          {
+            icon: 'CheckCircle',
+            title: 'Five Pillars of Faith',
+            description: 'Muslims are obligated to practise the five pillars of faith: faith in Allah, prayer five times a day, giving charity, fasting during Ramadan, and making a pilgrimage to Mecca at least once in a lifetime.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Freedom of Religion',
+            description: 'Muslims have the right to freedom of religion and to practise their faith in a peaceful manner. They are allowed to marry and divorce in accordance with Islamic law, as well as to own and manage property.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Moral Code',
+            description: 'Muslims have the obligation to follow the moral code prescribed by the Qur\'an and the traditions of the Prophet Muhammad. This includes respecting parents and elders, treating others with respect and kindness, and avoiding immorality or dishonesty.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Education and Social Rights',
+            description: 'Muslims have the right to receive an education and to be provided for in social and economic matters. They also have the right to participate in public life and engage in political activities.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Community Welfare',
+            description: 'Muslims have the obligation to work for the benefit of the Muslim community and to ensure peace and stability in their society. They must strive to promote justice and equality, and to protect the environment.'
+          }
+        ]
+      }
+    },
+    {
+      type: 'process',
+      heading: 'Procedure to File a Case Related to Muslim Law',
+      visible: true,
+      order: 6,
+      background: 'dark',
+      content: {
+        steps: [
+          {
+            stepNumber: 1,
+            title: 'Understand the Cause of Dispute',
+            description: 'Before a case is filed, it is important to understand the cause of the dispute. This could be related to inheritance, marriage, divorce, maintenance, or any other matter that falls under the jurisdiction of Muslim law.'
+          },
+          {
+            stepNumber: 2,
+            title: 'Choose an Appropriate Forum',
+            description: 'Choose an appropriate forum for filing the case. It can be in the District Court, Family Court, or High Court, depending on the nature and complexity of the case.'
+          },
+          {
+            stepNumber: 3,
+            title: 'Obtain Necessary Documents',
+            description: 'Gather all necessary documents including marriage certificate (Nikahnama), death certificate, divorce deed, waqf deed, guardianship deed, and any other documents related to the dispute.'
+          },
+          {
+            stepNumber: 4,
+            title: 'Draft the Petition',
+            description: 'The petition should include the facts of the dispute, the parties involved, the relief sought, and the legal arguments based on Muslim personal law and applicable statutes.'
+          },
+          {
+            stepNumber: 5,
+            title: 'File the Petition',
+            description: 'File the petition in court with the necessary documents. The court will issue a summons for the other party to appear in court. After the hearing, the court will pass a judgment based on the facts and evidence presented during the proceedings.'
+          }
+        ]
+      }
+    },
+    {
+      type: 'benefits',
+      heading: 'Role of Muslim Lawyer',
+      visible: true,
+      order: 7,
+      background: 'light',
+      content: {
+        items: [
+          {
+            icon: 'CheckCircle',
+            title: 'Legal Advice and Representation',
+            description: 'Lawyers provide legal advice to clients and represent them in court. They must be well-versed in Islamic law, as well as civil and criminal law, to effectively represent clients in Muslim law cases.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Document Preparation and Filing',
+            description: 'Lawyers are responsible for preparing and filing all necessary documents and forms, representing clients in court, and ensuring proceedings are conducted in accordance with the Islamic legal system and Indian law.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Cultural Understanding',
+            description: 'Lawyers must be familiar with the religious, cultural, and social norms of the Muslim community, and must be able to establish a rapport with their clients while understanding community nuances.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Legal Interpretation',
+            description: 'Lawyers must be familiar with the Islamic legal system and able to interpret relevant laws, regulations, and rulings. They must explain the implications of certain rulings or decisions to their clients.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Fair Outcome Assurance',
+            description: 'Lawyers ensure clients receive a fair and just outcome by understanding community cultural norms, the role of family and community members, types of punishments, evidence considerations, and types of contracts under Islamic law.'
+          }
+        ]
+      }
+    },
+    {
+      type: 'benefits',
+      heading: 'Documents Required for Muslim Law Cases',
+      visible: true,
+      order: 8,
+      background: 'light',
+      content: {
+        items: [
+          {
+            icon: 'CheckCircle',
+            title: 'Nikahnama',
+            description: 'A marriage contract between bride and groom including details such as the amount of Mahr (dower) and any other conditions. It must be signed by both parties in the presence of two witnesses.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Wills (Wasiyat)',
+            description: 'A legally binding document used to appoint an executor and distribute assets after death. Under Islamic law, it must be written and signed by the testator in the presence of two witnesses.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Divorce Deed',
+            description: 'A document used to dissolve a marriage under Islamic law. It needs to be signed by both parties in the presence of two witnesses.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Waqf Deed',
+            description: 'An irrevocable charitable endowment document outlining the details of the endowment, including objects, beneficiaries, and rules and regulations.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Guardianship Deed',
+            description: 'A document used to appoint a guardian for a minor or incapacitated adult. The guardian must be a trusted individual appointed with consent, and the deed must be signed in the presence of two witnesses.'
+          }
+        ]
+      }
+    },
+    {
+      type: 'overview',
+      heading: 'How Grover & Grover Advocates Help in Muslim Cases',
+      visible: true,
+      order: 9,
+      background: 'dark',
+      content: {
+        body: 'Grover and Grover Advocates and Solicitors are a well-established and respected legal firm in India that specialises in providing legal advice and services related to Muslim law. This firm has been in service for over 30 years and has a wide network of experienced professionals who are well-versed in the complexities of Muslim law.\n\nThe firm provides legal advice to individuals and businesses on matters related to inheritance, marriage, divorce, and family law. Clients receive a personalised approach with expert advice tailored to individual needs. The firm\'s team understands the nuances of Muslim law and provides assistance on wills, family business, marriage and divorce agreements, and inheritance rights.\n\nThe firm provides representation in court proceedings, offering assistance in civil and criminal cases related to Muslim law. Our lawyers are well-versed in the complexities of Muslim law and provide legal counsel on enforcement of Islamic laws and regulations in India. We also offer mediation services for negotiating disputes in a non-adversarial setting, working with both parties to reach mutually beneficial agreements in line with Muslim law principles.'
+      }
+    },
+    {
+      type: 'benefits',
+      heading: 'Landmark Cases in Muslim Law',
+      visible: true,
+      order: 10,
+      background: 'light',
+      content: {
+        items: [
+          {
+            icon: 'CheckCircle',
+            title: 'Shah Bano Case (1985)',
+            description: 'The Supreme Court held that a Muslim woman who was divorced by her husband was entitled to maintenance under Section 125 of the Code of Criminal Procedure, 1973. The judgment was widely criticized and subsequently led to the Muslim Women (Protection of Rights on Divorce) Act, 1986.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Shayara Bano Case (2017)',
+            description: 'In this landmark case, the Supreme Court held that the practice of Triple Talaq (instant divorce) was unconstitutional. The Court also struck down the practice of Nikah Halala and polygamy as unconstitutional.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Sarla Mudgal v. Union of India (1995)',
+            description: 'The Supreme Court held that a Hindu husband who had converted to Islam and subsequently married another woman was still legally married to his first wife. The conversion did not nullify the marriage and the second marriage was void.'
+          },
+          {
+            icon: 'CheckCircle',
+            title: 'Daniel Latifi v. Union of India (2001)',
+            description: 'The Supreme Court upheld the Muslim Women (Protection of Rights on Divorce) Act, 1986 and held that it was not in violation of any fundamental right. The Act provides for maintenance, return of dower, custody of children, and other reliefs for divorced Muslim women.'
+          }
+        ]
+      }
+    },
+    {
+      type: 'faq',
+      heading: 'Frequently Asked Questions',
+      visible: true,
+      order: 11,
+      background: 'light',
+      content: {
+        items: [
+          {
+            question: 'What is Muslim law, and what are some common disputes that arise under Muslim law in India?',
+            answer: 'Muslim law, also known as Islamic law, is a legal system based on the teachings of the Quran and the Hadith, which are the sayings and actions of the Prophet Muhammad. Muslim law covers a range of legal issues, including family law, inheritance, and property rights. Common disputes that arise under Muslim law in India include divorce (talaq), maintenance for divorced women, custody of children, inheritance distribution, property disputes, marriage validity, mahr (dower) disputes, waqf property matters, and guardianship issues.'
+          },
+          {
+            question: 'What are some common Muslim law cases in India?',
+            answer: 'Common Muslim law cases in India include: divorce proceedings (talaq, khula, mubarat), maintenance claims by divorced or separated wives, child custody disputes, inheritance and succession matters, property division disputes, marriage registration and validity, mahr (dower) recovery, waqf property disputes, guardianship of minors, adoption-related matters, and disputes over wills (wasiyat). These cases are typically handled in Family Courts or District Courts with expertise in Muslim personal law.'
+          },
+          {
+            question: 'What is the process for resolving Muslim law cases in India?',
+            answer: 'The process involves: understanding the nature of the dispute, choosing the appropriate forum (Family Court, District Court, or High Court), gathering necessary documents (Nikahnama, divorce deed, etc.), drafting a petition with facts and legal arguments, filing the petition in court, service of summons to the other party, court hearings where both parties present evidence and arguments, possible mediation or settlement discussions, final judgment by the court, and option to appeal to higher courts if dissatisfied with the decision. The entire process must comply with both Muslim personal law and Indian procedural law.'
+          },
+          {
+            question: 'What is the role of a Muslim lawyer in resolving disputes under Muslim law in India?',
+            answer: 'A Muslim lawyer provides legal advice on Islamic law matters, represents clients in court proceedings, prepares and files necessary legal documents, interprets Muslim personal law provisions, explains implications of legal decisions, negotiates settlements when appropriate, ensures clients\' rights are protected, bridges the gap between Islamic law and Indian legal system, provides culturally sensitive legal counsel, handles mediation and arbitration, and ensures fair outcomes in accordance with both religious principles and constitutional rights.'
+          },
+          {
+            question: 'How do Muslim lawyers in India balance the requirements of Muslim law with the Indian legal system?',
+            answer: 'Muslim lawyers balance these requirements by: understanding both Islamic law principles and Indian constitutional law, ensuring Muslim personal law applications comply with fundamental rights, applying Muslim Personal Law (Shariat) Application Act, 1937 appropriately, recognizing that Muslim personal law is subject to constitutional provisions, advocating for clients within the framework of Indian procedural law, staying updated on landmark judgments affecting Muslim law, ensuring religious practices don\'t violate constitutional principles, and providing advice that respects both religious traditions and legal requirements of the Indian justice system.'
+          },
+          {
+            question: 'How are Muslim law cases in India different from cases under other legal systems?',
+            answer: 'Muslim law cases differ in several ways: they are governed by Muslim Personal Law (Shariat) Application Act, 1937, they apply principles from the Quran, Hadith, and Sunnah, marriage is treated as a contract rather than a sacrament, inheritance follows specific Quranic shares, divorce procedures are different (talaq, khula, mubarat), maintenance obligations have specific provisions, adoption is not recognized in traditional Islamic law, waqf (charitable endowment) is unique to Muslim law, and cases require lawyers with specialized knowledge of Islamic jurisprudence in addition to Indian law.'
+          },
+          {
+            question: 'What are the legal rights of women under Muslim law in India?',
+            answer: 'Women under Muslim law in India have rights including: right to mahr (dower) at the time of marriage, right to maintenance during marriage and iddat period after divorce, right to seek divorce (khula) or judicial separation, right to custody of minor children (hizanat), right to inherit property as per Quranic shares, right to own and manage property independently, right to enter into contracts, right to education and employment, protection from arbitrary divorce (post-Triple Talaq ban), right to reside in matrimonial home, and right to approach courts for enforcement of these rights under the Muslim Women (Protection of Rights on Divorce) Act, 1986.'
+          },
+          {
+            question: 'Are there different schools of thought within Muslim personal law in India?',
+            answer: 'Yes, there are different schools of thought (madhabs) within Muslim personal law in India. The two main sects are Sunni and Shia. Within Sunni Islam, there are four major schools: Hanafi (most prevalent in India), Shafi, Maliki, and Hanbali. Shia Muslims primarily follow Ithna Ashari (Twelver) or Ismaili schools. These schools have variations in interpretation of certain provisions related to marriage, divorce, inheritance, and other matters. Indian courts recognize these differences and apply the appropriate school\'s principles based on the parties\' sect and tradition.'
+          },
+          {
+            question: 'What is the role of Sharia law in Muslim law cases in India?',
+            answer: 'Sharia law serves as the foundational source for Muslim personal law in India. However, its application is limited to personal matters like marriage, divorce, inheritance, and family relations under the Muslim Personal Law (Shariat) Application Act, 1937. Sharia principles are applied subject to Indian constitutional provisions and fundamental rights. Courts interpret Sharia law in the context of modern Indian jurisprudence. Criminal matters are governed by Indian Penal Code, not Sharia criminal law. The role of Sharia is advisory and interpretive, with final authority resting with Indian courts to ensure compliance with constitutional principles.'
+          },
+          {
+            question: 'How can I find a Muslim lawyer in India to handle my case?',
+            answer: 'You can find a Muslim lawyer by: contacting established law firms specializing in Muslim personal law like Grover and Grover Advocates and Solicitors, seeking referrals from family or community members, checking with local bar associations, searching online legal directories, visiting Family Courts where Muslim law cases are heard, consulting with Islamic organizations or community centers, attending legal aid clinics, or directly contacting our firm for expert representation in Muslim law matters. Look for lawyers with proven experience in Muslim personal law cases and positive client testimonials.'
+          },
+          {
+            question: 'Can a Muslim woman seek legal representation from a male lawyer in a Muslim personal law case?',
+            answer: 'Yes, absolutely. A Muslim woman can seek legal representation from any qualified lawyer, whether male or female, in a Muslim personal law case. Islamic law does not prohibit women from being represented by male lawyers. The choice of lawyer should be based on expertise, experience, and comfort level. Many Muslim women are successfully represented by male lawyers in Indian courts. However, if a woman prefers a female lawyer for personal or cultural reasons, she has the right to choose one. The most important factor is the lawyer\'s competence in Muslim personal law matters.'
+          },
+          {
+            question: 'Can a Muslim personal law case be settled through mediation or arbitration?',
+            answer: 'Yes, Muslim personal law cases can be settled through mediation or arbitration. In fact, Islamic law encourages amicable settlement of disputes. Mediation is often preferred as it allows parties to reach mutually acceptable solutions while preserving family relationships. Many Family Courts in India have mediation centers. Arbitration through community elders or religious scholars (Dar-ul-Qaza) is also common. However, any settlement must comply with Indian law and constitutional principles. Mediated settlements can be formalized through court orders. This approach is particularly effective for divorce, maintenance, and property disputes, often resulting in faster and less adversarial resolutions.'
+          },
+          {
+            question: 'Are there any special laws or provisions that apply to Muslim personal law cases in India?',
+            answer: 'Yes, several special laws apply to Muslim personal law cases in India: Muslim Personal Law (Shariat) Application Act, 1937 (governs personal matters), Muslim Women (Protection of Rights on Divorce) Act, 1986 (protects divorced women\'s rights), Dissolution of Muslim Marriages Act, 1939 (provides grounds for women to seek divorce), Wakf Act, 1995 (governs charitable endowments), Muslim Women (Protection of Rights on Marriage) Act, 2019 (criminalizes instant triple talaq), and various state-specific laws. Additionally, general laws like the Code of Criminal Procedure (Section 125 for maintenance) and Indian Evidence Act also apply. These laws work in conjunction with traditional Islamic jurisprudence.'
+          }
+        ]
+      }
+    },
+    {
+      type: 'cta_banner',
+      heading: 'Need Expert Muslim Law Services?',
+      visible: true,
+      order: 12,
+      background: 'dark',
+      content: {
+        body: 'Contact GAG Lawyers - Grover and Grover Advocates and Solicitors for professional Muslim personal law services in Delhi.',
+        buttonText: 'Schedule Consultation',
+        buttonLink: '/contact'
+      }
+    }
+  ],
+  seo: {
+    title: 'Muslim Lawyer in Delhi - Muslim Personal Law Expert | GAG Lawyers',
+    metaDescription: 'Expert Muslim personal law services in Delhi. Experienced lawyers for divorce, marriage, inheritance, maintenance, and all Muslim law matters.'
+  }
+};
+
+async function importService() {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log('✅ Connected to MongoDB');
+
+    const service = await Service.findOne({ slug: serviceData.slug });
+    
+    if (!service) {
+      console.log(`❌ Service not found: ${serviceData.slug}`);
+      process.exit(1);
+    }
+
+    await ServiceSection.deleteMany({ serviceId: service._id });
+
+    const sectionDocs = serviceData.sections.map(section => ({
+      serviceId: service._id,
+      type: section.type,
+      visible: section.visible,
+      order: section.order,
+      heading: section.heading,
+      background: section.background,
+      content: section.content
+    }));
+
+    await ServiceSection.insertMany(sectionDocs);
+
+    service.seo = serviceData.seo;
+    await service.save();
+
+    console.log(`✅ ${serviceData.name} imported — ${serviceData.sections.length} sections saved`);
+    
+    await mongoose.connection.close();
+    process.exit(0);
+  } catch (error) {
+    console.error('❌ Error:', error.message);
+    process.exit(1);
+  }
+}
+
+importService();

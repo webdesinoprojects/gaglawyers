@@ -3,7 +3,6 @@ import * as Icons from 'lucide-react';
 import FAQItem from '../components/FAQItem';
 import { Link } from 'react-router-dom';
 import SEOHead from '../components/SEOHead';
-import { services as staticServices } from '../data/services';
 import API_BASE_URL from '../config/api';
 
 const Services = () => {
