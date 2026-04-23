@@ -12,6 +12,7 @@ const BlogManager = () => {
   const [filter, setFilter] = useState('all');
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
   const [loading, setLoading] = useState(false);
+  const [togglingPostId, setTogglingPostId] = useState(null);
   const [searchDraft, setSearchDraft] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [formData, setFormData] = useState({
@@ -159,6 +160,39 @@ const BlogManager = () => {
     }
   };
 
+  const handleToggleVisibility = async (post) => {
+    const token = localStorage.getItem('adminToken');
+    setTogglingPostId(post._id);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/blog/${post._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          isPublished: !post.isPublished,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setPosts((prev) =>
+          prev.map((item) =>
+            item._id === post._id
+              ? { ...item, isPublished: !post.isPublished, publishedAt: data.data?.publishedAt || item.publishedAt }
+              : item
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error toggling blog visibility:', error);
+    } finally {
+      setTogglingPostId(null);
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       title: '',
@@ -206,7 +240,7 @@ const BlogManager = () => {
             <h2 className="font-serif text-xl font-bold text-navy">
               {editingPost ? 'Edit Post' : 'Create New Post'}
             </h2>
-            <button onClick={resetForm}>
+            <button type="button" onClick={resetForm}>
               <X className="text-gray-500 hover:text-navy" size={24} />
             </button>
           </div>
@@ -494,12 +528,27 @@ const BlogManager = () => {
                       
                       <div className="flex gap-2">
                         <button
+                          type="button"
+                          onClick={() => handleToggleVisibility(post)}
+                          disabled={togglingPostId === post._id}
+                          className={`px-3 py-2 rounded-sm text-sm font-sans transition-colors ${
+                            post.isPublished
+                              ? 'bg-amber-500 text-white hover:bg-amber-600'
+                              : 'bg-green-600 text-white hover:bg-green-700'
+                          } disabled:opacity-60 disabled:cursor-not-allowed`}
+                          title={post.isPublished ? 'Hide post (set as draft)' : 'Make post visible (publish)'}
+                        >
+                          {post.isPublished ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => handleEdit(post)}
                           className="px-3 py-2 bg-navy text-white rounded-sm text-sm font-sans hover:bg-navy-dark transition-colors"
                         >
                           <Edit size={16} />
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDelete(post._id)}
                           className="px-3 py-2 bg-red-500 text-white rounded-sm text-sm font-sans hover:bg-red-600 transition-colors"
                         >

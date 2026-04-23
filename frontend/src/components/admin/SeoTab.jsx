@@ -7,6 +7,7 @@ import { Globe } from 'lucide-react';
 const SeoTab = ({ serviceData, onUpdate }) => {
   const seo = serviceData.seo || {};
   const globalSettings = serviceData.globalSettings || {};
+  const isActive = serviceData.isActive !== false;
 
   const updateSeo = (field, value) => {
     onUpdate({
@@ -19,6 +20,13 @@ const SeoTab = ({ serviceData, onUpdate }) => {
     onUpdate({
       ...serviceData,
       globalSettings: { ...globalSettings, [field]: value },
+    });
+  };
+
+  const updateServiceField = (field, value) => {
+    onUpdate({
+      ...serviceData,
+      [field]: value,
     });
   };
 
@@ -99,6 +107,66 @@ const SeoTab = ({ serviceData, onUpdate }) => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Service Listing Settings */}
+        <div className="pt-8 border-t border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Service Listing Settings
+          </h2>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 rounded-lg border border-gray-200 p-3">
+              <input
+                id="service-active-toggle"
+                type="checkbox"
+                checked={isActive}
+                onChange={(e) => updateServiceField('isActive', e.target.checked)}
+                className="h-5 w-5 rounded border-gray-300"
+              />
+              <label htmlFor="service-active-toggle" className="text-sm font-medium text-gray-800">
+                Service Active (shows on public menus and /services page)
+              </label>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Card Summary (for /services page)
+              </label>
+              <textarea
+                value={serviceData.shortDescription || ''}
+                onChange={(e) => updateServiceField('shortDescription', e.target.value)}
+                rows={3}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                placeholder="Short summary shown in service cards."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Card Image URL
+              </label>
+              <input
+                type="text"
+                value={serviceData.cardImageUrl || ''}
+                onChange={(e) => updateServiceField('cardImageUrl', e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                placeholder="https://images.unsplash.com/..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Card Image Alt Text
+              </label>
+              <input
+                type="text"
+                value={serviceData.cardImageAlt || ''}
+                onChange={(e) => updateServiceField('cardImageAlt', e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                placeholder="Descriptive image text for accessibility"
+              />
             </div>
           </div>
         </div>

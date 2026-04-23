@@ -22,20 +22,36 @@ exports.getSettings = async (req, res) => {
 // Update global settings
 exports.updateSettings = async (req, res) => {
   try {
-    let settings = await GlobalSettings.findOne();
+    console.log('Received update request');
+    console.log('pageVisibility in request:', req.body.pageVisibility);
     
-    if (!settings) {
-      settings = new GlobalSettings(req.body);
-    } else {
-      Object.assign(settings, req.body);
-    }
+    const settings = await GlobalSettings.getSettings();
+    console.log('Updating settings document:', settings._id.toString());
+
+    // Simple approach: directly assign all fields
+    Object.keys(req.body).forEach(key => {
+      // Skip internal mongoose fields
+      if (!key.startsWith('_') && key !== '__v' && key !== 'createdAt' && key !== 'updatedAt') {
+        settings[key] = req.body[key];
+        // Mark as modified for nested object paths.
+        if (typeof req.body[key] === 'object' && req.body[key] !== null) {
+          settings.markModified(key);
+        }
+      }
+    });
     
+    console.log('pageVisibility before save:', settings.pageVisibility);
     await settings.save();
+    console.log('Settings saved successfully');
+    
+    // Fetch the same document we just updated
+    const savedSettings = await GlobalSettings.findById(settings._id).lean();
+    console.log('pageVisibility after fetch:', savedSettings.pageVisibility);
     
     res.json({
       success: true,
       message: 'Settings updated successfully',
-      data: settings,
+      data: savedSettings,
     });
   } catch (error) {
     console.error('Error updating settings:', error);

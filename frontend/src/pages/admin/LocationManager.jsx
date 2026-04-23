@@ -56,6 +56,7 @@ const LocationManager = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingPageId, setEditingPageId] = useState(null);
+  const [togglingPageId, setTogglingPageId] = useState(null);
   const [formData, setFormData] = useState(createInitialFormData);
   
   const [filters, setFilters] = useState({
@@ -154,21 +155,40 @@ const LocationManager = () => {
     }
   };
 
-  const handleTogglePage = async (id, currentStatus) => {
+  const handleTogglePage = async (id) => {
     const token = localStorage.getItem('adminToken');
+    setTogglingPageId(id);
     
     try {
-      await fetch(`${API_BASE_URL}/api/locations/${id}/toggle`, {
+      const response = await fetch(`${API_BASE_URL}/api/locations/${id}/toggle`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });
-      fetchPages();
-      fetchStats();
+      const data = await response.json();
+      if (response.ok && data.success) {
+        const nextActive = Boolean(data.data?.isActive);
+
+        setPages((prev) =>
+          prev.map((page) =>
+            page._id === id ? { ...page, isActive: nextActive } : page
+          )
+        );
+        setStats((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            active: Math.max(0, prev.active + (nextActive ? 1 : -1)),
+            inactive: Math.max(0, prev.inactive + (nextActive ? -1 : 1)),
+          };
+        });
+      }
     } catch (error) {
       console.error('Error toggling page:', error);
+    } finally {
+      setTogglingPageId(null);
     }
   };
 
@@ -1472,12 +1492,14 @@ const LocationManager = () => {
                     </td>
                     <td className="px-4 py-3">
                       <button
-                        onClick={() => handleTogglePage(page._id, page.isActive)}
+                        type="button"
+                        onClick={() => handleTogglePage(page._id)}
+                        disabled={togglingPageId === page._id}
                         className={`px-3 py-1 rounded-full text-xs font-sans font-medium ${
                           page.isActive
                             ? 'bg-green-100 text-green-800'
                             : 'bg-gray-100 text-gray-600'
-                        }`}
+                        } disabled:opacity-60 disabled:cursor-not-allowed`}
                       >
                         {page.isActive ? 'Active' : 'Inactive'}
                       </button>
@@ -1485,6 +1507,20 @@ const LocationManager = () => {
                     <td className="px-4 py-3">
                       <div className="flex justify-end space-x-2">
                         <button
+                          type="button"
+                          onClick={() => handleTogglePage(page._id)}
+                          disabled={togglingPageId === page._id}
+                          className={`p-2 rounded-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+                            page.isActive
+                              ? 'text-amber-600 hover:bg-amber-50'
+                              : 'text-green-600 hover:bg-green-50'
+                          }`}
+                          title={page.isActive ? 'Hide location page' : 'Make location page visible'}
+                        >
+                          {page.isActive ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => window.open(`/${page.slug}`, '_blank')}
                           className="p-2 text-gray-500 hover:text-navy hover:bg-gray-100 rounded-sm transition-colors"
                           title="View page"
@@ -1492,6 +1528,7 @@ const LocationManager = () => {
                           <Eye size={16} />
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleEditPage(page)}
                           className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-sm transition-colors"
                           title="Edit page"
@@ -1499,6 +1536,7 @@ const LocationManager = () => {
                           <Edit size={16} />
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDelete(page._id)}
                           className="p-2 text-red-500 hover:bg-red-50 rounded-sm transition-colors"
                           title="Delete"

@@ -121,6 +121,70 @@ const globalSettingsSchema = new mongoose.Schema({
     },
   },
   
+  // Page Visibility Management
+  pageVisibility: {
+    home: {
+      isActive: { type: Boolean, default: true },
+      showInNavigation: { type: Boolean, default: true },
+      redirectTo: { type: String, default: '' },
+    },
+    about: {
+      isActive: { type: Boolean, default: true },
+      showInNavigation: { type: Boolean, default: true },
+      redirectTo: { type: String, default: '' },
+    },
+    services: {
+      isActive: { type: Boolean, default: true },
+      showInNavigation: { type: Boolean, default: true },
+      redirectTo: { type: String, default: '' },
+    },
+    team: {
+      isActive: { type: Boolean, default: true },
+      showInNavigation: { type: Boolean, default: true },
+      redirectTo: { type: String, default: '' },
+    },
+    awards: {
+      isActive: { type: Boolean, default: true },
+      showInNavigation: { type: Boolean, default: true },
+      redirectTo: { type: String, default: '' },
+    },
+    gallery: {
+      isActive: { type: Boolean, default: true },
+      showInNavigation: { type: Boolean, default: true },
+      redirectTo: { type: String, default: '' },
+    },
+    blog: {
+      isActive: { type: Boolean, default: true },
+      showInNavigation: { type: Boolean, default: true },
+      redirectTo: { type: String, default: '' },
+    },
+    contact: {
+      isActive: { type: Boolean, default: true },
+      showInNavigation: { type: Boolean, default: true },
+      redirectTo: { type: String, default: '' },
+    },
+    firm: {
+      isActive: { type: Boolean, default: true },
+      showInNavigation: { type: Boolean, default: true },
+      redirectTo: { type: String, default: '' },
+    },
+    affiliation: {
+      isActive: { type: Boolean, default: true },
+      showInNavigation: { type: Boolean, default: true },
+      redirectTo: { type: String, default: '' },
+    },
+    privacyPolicy: {
+      isActive: { type: Boolean, default: true },
+      showInNavigation: { type: Boolean, default: false },
+      redirectTo: { type: String, default: '' },
+    },
+    termsOfService: {
+      isActive: { type: Boolean, default: true },
+      showInNavigation: { type: Boolean, default: false },
+      redirectTo: { type: String, default: '' },
+    },
+  },
+  
   // Legal
   legal: {
     copyrightText: String,
@@ -132,7 +196,7 @@ const globalSettingsSchema = new mongoose.Schema({
 
 // Ensure only one settings document exists
 globalSettingsSchema.statics.getSettings = async function() {
-  let settings = await this.findOne();
+  let settings = await this.findOne().sort({ createdAt: 1, _id: 1 });
   if (!settings) {
     settings = await this.create({});
   }

@@ -10,7 +10,12 @@ const { generateSlug, generateUniqueSlug } = require('../utils/slugify');
  */
 const getAllServices = async (req, res) => {
   try {
-    const services = await Service.find({}, 'name slug')
+    const includeInactive = String(req.query.includeInactive || '').toLowerCase() === 'true';
+    const query = includeInactive ? {} : { isActive: { $ne: false } };
+    const services = await Service.find(
+      query,
+      'name slug isActive shortDescription cardImageUrl cardImageAlt seo globalSettings servicesPageSettings'
+    )
       .sort({ name: 1 })
       .lean();
 
@@ -57,6 +62,10 @@ const createService = async (req, res) => {
     const service = await Service.create({
       name: rawName,
       slug: uniqueSlug,
+      isActive: true,
+      shortDescription: '',
+      cardImageUrl: '',
+      cardImageAlt: '',
       seo: {
         title: `${rawName} | GAG Lawyers`,
         metaDescription: '',
@@ -85,6 +94,7 @@ const createService = async (req, res) => {
 const getServiceBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
+    const includeInactive = String(req.query.includeInactive || '').toLowerCase() === 'true';
 
     const service = await Service.findOne({ slug }).lean();
     if (!service) {
@@ -126,7 +136,18 @@ const getServiceBySlug = async (req, res) => {
 const updateService = async (req, res) => {
   try {
     const { slug } = req.params;
-    const { name, slug: newSlug, seo, globalSettings, sections } = req.body;
+    const {
+      name,
+      slug: newSlug,
+      seo,
+      globalSettings,
+      servicesPageSettings,
+      sections,
+      isActive,
+      shortDescription,
+      cardImageUrl,
+      cardImageAlt,
+    } = req.body;
 
     const service = await Service.findOne({ slug });
     if (!service) {
@@ -149,8 +170,22 @@ const updateService = async (req, res) => {
       }
       service.slug = newSlug;
     }
-    if (seo) service.seo = seo;
-    if (globalSettings) service.globalSettings = globalSettings;
+    if (seo) {
+      service.seo = seo;
+      service.markModified('seo');
+    }
+    if (globalSettings) {
+      service.globalSettings = globalSettings;
+      service.markModified('globalSettings');
+    }
+    if (servicesPageSettings) {
+      service.servicesPageSettings = servicesPageSettings;
+      service.markModified('servicesPageSettings');
+    }
+    if (typeof isActive === 'boolean') service.isActive = isActive;
+    if (typeof shortDescription === 'string') service.shortDescription = shortDescription;
+    if (typeof cardImageUrl === 'string') service.cardImageUrl = cardImageUrl;
+    if (typeof cardImageAlt === 'string') service.cardImageAlt = cardImageAlt;
     await service.save();
 
     // Update sections if provided
@@ -299,6 +334,12 @@ const deleteService = async (req, res) => {
 
     const service = await Service.findOne({ slug });
     if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service not found',
+      });
+    }
+    if (service.isActive === false && !includeInactive) {
       return res.status(404).json({
         success: false,
         message: 'Service not found',

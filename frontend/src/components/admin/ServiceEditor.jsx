@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Loader2, ExternalLink, Save } from 'lucide-react';
 import SectionsTab from './SectionsTab';
 import SeoTab from './SeoTab';
+import ServicesPageTab from './ServicesPageTab';
 
 /**
  * Service Editor - Right panel with tabs
@@ -168,6 +169,16 @@ const ServiceEditor = ({
             Sections
           </button>
           <button
+            onClick={() => setActiveTab('servicesPage')}
+            className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+              activeTab === 'servicesPage'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Services Page
+          </button>
+          <button
             onClick={() => setActiveTab('seo')}
             className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
               activeTab === 'seo'
@@ -184,6 +195,8 @@ const ServiceEditor = ({
       <div className="flex-1 overflow-y-auto">
         {activeTab === 'sections' ? (
           <SectionsTab serviceData={serviceData} onUpdate={onUpdate} />
+        ) : activeTab === 'servicesPage' ? (
+          <ServicesPageTab serviceData={serviceData} onUpdate={onUpdate} />
         ) : (
           <SeoTab serviceData={serviceData} onUpdate={onUpdate} />
         )}

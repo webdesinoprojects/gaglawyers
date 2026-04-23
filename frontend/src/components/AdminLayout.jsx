@@ -19,6 +19,7 @@ import {
   Search,
   User,
   Loader2,
+  Eye,
 } from 'lucide-react';
 import API_BASE_URL from '../config/api';
 
@@ -229,6 +230,7 @@ const AdminLayout = () => {
     {
       title: 'Configuration',
       items: [
+        { name: 'Page Visibility', path: '/admin/page-visibility', icon: Eye },
         { name: 'Site Settings', path: '/admin/settings', icon: Settings },
       ],
     },

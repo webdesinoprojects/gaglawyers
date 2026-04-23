@@ -26,7 +26,7 @@ const ServiceManager = () => {
   const fetchServices = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/services`);
+      const response = await fetch(`${API_BASE_URL}/api/services?includeInactive=true`);
       const data = await response.json();
       
       if (data.success) {
@@ -56,7 +56,7 @@ const ServiceManager = () => {
 
     try {
       console.log('Fetching service data for:', slug);
-      const response = await fetch(`${API_BASE_URL}/api/services/${slug}`);
+      const response = await fetch(`${API_BASE_URL}/api/services/${slug}?includeInactive=true`);
       const data = await response.json();
       console.log('Service data received:', data);
 
@@ -102,8 +102,14 @@ const ServiceManager = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
+          name: serviceData.name,
+          isActive: Boolean(serviceData.isActive),
+          shortDescription: serviceData.shortDescription || '',
+          cardImageUrl: serviceData.cardImageUrl || '',
+          cardImageAlt: serviceData.cardImageAlt || '',
           seo: serviceData.seo,
           globalSettings: serviceData.globalSettings,
+          servicesPageSettings: serviceData.servicesPageSettings,
           sections: serviceData.sections,
         }),
       });
@@ -230,6 +236,41 @@ const ServiceManager = () => {
     }
   };
 
+  const handleToggleServiceActive = async (service, nextActive) => {
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      showToast('Authentication required. Please log in again.', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/services/${service.slug}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ isActive: nextActive }),
+      });
+      const data = await response.json();
+      if (!data.success) {
+        showToast(data.message || 'Failed to update service status', 'error');
+        return;
+      }
+      setServices((prev) =>
+        prev.map((row) =>
+          row.slug === service.slug ? { ...row, isActive: nextActive } : row
+        )
+      );
+      if (serviceData?.slug === service.slug) {
+        setServiceData((prev) => (prev ? { ...prev, isActive: nextActive } : prev));
+      }
+    } catch (error) {
+      console.error('Error toggling service status:', error);
+      showToast('Error updating service status', 'error');
+    }
+  };
+
   // Simple toast notification
   const showToast = (message, type) => {
     // You can replace this with a proper toast library
@@ -258,6 +299,7 @@ const ServiceManager = () => {
         onDeleteService={handleDeleteService}
         canDeleteService={Boolean(selectedServiceSlug)}
         deletingService={deletingService}
+        onToggleServiceActive={handleToggleServiceActive}
       />
 
       {/* Right Panel - Editor */}

@@ -18,11 +18,35 @@ const serviceSchema = new mongoose.Schema({
     lowercase: true,
     trim: true,
   },
+  isActive: {
+    type: Boolean,
+    default: true,
+    index: true,
+  },
+  shortDescription: {
+    type: String,
+    default: '',
+    trim: true,
+  },
+  cardImageUrl: {
+    type: String,
+    default: '',
+    trim: true,
+  },
+  cardImageAlt: {
+    type: String,
+    default: '',
+    trim: true,
+  },
   seo: {
     type: mongoose.Schema.Types.Mixed,
     default: {},
   },
   globalSettings: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {},
+  },
+  servicesPageSettings: {
     type: mongoose.Schema.Types.Mixed,
     default: {},
   },

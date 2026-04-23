@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'rea
 import Layout from './components/Layout';
 import AdminLayout from './components/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import PageVisibilityWrapper from './components/PageVisibilityWrapper';
 import Home from './pages/Home';
 import About from './pages/About';
 import Services from './pages/Services';
@@ -35,6 +36,7 @@ import ServiceImport from './pages/admin/ServiceImport';
 import PageContentManager from './pages/admin/PageContentManager';
 import LocationManager from './pages/admin/LocationManager';
 import SEOManager from './pages/admin/SEOManager';
+import PageVisibilityManager from './pages/admin/PageVisibilityManager';
 import ComingSoon from './pages/admin/ComingSoon';
 import Affiliation from './pages/Affiliation';
 
@@ -64,6 +66,7 @@ function App() {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="blog" element={<BlogManager />} />
             <Route path="pages" element={<PageContentManager />} />
+            <Route path="page-visibility" element={<PageVisibilityManager />} />
             <Route path="team" element={<TeamManager />} />
             <Route path="services" element={<ServiceManager />} />
             <Route path="services/import" element={<ServiceImport />} />
@@ -79,20 +82,20 @@ function App() {
 
           {/* Public routes */}
           <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="about" element={<About />} />
-            <Route path="firm" element={<Firm />} />
-            <Route path="team" element={<Team />} />
-            <Route path="awards" element={<Awards />} />
-            <Route path="gallery" element={<Gallery />} />
-            <Route path="services" element={<Services />} />
+            <Route index element={<PageVisibilityWrapper pageKey="home"><Home /></PageVisibilityWrapper>} />
+            <Route path="about" element={<PageVisibilityWrapper pageKey="about"><About /></PageVisibilityWrapper>} />
+            <Route path="firm" element={<PageVisibilityWrapper pageKey="firm"><Firm /></PageVisibilityWrapper>} />
+            <Route path="team" element={<PageVisibilityWrapper pageKey="team"><Team /></PageVisibilityWrapper>} />
+            <Route path="awards" element={<PageVisibilityWrapper pageKey="awards"><Awards /></PageVisibilityWrapper>} />
+            <Route path="gallery" element={<PageVisibilityWrapper pageKey="gallery"><Gallery /></PageVisibilityWrapper>} />
+            <Route path="services" element={<PageVisibilityWrapper pageKey="services"><Services /></PageVisibilityWrapper>} />
             <Route path="services/:slug" element={<RedirectToSlug />} />
-            <Route path="blog" element={<Blog />} />
+            <Route path="blog" element={<PageVisibilityWrapper pageKey="blog"><Blog /></PageVisibilityWrapper>} />
             <Route path="blog/:slug" element={<BlogPost />} />
-            <Route path="contact" element={<Contact />} />
-            <Route path="affiliation" element={<Affiliation />} />
-            <Route path="privacy" element={<PrivacyPolicy />} />
-            <Route path="terms" element={<TermsOfService />} />
+            <Route path="contact" element={<PageVisibilityWrapper pageKey="contact"><Contact /></PageVisibilityWrapper>} />
+            <Route path="affiliation" element={<PageVisibilityWrapper pageKey="affiliation"><Affiliation /></PageVisibilityWrapper>} />
+            <Route path="privacy" element={<PageVisibilityWrapper pageKey="privacyPolicy"><PrivacyPolicy /></PageVisibilityWrapper>} />
+            <Route path="terms" element={<PageVisibilityWrapper pageKey="termsOfService"><TermsOfService /></PageVisibilityWrapper>} />
             {/* Location pages - dynamic service/city routing */}
             <Route path=":service/:city" element={<LocationPage />} />
             <Route path=":slug" element={<SlugPageRouter />} />
