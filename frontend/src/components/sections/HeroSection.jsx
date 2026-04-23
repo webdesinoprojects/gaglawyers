@@ -1,29 +1,41 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 
+const HERO_BG =
+  'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1600&q=80';
+
 /**
  * Hero Section Component
- * Content: { subheading, ctaText, ctaLink, backgroundImageUrl }
+ * Content: { subheading, ctaText, ctaLink, description }
  */
 const HeroSection = ({ heading, content, background }) => {
-  const { subheading, description, ctaText, ctaLink, backgroundImageUrl } = content || {};
-
-  const bgStyle = backgroundImageUrl
-    ? {
-        backgroundImage: `linear-gradient(130deg, rgba(11, 20, 42, 0.88), rgba(22, 43, 77, 0.82) 55%, rgba(33, 63, 110, 0.76)), url(${backgroundImageUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }
-    : {};
+  const { subheading, description, ctaText, ctaLink } = content || {};
+  const heroBgImage = content?.backgroundImageUrl || HERO_BG;
 
   return (
     <section
-      className="relative overflow-hidden bg-gradient-to-br from-[#0f1f3f] via-[#162f58] to-[#224170] py-20 text-white md:py-28"
-      style={bgStyle}
+      className="hero-section relative overflow-hidden py-20 text-white md:py-28"
+      style={{
+        backgroundImage: `linear-gradient(135deg, rgba(10,25,60,0.82) 0%, rgba(10,25,60,0.65) 100%), url(${heroBgImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        minHeight: '520px',
+        display: 'flex',
+        alignItems: 'center',
+      }}
     >
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.14]"
+        style={{
+          backgroundImage:
+            'linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px)',
+          backgroundSize: '26px 26px',
+        }}
+      />
       <div className="absolute inset-0 opacity-60">
         <div className="absolute -left-24 top-14 h-60 w-60 rounded-full bg-[#c9a84c]/30 blur-3xl animate-pulse" />
-        <div className="absolute -right-10 bottom-6 h-72 w-72 rounded-full bg-sky-300/20 blur-3xl animate-pulse" />
+        <div className="absolute -right-10 bottom-6 h-72 w-72 rounded-full bg-emerald-300/20 blur-3xl animate-pulse" />
       </div>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
@@ -53,6 +65,14 @@ const HeroSection = ({ heading, content, background }) => {
               </a>
             </div>
           )}
+        </div>
+      </div>
+
+      <div className="hero-badge">
+        <span>⚖️</span>
+        <div>
+          <strong>25+ Years</strong>
+          <p>Legal Excellence</p>
         </div>
       </div>
     </section>

@@ -1,12 +1,14 @@
 import React from 'react';
 import { ArrowRightCircle } from 'lucide-react';
+import { getSectionImage } from '../../utils/sectionImages';
 
 /**
  * Process Section Component
  * Content: { steps: [{ stepNumber, title, description }] }
  */
-const ProcessSection = ({ heading, content, background }) => {
-  const { imageUrl, imageAlt, imagePosition = 'top', steps = [] } = content || {};
+const ProcessSection = ({ heading, content, background, serviceSlug = '' }) => {
+  const { steps = [] } = content || {};
+  const imgSrc = content?.imageUrl || getSectionImage(serviceSlug, 'process');
   
   // Dynamic colors based on background
   const isDark = background === 'dark';
@@ -18,18 +20,6 @@ const ProcessSection = ({ heading, content, background }) => {
   const cardBorder = isDark ? 'border-white/15' : 'border-slate-200';
   const cardTitleColor = isDark ? 'text-white' : 'text-[#152f54]';
   const cardBodyColor = isDark ? 'text-slate-300' : 'text-slate-700';
-  const hasImage = Boolean(imageUrl);
-  const isSplitLayout = hasImage && (imagePosition === 'left' || imagePosition === 'right');
-
-  const imageBlock = hasImage ? (
-    <div className="overflow-hidden rounded-2xl border border-white/20 shadow-lg">
-      <img
-        src={imageUrl}
-        alt={imageAlt || `${heading} image`}
-        className="h-72 w-full object-cover transition-transform duration-700 hover:scale-105"
-      />
-    </div>
-  ) : null;
 
   const stepsList = (
     <div className="space-y-6">
@@ -65,22 +55,16 @@ const ProcessSection = ({ heading, content, background }) => {
       </div>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+        <img
+          src={imgSrc}
+          alt={content?.imageAlt || 'Legal process'}
+          loading="lazy"
+          style={{ width: '100%', maxHeight: '260px', objectFit: 'cover', borderRadius: '12px', marginBottom: '32px' }}
+        />
         <h2 className={`mb-8 font-serif text-3xl font-bold md:text-4xl ${headingColor}`}>
           {heading}
         </h2>
-        {isSplitLayout ? (
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-            {imagePosition === 'left' && imageBlock}
-            {stepsList}
-            {imagePosition === 'right' && imageBlock}
-          </div>
-        ) : (
-          <>
-            {imagePosition === 'top' && <div className="mb-8">{imageBlock}</div>}
-            {stepsList}
-            {imagePosition === 'bottom' && <div className="mt-8">{imageBlock}</div>}
-          </>
-        )}
+        {stepsList}
       </div>
     </section>
   );

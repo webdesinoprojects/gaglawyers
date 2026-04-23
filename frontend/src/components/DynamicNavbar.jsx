@@ -135,7 +135,7 @@ const DynamicNavbar = () => {
         dropdownType: 'services',
         submenu: services.map(service => ({
           name: service.name || service.title,
-          path: `/services/${service.slug}`
+          path: `/${service.slug}`
         }))
       };
     }
@@ -160,11 +160,13 @@ const DynamicNavbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex min-h-[56px] items-center justify-between md:h-[72px]">
           <Link to="/" className="flex max-w-[min(100%,calc(100vw-4rem))] items-center gap-2 py-2 md:gap-4 md:py-3">
-            <img
-              src="/logo.png"
-              alt="GAG Lawyers"
-              className="h-8 w-auto md:h-10 lg:h-12"
-            />
+            <span className="brand-logo-shell">
+              <img
+                src="/logo.png"
+                alt="GAG Lawyers"
+                className="h-7 w-auto md:h-9 lg:h-11"
+              />
+            </span>
             <div className="flex min-w-0 flex-col items-center justify-center gap-0.5 text-center">
               <span
                 className="truncate text-base font-bold leading-none tracking-tight text-white md:text-[22px] lg:text-[22px]"
@@ -545,3 +547,4 @@ const DynamicNavbar = () => {
 };
 
 export default DynamicNavbar;
+

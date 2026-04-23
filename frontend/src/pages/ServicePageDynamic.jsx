@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Home, ChevronRight, AlertCircle, Loader2 } from 'lucide-react';
+import SEOHead from '../components/SEOHead';
 import SectionRenderer from '../components/sections/SectionRenderer';
 import API_BASE_URL from '../config/api';
+import { getSectionImage } from '../utils/sectionImages';
 
 /**
  * Dynamic Service Page - Fetches content from database
@@ -13,9 +15,11 @@ const ServicePageDynamic = () => {
   const [service, setService] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const normalizeGeneralServiceTitle = (title) =>
-    title.replace(/\s+in\s+Delhi\b/gi, '').replace(/\s{2,}/g, ' ').trim();
+  const stripDelhiSuffix = (value = '') =>
+    String(value)
+      .replace(/\s+in\s+delhi\b/gi, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
 
   useEffect(() => {
     const fetchService = async () => {
@@ -26,32 +30,12 @@ const ServicePageDynamic = () => {
 
         if (data.success) {
           setService(data.data);
-          
-          // Update document title dynamically
-          if (data.data.seo?.title) {
-            document.title = normalizeGeneralServiceTitle(data.data.seo.title);
-          } else {
-            document.title = `${data.data.name} - GAG Lawyers`;
-          }
-          
-          // Update meta description if available
-          if (data.data.seo?.metaDescription) {
-            let metaDescription = document.querySelector('meta[name="description"]');
-            if (!metaDescription) {
-              metaDescription = document.createElement('meta');
-              metaDescription.name = 'description';
-              document.head.appendChild(metaDescription);
-            }
-            metaDescription.content = data.data.seo.metaDescription;
-          }
         } else {
           setError('Service not found');
-          document.title = 'Service Not Found - GAG Lawyers';
         }
       } catch (err) {
         console.error('Error fetching service:', err);
         setError('Failed to load service');
-        document.title = 'Error - GAG Lawyers';
       } finally {
         setLoading(false);
       }
@@ -92,8 +76,44 @@ const ServicePageDynamic = () => {
     );
   }
 
+  const displayServiceName = stripDelhiSuffix(service?.name || '');
+  const seoTitle = stripDelhiSuffix(
+    service?.seo?.title || `${displayServiceName || service?.name} | Grover & Grover Advocates`
+  );
+  const seoDescription =
+    service?.seo?.metaDescription ||
+    service?.seo?.description ||
+    `Get reliable legal support from Grover & Grover Advocates for ${displayServiceName.toLowerCase() || 'legal matters'}.`;
+  const seoKeywords =
+    service?.seo?.keywords ||
+    `${displayServiceName || service?.name}, ${displayServiceName || service?.name} lawyer, legal services, Grover and Grover Advocates`;
+
+  const displaySections = Array.isArray(service?.sections)
+    ? service.sections.map((section) => {
+        const nextSection = {
+          ...section,
+          heading: stripDelhiSuffix(section.heading || ''),
+        };
+
+        if (section.type === 'hero' && section.content && typeof section.content === 'object') {
+          nextSection.content = {
+            ...section.content,
+            subheading: stripDelhiSuffix(section.content.subheading || ''),
+          };
+        }
+
+        return nextSection;
+      })
+    : [];
+
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f7f8fb_0%,_#f1f3f7_45%,_#edf0f5_100%)]">
+      <SEOHead
+        title={seoTitle}
+        description={seoDescription}
+        keywords={seoKeywords}
+      />
+
       {/* Breadcrumb */}
       <div className="sticky top-0 z-30 border-b border-white/60 bg-white/85 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -107,17 +127,43 @@ const ServicePageDynamic = () => {
             </Link>
             <ChevronRight size={16} className="text-slate-300" />
             <span className="rounded-full bg-slate-100 px-3 py-1 font-semibold text-[#1a2744]">
-              {service.name}
+              {displayServiceName || service.name}
             </span>
           </div>
         </div>
       </div>
 
       {/* Dynamic Sections */}
-      {service.sections && service.sections.length > 0 ? (
-        service.sections.map((section, index) => (
-          <SectionRenderer key={section._id} section={section} sectionIndex={index} />
-        ))
+      {displaySections.length > 0 ? (
+        displaySections.map((section, index) => {
+          const isHowGroverSection = /how grover/i.test(section?.heading || '');
+
+          if (isHowGroverSection) {
+            const teamImageSrc = section?.content?.imageUrl || getSectionImage(slug, 'team');
+            const teamImageAlt =
+              section?.content?.imageAlt || 'Grover & Grover Advocates team';
+
+            return (
+              <div key={section._id} className="mx-auto max-w-7xl px-4 py-10 sm:px-6 md:px-8">
+                <div className="section-split">
+                  <div className="section-split__text">
+                    <SectionRenderer section={section} sectionIndex={index} serviceSlug={slug} />
+                  </div>
+                  <div className="section-split__image">
+                    <img
+                      src={teamImageSrc}
+                      alt={teamImageAlt}
+                      loading="lazy"
+                      style={{ borderRadius: '12px', width: '100%', objectFit: 'cover', maxHeight: '360px' }}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          return <SectionRenderer key={section._id} section={section} sectionIndex={index} serviceSlug={slug} />;
+        })
       ) : (
         <div className="py-20 text-center">
           <p className="text-gray-600 font-sans">No content available for this service yet.</p>

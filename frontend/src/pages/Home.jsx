@@ -584,7 +584,7 @@ const Home = () => {
                   {services.slice(0, 8).map((service, index) => (
                     <Link
                       key={service._id || index}
-                      to={`/services/${service.slug}`}
+                      to={`/${service.slug}`}
                       className="group bg-[#112240] rounded-xl border border-gold/30 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-gold/10 hover:border-gold/60 flex flex-col h-full min-h-[18rem]"
                     >
                       <ServiceCard
@@ -1284,3 +1284,4 @@ const Home = () => {
 };
 
 export default Home;
+

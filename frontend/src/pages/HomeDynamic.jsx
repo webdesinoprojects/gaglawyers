@@ -289,3 +289,4 @@ const HomeDynamic = () => {
 };
 
 export default HomeDynamic;
+

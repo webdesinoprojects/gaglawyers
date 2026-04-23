@@ -17,6 +17,9 @@ The rules of the Bar Council of India prohibit law firms from soliciting work or
 • GAG Lawyers – Grover & Grover Advocates & Solicitors is not liable for any consequence of any action taken by the user relying on material/information provided under this website. In cases where the user has any legal issues, he/she in all cases must seek independent legal advice.`,
     whatsappEnabled: true,
     whatsappNumber: '+919996263370',
+    tawkEnabled: false,
+    tawkPropertyId: '',
+    tawkWidgetId: '',
     phoneNumber: '+919996263370',
     email: 'contact@gaglawyers.com',
     address: OFFICE_ADDRESS_LINE,
@@ -245,6 +248,72 @@ The rules of the Bar Council of India prohibit law firms from soliciting work or
                 className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy font-sans"
                 placeholder="International format, e.g. +91…"
               />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-sm shadow-sm p-6">
+          <h2 className="font-serif text-xl font-semibold text-navy mb-6">Tawk Live Chat</h2>
+
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="tawkEnabled"
+                name="tawkEnabled"
+                checked={Boolean(settings.tawkEnabled)}
+                onChange={handleChange}
+                className="w-5 h-5 text-navy focus:ring-navy/20 rounded"
+              />
+              <label htmlFor="tawkEnabled" className="font-sans text-sm font-medium text-gray-700">
+                Enable Tawk Live Chat Widget
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="tawkPropertyId" className="block font-sans text-sm font-medium text-gray-700 mb-2">
+                  Tawk Property ID
+                </label>
+                <input
+                  type="text"
+                  id="tawkPropertyId"
+                  name="tawkPropertyId"
+                  value={settings.tawkPropertyId || ''}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy font-sans"
+                  placeholder="e.g. 67f0f6f5f00f4d190f7061f2"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="tawkWidgetId" className="block font-sans text-sm font-medium text-gray-700 mb-2">
+                  Tawk Widget ID
+                </label>
+                <input
+                  type="text"
+                  id="tawkWidgetId"
+                  name="tawkWidgetId"
+                  value={settings.tawkWidgetId || ''}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy font-sans"
+                  placeholder="e.g. 1io2bj6eo"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <a
+                href="https://dashboard.tawk.to/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center rounded-md border border-navy/20 px-4 py-2 text-sm font-medium text-navy hover:bg-navy hover:text-white transition-colors"
+              >
+                Manage Tawk Dashboard
+              </a>
+              <p className="font-sans text-xs text-gray-500">
+                After saving, public pages will use Admin values first; env values are fallback.
+              </p>
             </div>
           </div>
         </div>

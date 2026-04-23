@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Quote } from 'lucide-react';
 
-const TestimonialsSection = ({ heading, content, background }) => {
+const TestimonialsSection = ({ heading, content, background, serviceSlug = '' }) => {
   const { items = [] } = content || {};
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -54,7 +54,6 @@ const TestimonialsSection = ({ heading, content, background }) => {
 
   const goPrev = () => setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
   const goNext = () => setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-
   if (!items.length) return null;
 
   return (
@@ -110,15 +109,24 @@ const TestimonialsSection = ({ heading, content, background }) => {
                 <article
                   className={`h-full rounded-3xl border ${cardBorder} ${cardBg} p-6 shadow-[0_14px_36px_rgba(15,23,42,0.12)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(15,23,42,0.16)]`}
                 >
+                  {/*
+                    Admin photoUrl takes priority. Falls back to generated avatar if empty.
+                  */}
+                  {(() => {
+                    const avatarSrc =
+                      item.photoUrl ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name || 'Client')}&background=0A193C&color=C9A84C&size=64`;
+                    return (
+                      <img
+                        src={avatarSrc}
+                        alt={item.name || 'Client'}
+                        loading="lazy"
+                        style={{ borderRadius: '50%', width: '64px', height: '64px', marginBottom: '12px', objectFit: 'cover' }}
+                      />
+                    );
+                  })()}
                   <div className="mb-4 flex items-center justify-between">
                     <Quote className={`h-7 w-7 ${quoteColor}`} />
-                    {item.photoUrl ? (
-                      <img
-                        src={item.photoUrl}
-                        alt={item.name || 'Client photo'}
-                        className="h-12 w-12 rounded-full border border-white/30 object-cover"
-                      />
-                    ) : null}
                   </div>
                   <p className={`font-sans text-[1.02rem] leading-7 ${bodyColor}`}>“{item.quote}”</p>
                   <div className="mt-6 border-t border-white/15 pt-4">

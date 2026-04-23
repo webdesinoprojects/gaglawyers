@@ -15,7 +15,17 @@ const SECTION_TYPES = [
   { value: 'footer_note', label: 'Footer Note', color: 'bg-gray-100 text-gray-800' },
 ];
 
-const IMAGE_ENABLED_SECTION_TYPES = ['hero', 'overview', 'benefits', 'process', 'faq', 'testimonials'];
+const IMAGE_ENABLED_SECTION_TYPES = [
+  'hero',
+  'overview',
+  'benefits',
+  'process',
+  'faq',
+  'testimonials',
+  'audience',
+  'pricing',
+  'footer_note',
+];
 
 /**
  * Sections Tab - Manage service sections
@@ -93,15 +103,15 @@ const SectionsTab = ({ serviceData, onUpdate }) => {
       case 'process':
         return { imageUrl: '', imageAlt: '', imagePosition: 'top', steps: [] };
       case 'audience':
-        return { body: '', tags: [] };
+        return { body: '', tags: [], imageUrl: '', imageAlt: '', imagePosition: 'top' };
       case 'pricing':
-        return { tiers: [] };
+        return { tiers: [], imageUrl: '', imageAlt: '', imagePosition: 'top' };
       case 'faq':
         return { imageUrl: '', imageAlt: '', imagePosition: 'top', items: [] };
       case 'testimonials':
-        return { items: [] };
+        return { imageUrl: '', imageAlt: '', imagePosition: 'top', items: [] };
       case 'footer_note':
-        return { text: '' };
+        return { text: '', imageUrl: '', imageAlt: '', imagePosition: 'top' };
       default:
         return {};
     }
@@ -133,8 +143,8 @@ const SectionsTab = ({ serviceData, onUpdate }) => {
             You can add images in: {imageEnabledLabels}.
           </p>
           <p className="mt-1 text-xs text-blue-700">
-            For Overview, Benefits, Process, and FAQ, admin can choose image position (top, left, right, bottom).
-            Hero uses background image, and Testimonials support per-testimonial photos.
+            For all supported section types above, admin can set image URL, alt text, and position.
+            Hero uses a background image, Testimonials support both section image and per-testimonial photos.
           </p>
         </div>
 

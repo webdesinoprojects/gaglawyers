@@ -63,6 +63,22 @@ const SeoTab = ({ serviceData, onUpdate }) => {
               </p>
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Meta Keywords
+              </label>
+              <input
+                type="text"
+                value={seo.keywords || ''}
+                onChange={(e) => updateSeo('keywords', e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                placeholder="bail lawyer in delhi, bail advocate, criminal bail legal services"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Comma-separated keywords relevant to this service page
+              </p>
+            </div>
+
             {/* SEO Preview */}
             <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
               <div className="flex items-start gap-3">
@@ -75,9 +91,7 @@ const SeoTab = ({ serviceData, onUpdate }) => {
                     <div className="text-blue-600 text-lg font-medium">
                       {seo.title || serviceData.name || 'Service Title'}
                     </div>
-                    <div className="text-green-700 text-sm">
-                      yoursite.com › services › {serviceData.slug}
-                    </div>
+                    <div className="text-green-700 text-sm">yoursite.com/{serviceData.slug}</div>
                     <div className="text-gray-600 text-sm">
                       {seo.metaDescription ||
                         'Add a meta description to see how it appears in search results.'}

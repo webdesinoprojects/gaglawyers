@@ -1,35 +1,24 @@
 import React from 'react';
 import { CheckCircle, ShieldCheck } from 'lucide-react';
+import { getSectionImage } from '../../utils/sectionImages';
 
 /**
  * Benefits Section Component
  * Content: { items: [{ icon, title, description }] }
  */
-const BenefitsSection = ({ heading, content, background }) => {
-  const { imageUrl, imageAlt, imagePosition = 'top', items = [] } = content || {};
+const BenefitsSection = ({ heading, content, background, serviceSlug = '' }) => {
+  const { items = [] } = content || {};
+  const imgSrc = content?.imageUrl || getSectionImage(serviceSlug, 'benefits');
   
   // Dynamic colors based on background
   const isDark = background === 'dark';
   const sectionBg = isDark
     ? 'bg-gradient-to-br from-[#14284e] via-[#101d38] to-[#0d172d]'
     : 'bg-gradient-to-b from-white to-[#f5f8fc]';
-  const headingColor = isDark ? 'text-white' : 'text-[#122b4d]';
   const cardBg = isDark ? 'bg-white/8' : 'bg-white';
   const cardBorder = isDark ? 'border-white/15' : 'border-slate-200';
   const cardTitleColor = isDark ? 'text-white' : 'text-[#122b4d]';
   const cardBodyColor = isDark ? 'text-slate-300' : 'text-slate-700';
-  const hasImage = Boolean(imageUrl);
-  const isSplitLayout = hasImage && (imagePosition === 'left' || imagePosition === 'right');
-
-  const imageBlock = hasImage ? (
-    <div className="overflow-hidden rounded-2xl border border-white/20 shadow-lg">
-      <img
-        src={imageUrl}
-        alt={imageAlt || `${heading} image`}
-        className="h-72 w-full object-cover transition-transform duration-700 hover:scale-105"
-      />
-    </div>
-  ) : null;
 
   const itemsGrid = (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -60,22 +49,23 @@ const BenefitsSection = ({ heading, content, background }) => {
       </div>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-        <h2 className={`mb-8 font-serif text-3xl font-bold md:text-4xl ${headingColor}`}>
-          {heading}
-        </h2>
-        {isSplitLayout ? (
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-            {imagePosition === 'left' && imageBlock}
-            {itemsGrid}
-            {imagePosition === 'right' && imageBlock}
-          </div>
-        ) : (
-          <>
-            {imagePosition === 'top' && <div className="mb-8">{imageBlock}</div>}
-            {itemsGrid}
-            {imagePosition === 'bottom' && <div className="mt-8">{imageBlock}</div>}
-          </>
-        )}
+        <div
+          style={{
+            backgroundImage: `linear-gradient(rgba(10,25,60,0.72), rgba(10,25,60,0.72)), url(${imgSrc})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            padding: '48px 32px',
+            borderRadius: '12px',
+            marginBottom: '32px',
+            textAlign: 'center',
+          }}
+        >
+          <h2 style={{ color: '#C9A84C', fontSize: '28px', marginBottom: '8px' }}>{heading}</h2>
+          <p style={{ color: '#e0e0e0', maxWidth: '600px', margin: '0 auto' }}>
+            Expert legal assistance tailored to your needs
+          </p>
+        </div>
+        {itemsGrid}
       </div>
     </section>
   );

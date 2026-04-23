@@ -120,7 +120,7 @@ const ServiceEditor = ({
           <div className="flex items-center gap-3">
             {/* View Page Link */}
             <a
-              href={`/services/${serviceData.slug}`}
+              href={`/${serviceData.slug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
@@ -193,3 +193,4 @@ const ServiceEditor = ({
 };
 
 export default ServiceEditor;
+

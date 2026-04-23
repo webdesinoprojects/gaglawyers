@@ -52,12 +52,12 @@ const CITY_ALIASES = {
 const normalizeCity = (value = '') => value.toString().trim().toLowerCase();
 const FOOTER_LOCATION_LIMIT = 200;
 const FOOTER_FETCH_LIMIT = 1000;
-/** Bump when API slug shape changes (e.g. `*-lawyer-in-*`) so clients refetch. */
-const FOOTER_LOCATIONS_CACHE_KEY = 'gag-footer-locations-v5';
+/** Bump when API slug shape changes (e.g. `*-in-*`) so clients refetch. */
+const FOOTER_LOCATIONS_CACHE_KEY = 'gag-footer-locations-v6';
 let footerLocationsCache = null;
 
 const isStaleFooterSlug = (slug) =>
-  typeof slug === 'string' && slug.length > 0 && !slug.includes('-lawyer-in-');
+  typeof slug === 'string' && slug.length > 0 && !slug.includes('-in-');
 
 const getCityPriority = (cityName) => {
   const normalized = normalizeCity(cityName);
@@ -235,11 +235,13 @@ const Footer = () => {
             <div className="space-y-6 sm:col-span-2 lg:col-span-1">
               <Link to="/" className="flex items-center gap-4">
                 {/* Logo Image - Enlarged */}
-                <img 
-                  src="/logo.png" 
-                  alt="GAG Lawyers" 
-                  className="h-14 w-auto"
-                />
+                <span className="brand-logo-shell">
+                  <img 
+                    src="/logo.png" 
+                    alt="GAG Lawyers" 
+                    className="h-12 w-auto"
+                  />
+                </span>
                 {/* Text Logo */}
                 <div className="flex flex-col gap-0.5 items-center">
                   <span className="text-[22px] font-bold text-white leading-none tracking-tight" style={{ fontFamily: '"Baskerville", "Times New Roman", Georgia, serif' }}>
@@ -322,7 +324,7 @@ const Footer = () => {
                 {practiceServices.map((s) => (
                   <li key={s._id}>
                     <Link
-                      to={`/services/${s.slug}`}
+                      to={`/${s.slug}`}
                       className="text-gray-300 hover:text-gold transition-all duration-200 hover:translate-x-1 inline-block line-clamp-2"
                     >
                       {s.name || s.title}
@@ -478,3 +480,4 @@ const Footer = () => {
 };
 
 export default Footer;
+

@@ -19,7 +19,7 @@ export const generateSlug = (text) => {
 
 /**
  * Build canonical location page slug
- * Format: {service-slug}-lawyer-in-{city-slug}
+ * Format: {service-slug}-in-{city-slug}
  * @param {string} serviceSlug - Service slug
  * @param {string} cityDisplayName - City name
  * @returns {string} Location page slug
@@ -29,8 +29,15 @@ export const buildLocationPageSlug = (serviceSlug, cityDisplayName) => {
   const city = generateSlug(String(cityDisplayName || ''));
 
   if (!service || !city) return '';
-  return `${service}-lawyer-in-${city}`;
+  return `${service}-in-${city}`;
 };
+
+/**
+ * Alias: Generate canonical location page slug
+ * Format: {service-slug}-in-{city-slug}
+ */
+export const generateLocationSlug = (serviceSlug, cityDisplayName) =>
+  buildLocationPageSlug(serviceSlug, cityDisplayName);
 
 /**
  * Convert slug back to readable text
@@ -51,7 +58,8 @@ export const slugToText = (slug) => {
  * @returns {string} Location path
  */
 export const getLocationPath = (serviceSlug, citySlug) => {
-  return `/${serviceSlug}/${citySlug}`;
+  const slug = buildLocationPageSlug(serviceSlug, citySlug);
+  return slug ? `/${slug}` : '/';
 };
 
 /**
@@ -60,7 +68,7 @@ export const getLocationPath = (serviceSlug, citySlug) => {
  * @returns {string} Service page path
  */
 export const getServicePath = (serviceSlug) => {
-  return `/services/${serviceSlug}`;
+  return `/${serviceSlug}`;
 };
 
 /**
@@ -130,7 +138,9 @@ export const extractSlugFromPath = (path) => {
  */
 export const isLocationPath = (path) => {
   const parts = path.split('/').filter(p => p);
-  return parts.length === 2 && parts[0] !== 'services' && parts[0] !== 'blog';
+  if (parts.length !== 1) return false;
+  const slug = parts[0];
+  return slug.includes('-in-') && slug !== 'blog' && slug !== 'services';
 };
 
 /**

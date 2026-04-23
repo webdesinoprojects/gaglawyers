@@ -65,7 +65,7 @@ const Navbar = () => {
       dropdownType: 'services',
       submenu: services.map(service => ({
         name: service.name || service.title,
-        path: `/services/${service.slug}`
+        path: `/${service.slug}`
       }))
     },
     { name: 'Blog', path: '/blog' },
@@ -84,11 +84,13 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-20">
           <Link to="/" className="flex items-center gap-3">
             {/* Logo Image */}
-            <img 
-              src="/logo.png" 
-              alt="GAG Lawyers" 
-              className="h-12 w-auto"
-            />
+            <span className="brand-logo-shell">
+              <img 
+                src="/logo.png" 
+                alt="GAG Lawyers" 
+                className="h-10 w-auto"
+              />
+            </span>
             {/* Text Logo - Always show alongside image */}
             <div className="flex items-center gap-2">
               <span className="font-serif text-2xl lg:text-3xl font-bold text-white">
@@ -357,3 +359,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+

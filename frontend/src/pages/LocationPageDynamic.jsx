@@ -25,7 +25,7 @@ const deriveServiceSlug = (locationSlug = '', pageData = null) => {
   if (pageData?.service?.slug) return pageData.service.slug;
   const { serviceSlugPart } = parseServiceAndCityFromSlug(locationSlug);
   if (!serviceSlugPart) return '';
-  return serviceSlugPart.replace(/-lawyer$/i, '');
+  return serviceSlugPart;
 };
 
 const localizeText = (value, city) => {

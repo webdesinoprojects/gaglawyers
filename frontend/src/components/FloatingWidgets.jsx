@@ -1,9 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { MessageCircle, Phone, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Phone } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import API_BASE_URL from '../config/api';
-import { useGuidedChatbot } from '../hooks/useGuidedChatbot';
-import GuidedChatbotPanel from './chatbot/GuidedChatbotPanel';
 import {
   SETTINGS_REV_KEY,
   WIDGET_SETTINGS_CACHE_KEY,
@@ -12,19 +10,34 @@ import {
 const TAWK_ENABLED = String(import.meta.env.VITE_TAWK_ENABLED || 'false').toLowerCase() === 'true';
 const TAWK_PROPERTY_ID = (import.meta.env.VITE_TAWK_PROPERTY_ID || '').trim();
 const TAWK_WIDGET_ID = (import.meta.env.VITE_TAWK_WIDGET_ID || '').trim();
+const parseSettingBoolean = (value, fallback = false) => {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    const v = value.trim().toLowerCase();
+    if (v === 'true') return true;
+    if (v === 'false') return false;
+  }
+  if (typeof value === 'number') return value === 1;
+  return fallback;
+};
 
 const FloatingWidgets = () => {
   const location = useLocation();
   const [settings, setSettings] = useState({
     whatsappEnabled: false,
     whatsappNumber: '',
-    phoneNumber: ''
+    phoneNumber: '',
+    tawkEnabled: null,
+    tawkPropertyId: '',
+    tawkWidgetId: '',
   });
-  const [showChat, setShowChat] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [phoneVariant, setPhoneVariant] = useState('dark');
-  const [isTawkLoaded, setIsTawkLoaded] = useState(false);
-  const hasTawkConfig = TAWK_ENABLED && Boolean(TAWK_PROPERTY_ID) && Boolean(TAWK_WIDGET_ID);
+  const resolvedTawkEnabled = parseSettingBoolean(settings.tawkEnabled, TAWK_ENABLED);
+  const resolvedTawkPropertyId = (settings.tawkPropertyId || TAWK_PROPERTY_ID || '').trim();
+  const resolvedTawkWidgetId = (settings.tawkWidgetId || TAWK_WIDGET_ID || '').trim();
+  const hasTawkConfig =
+    resolvedTawkEnabled && Boolean(resolvedTawkPropertyId) && Boolean(resolvedTawkWidgetId);
   const hasWhatsApp = settings.whatsappEnabled && settings.whatsappNumber;
   const hasPhone = Boolean(settings.phoneNumber);
 
@@ -32,20 +45,36 @@ const FloatingWidgets = () => {
   const isAdminPanel = location.pathname.startsWith('/admin');
 
   const fetchWidgetSettingsFromApi = async () => {
-    const [whatsappEnabledRes, whatsappNumberRes, phoneNumberRes] = await Promise.all([
+    const [
+      whatsappEnabledRes,
+      whatsappNumberRes,
+      phoneNumberRes,
+      tawkEnabledRes,
+      tawkPropertyIdRes,
+      tawkWidgetIdRes,
+    ] = await Promise.all([
       fetch(`${API_BASE_URL}/api/settings/whatsappEnabled`),
       fetch(`${API_BASE_URL}/api/settings/whatsappNumber`),
       fetch(`${API_BASE_URL}/api/settings/phoneNumber`),
+      fetch(`${API_BASE_URL}/api/settings/tawkEnabled`),
+      fetch(`${API_BASE_URL}/api/settings/tawkPropertyId`),
+      fetch(`${API_BASE_URL}/api/settings/tawkWidgetId`),
     ]);
 
     const whatsappEnabledData = await whatsappEnabledRes.json();
     const whatsappNumberData = await whatsappNumberRes.json();
     const phoneNumberData = await phoneNumberRes.json();
+    const tawkEnabledData = await tawkEnabledRes.json();
+    const tawkPropertyIdData = await tawkPropertyIdRes.json();
+    const tawkWidgetIdData = await tawkWidgetIdRes.json();
 
     const nextSettings = {
       whatsappEnabled: whatsappEnabledData.success ? whatsappEnabledData.data.settingValue : false,
       whatsappNumber: whatsappNumberData.success ? whatsappNumberData.data.settingValue : '',
       phoneNumber: phoneNumberData.success ? phoneNumberData.data.settingValue : '',
+      tawkEnabled: tawkEnabledData.success ? tawkEnabledData.data.settingValue : null,
+      tawkPropertyId: tawkPropertyIdData.success ? tawkPropertyIdData.data.settingValue : '',
+      tawkWidgetId: tawkWidgetIdData.success ? tawkWidgetIdData.data.settingValue : '',
     };
 
     try {
@@ -217,18 +246,39 @@ const FloatingWidgets = () => {
       window.removeEventListener('scroll', queueUpdate);
       window.removeEventListener('resize', queueUpdate);
     };
-  }, [location.pathname, showChat, hasPhone, isAdminPanel]);
+  }, [location.pathname, hasPhone, isAdminPanel]);
 
   useEffect(() => {
-    if (isAdminPanel || !hasTawkConfig) return undefined;
+    const desiredSrc =
+      hasTawkConfig && !isAdminPanel
+        ? `https://embed.tawk.to/${resolvedTawkPropertyId}/${resolvedTawkWidgetId}`
+        : '';
 
-    if (window.Tawk_API && typeof window.Tawk_API.maximize === 'function') {
-      setIsTawkLoaded(true);
+    if (!desiredSrc) {
+      if (window.Tawk_API && typeof window.Tawk_API.hideWidget === 'function') {
+        window.Tawk_API.hideWidget();
+      }
+      setIsTawkLoaded(false);
       return undefined;
     }
 
-    const scriptId = 'gag-tawk-script';
-    if (document.getElementById(scriptId)) {
+    const existingScripts = Array.from(
+      document.querySelectorAll('script[src*="embed.tawk.to/"]')
+    );
+    const hasExactScript = existingScripts.some((script) => script.src === desiredSrc);
+
+    if (!hasExactScript && existingScripts.length > 0) {
+      existingScripts.forEach((script) => script.remove());
+      window.Tawk_API = {};
+      window.Tawk_LoadStart = null;
+      setIsTawkLoaded(false);
+    }
+
+    if (window.Tawk_API && typeof window.Tawk_API.maximize === 'function' && hasExactScript) {
+      return undefined;
+    }
+
+    if (hasExactScript) {
       return undefined;
     }
 
@@ -236,56 +286,36 @@ const FloatingWidgets = () => {
     window.Tawk_LoadStart = new Date();
 
     const script = document.createElement('script');
-    script.id = scriptId;
+    script.id = 'gag-tawk-script';
     script.async = true;
-    script.src = `https://embed.tawk.to/${TAWK_PROPERTY_ID}/${TAWK_WIDGET_ID}`;
+    script.src = desiredSrc;
     script.charset = 'UTF-8';
     script.setAttribute('crossorigin', '*');
-    script.onload = () => {
-      setIsTawkLoaded(true);
-      if (typeof window.Tawk_API?.hideWidget === 'function') {
-        window.Tawk_API.hideWidget();
-      }
-    };
-    script.onerror = () => {
-      setIsTawkLoaded(false);
-    };
+    script.onload = () => {};
+    script.onerror = () => {};
 
     document.body.appendChild(script);
     return undefined;
-  }, [hasTawkConfig, isAdminPanel]);
+  }, [
+    hasTawkConfig,
+    isAdminPanel,
+    resolvedTawkPropertyId,
+    resolvedTawkWidgetId,
+  ]);
 
-  const handleWhatsAppClick = useCallback(() => {
+  const handleWhatsAppClick = () => {
     if (settings.whatsappNumber) {
       const cleanNumber = settings.whatsappNumber.replace(/[^0-9]/g, '');
       const message = encodeURIComponent('Hello! I would like to inquire about your legal services.');
       window.open(`https://wa.me/${cleanNumber}?text=${message}`, '_blank');
     }
-  }, [settings.whatsappNumber]);
+  };
 
   const handlePhoneClick = () => {
     if (settings.phoneNumber) {
       window.location.href = `tel:${settings.phoneNumber}`;
     }
   };
-
-  const handleChatClick = () => {
-    if (hasTawkConfig && isTawkLoaded && window.Tawk_API) {
-      if (typeof window.Tawk_API.showWidget === 'function') {
-        window.Tawk_API.showWidget();
-      }
-      if (typeof window.Tawk_API.maximize === 'function') {
-        window.Tawk_API.maximize();
-      }
-      return;
-    }
-    setShowChat(!showChat);
-  };
-
-  const guidedChatbot = useGuidedChatbot({
-    onWhatsApp: handleWhatsAppClick,
-    typingDelayMs: 420,
-  });
 
   // Hide entire widget rail on admin; public site always gets guided assistant
   if (isAdminPanel) {
@@ -295,26 +325,7 @@ const FloatingWidgets = () => {
   return (
     <>
       {/* Right Side Widgets Stack - Bottom Right */}
-      <div className={`fixed bottom-6 right-6 z-50 flex flex-col gap-3 transition-all duration-500 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-20 opacity-0'}`}>
-        {/* Chat Widget Button */}
-        <button
-          onClick={handleChatClick}
-          className="group relative w-14 h-14 bg-gold hover:bg-gold/90 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center hover:scale-110"
-          title="GAG Assistant"
-        >
-          {!hasTawkConfig && showChat ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
-          
-          {/* Tooltip */}
-          <span className="absolute right-full mr-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-            {hasTawkConfig ? 'Live chat' : showChat ? 'Close' : 'Help & options'}
-          </span>
-
-          {/* Notification Badge */}
-          {(!showChat || hasTawkConfig) && (
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
-          )}
-        </button>
-
+      <div className={`fixed ${hasTawkConfig ? 'bottom-24' : 'bottom-6'} right-6 z-50 flex flex-col gap-3 transition-all duration-500 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-20 opacity-0'}`}>
         {/* WhatsApp Button */}
         {hasWhatsApp && (
           <button
@@ -372,20 +383,6 @@ const FloatingWidgets = () => {
         </div>
       )}
 
-      {!hasTawkConfig && showChat && (
-        <GuidedChatbotPanel
-          messages={guidedChatbot.messages}
-          currentOptions={guidedChatbot.currentOptions}
-          currentNodeId={guidedChatbot.currentNodeId}
-          stack={guidedChatbot.stack}
-          isTyping={guidedChatbot.isTyping}
-          selectOption={guidedChatbot.selectOption}
-          goBack={guidedChatbot.goBack}
-          startOver={guidedChatbot.startOver}
-          onClose={() => setShowChat(false)}
-          phoneDisplay={hasPhone ? settings.phoneNumber : ''}
-        />
-      )}
     </>
   );
 };

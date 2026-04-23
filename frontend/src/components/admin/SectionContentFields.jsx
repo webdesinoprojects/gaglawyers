@@ -357,12 +357,14 @@ const SectionContentFields = ({ type, content, onChange }) => {
               placeholder="Business Owners, Startups, Corporations"
             />
           </div>
+          {renderSectionImageFields('Optional Section Image')}
         </div>
       );
 
     case 'pricing':
       return (
         <div className="space-y-4">
+          {renderSectionImageFields('Optional Section Image')}
           <div className="flex items-center justify-between">
             <label className="block text-sm font-medium text-gray-700">
               Pricing Tiers
@@ -447,6 +449,7 @@ const SectionContentFields = ({ type, content, onChange }) => {
     case 'testimonials':
       return (
         <div className="space-y-4">
+          {renderSectionImageFields('Optional Section Image')}
           <div className="flex items-center justify-between">
             <label className="block text-sm font-medium text-gray-700">
               Testimonials
@@ -520,17 +523,20 @@ const SectionContentFields = ({ type, content, onChange }) => {
 
     case 'footer_note':
       return (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Note Text
-          </label>
-          <textarea
-            value={content.text || ''}
-            onChange={(e) => updateField('text', e.target.value)}
-            rows={4}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-            placeholder="Footer note or disclaimer..."
-          />
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Note Text
+            </label>
+            <textarea
+              value={content.text || ''}
+              onChange={(e) => updateField('text', e.target.value)}
+              rows={4}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              placeholder="Footer note or disclaimer..."
+            />
+          </div>
+          {renderSectionImageFields('Optional Section Image')}
         </div>
       );
 

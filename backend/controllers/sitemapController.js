@@ -18,6 +18,7 @@ const generateSitemap = async (req, res) => {
       { url: '/contact', priority: '0.9', changefreq: 'monthly' },
     ];
 
+    const services = await Service.find({ slug: { $exists: true, $ne: '' } }).select('slug updatedAt');
     const blogPosts = await BlogPost.find({ isPublished: true }).select('slug updatedAt');
     const locationPages = await LocationPage.find({ isActive: true }).select('slug updatedAt');
 
@@ -29,6 +30,15 @@ const generateSitemap = async (req, res) => {
       xml += `    <loc>${baseUrl}${page.url}</loc>\n`;
       xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
       xml += `    <priority>${page.priority}</priority>\n`;
+      xml += `  </url>\n`;
+    });
+
+    services.forEach(service => {
+      xml += `  <url>\n`;
+      xml += `    <loc>${baseUrl}/${service.slug}</loc>\n`;
+      xml += `    <lastmod>${service.updatedAt.toISOString()}</lastmod>\n`;
+      xml += `    <changefreq>weekly</changefreq>\n`;
+      xml += `    <priority>0.8</priority>\n`;
       xml += `  </url>\n`;
     });
 

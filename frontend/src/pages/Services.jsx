@@ -144,7 +144,7 @@ const Services = () => {
                     {currentService.description}
                   </p>
                   <Link 
-                    to={`/services/${currentService.slug}`}
+                    to={`/${currentService.slug}`}
                     className="inline-flex items-center gap-2 text-gold font-semibold hover:text-gold/80 transition mt-4"
                   >
                     View full service details →
@@ -190,7 +190,7 @@ const Services = () => {
                       Schedule Consultation
                     </button>
                   </Link>
-                  <Link to={`/services/${currentService.slug}`} className="flex-1">
+                  <Link to={`/${currentService.slug}`} className="flex-1">
                     <button className="w-full px-6 py-4 bg-transparent text-navy font-sans font-semibold rounded-lg border-2 border-navy transition-all duration-200 hover:bg-navy/5">
                       Full Details & More
                     </button>
@@ -263,4 +263,5 @@ const Services = () => {
 };
 
 export default Services;
+
 

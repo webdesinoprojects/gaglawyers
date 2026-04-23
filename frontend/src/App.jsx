@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Layout from './components/Layout';
 import AdminLayout from './components/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -13,9 +13,8 @@ import Awards from './pages/Awards';
 import Gallery from './pages/Gallery';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
-import ServicePageDynamic from './pages/ServicePageDynamic';
+import SlugPageRouter from './pages/SlugPageRouter';
 import LocationPage from './pages/LocationPage';
-import LocationPageDynamic from './pages/LocationPageDynamic';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import NotFound from './pages/NotFound';
@@ -38,6 +37,11 @@ import LocationManager from './pages/admin/LocationManager';
 import SEOManager from './pages/admin/SEOManager';
 import ComingSoon from './pages/admin/ComingSoon';
 import Affiliation from './pages/Affiliation';
+
+const RedirectToSlug = () => {
+  const { slug } = useParams();
+  return <Navigate to={`/${slug}`} replace />;
+};
 
 function App() {
   return (
@@ -82,7 +86,7 @@ function App() {
             <Route path="awards" element={<Awards />} />
             <Route path="gallery" element={<Gallery />} />
             <Route path="services" element={<Services />} />
-            <Route path="services/:slug" element={<ServicePageDynamic />} />
+            <Route path="services/:slug" element={<RedirectToSlug />} />
             <Route path="blog" element={<Blog />} />
             <Route path="blog/:slug" element={<BlogPost />} />
             <Route path="contact" element={<Contact />} />
@@ -91,7 +95,7 @@ function App() {
             <Route path="terms" element={<TermsOfService />} />
             {/* Location pages - dynamic service/city routing */}
             <Route path=":service/:city" element={<LocationPage />} />
-            <Route path=":slug" element={<LocationPageDynamic />} />
+            <Route path=":slug" element={<SlugPageRouter />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { FileText, Scale } from 'lucide-react';
+import { getSectionImage } from '../../utils/sectionImages';
 
 const BULLET_LINE_REGEX = /^([-*•]\s+|\d+\.\s+)/;
 
@@ -52,9 +53,10 @@ const parseOverviewBody = (rawBody) => {
  * Overview Section Component
  * Content: { body }
  */
-const OverviewSection = ({ heading, content, background }) => {
-  const { body, imageUrl, imageAlt, imagePosition = 'top' } = content || {};
+const OverviewSection = ({ heading, content, background, serviceSlug = '' }) => {
+  const { body } = content || {};
   const { leadParagraphs, bulletItems } = parseOverviewBody(body);
+  const imgSrc = content?.imageUrl || getSectionImage(serviceSlug, 'overview');
   
   // Dynamic colors based on background
   const isDark = background === 'dark';
@@ -67,18 +69,6 @@ const OverviewSection = ({ heading, content, background }) => {
   const iconColor = isDark ? 'text-[#f5d98c]' : 'text-white';
   const headingColor = isDark ? 'text-white' : 'text-[#102846]';
   const bodyColor = isDark ? 'text-slate-200' : 'text-slate-700';
-  const hasImage = Boolean(imageUrl);
-  const isSplitLayout = hasImage && (imagePosition === 'left' || imagePosition === 'right');
-
-  const imageBlock = hasImage ? (
-    <div className="overflow-hidden rounded-2xl border border-white/20 shadow-lg">
-      <img
-        src={imageUrl}
-        alt={imageAlt || `${heading} image`}
-        className="h-72 w-full object-cover transition-transform duration-700 hover:scale-105"
-      />
-    </div>
-  ) : null;
 
   const renderOverviewBody = (containerClasses = '') => (
     <div className={containerClasses}>
@@ -109,31 +99,29 @@ const OverviewSection = ({ heading, content, background }) => {
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
         <div className={`relative rounded-3xl border ${borderColor} ${cardBg} p-8 shadow-[0_16px_45px_rgba(15,23,42,0.12)] backdrop-blur-sm md:p-10`}>
-          <div className="mb-7 flex items-center gap-3">
-            <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${iconBg}`}>
-              <FileText size={24} className={iconColor} />
-            </div>
-            <h2 className={`font-serif text-3xl font-bold md:text-4xl ${headingColor}`}>
-              {heading}
-            </h2>
-            <Scale className={`ml-auto h-5 w-5 ${isDark ? 'text-[#f5d98c]' : 'text-[#c9a84c]'}`} />
-          </div>
-          <div className={`max-w-none font-sans ${bodyColor} leading-8 text-[1.06rem]`}>
-            {isSplitLayout ? (
-              <div className="not-prose grid grid-cols-1 items-start gap-8 lg:grid-cols-2">
-                {imagePosition === 'left' && imageBlock}
-                <div className={`rounded-2xl border ${borderColor} bg-white/5 p-6 font-sans ${bodyColor} leading-8`}>
-                  {renderOverviewBody()}
+          <div className="section-split">
+            <div className="section-split__text">
+              <div className="mb-7 flex items-center gap-3">
+                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${iconBg}`}>
+                  <FileText size={24} className={iconColor} />
                 </div>
-                {imagePosition === 'right' && imageBlock}
+                <h2 className={`font-serif text-3xl font-bold md:text-4xl ${headingColor}`}>
+                  {heading}
+                </h2>
+                <Scale className={`ml-auto h-5 w-5 ${isDark ? 'text-[#f5d98c]' : 'text-[#c9a84c]'}`} />
               </div>
-            ) : (
-              <>
-                {imagePosition === 'top' && imageBlock}
-                {renderOverviewBody(imagePosition === 'top' ? 'mt-7' : '')}
-                {imagePosition === 'bottom' && <div className="mt-6">{imageBlock}</div>}
-              </>
-            )}
+              <div className={`max-w-none font-sans ${bodyColor} leading-8 text-[1.06rem]`}>
+                {renderOverviewBody()}
+              </div>
+            </div>
+            <div className="section-split__image">
+              <img
+                src={imgSrc}
+                alt={content?.imageAlt || heading || 'Legal service'}
+                loading="lazy"
+                style={{ borderRadius: '12px', width: '100%', objectFit: 'cover', maxHeight: '380px' }}
+              />
+            </div>
           </div>
         </div>
       </div>

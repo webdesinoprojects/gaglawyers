@@ -6,7 +6,7 @@ import { ChevronDown, MessageCircleQuestion } from 'lucide-react';
  * Content: { items: [{ question, answer }] }
  */
 const FAQSection = ({ heading, content, background }) => {
-  const { imageUrl, imageAlt, imagePosition = 'top', items = [] } = content || {};
+  const { items = [] } = content || {};
   const [openIndex, setOpenIndex] = useState(null);
   
   // Dynamic colors based on background
@@ -15,23 +15,15 @@ const FAQSection = ({ heading, content, background }) => {
     ? 'bg-gradient-to-br from-[#0d1d3a] via-[#10274a] to-[#153055]'
     : 'bg-gradient-to-b from-white to-[#f4f7fc]';
   const headingColor = isDark ? 'text-white' : 'text-[#112b4e]';
-  const itemBg = isDark ? 'bg-white/8' : 'bg-white';
+  const itemBg = isDark ? 'bg-white/10' : 'bg-white';
   const itemBorder = isDark ? 'border-white/15' : 'border-slate-200';
-  const itemHoverBg = isDark ? 'hover:bg-white/15' : 'hover:bg-slate-50';
-  const questionColor = isDark ? 'text-white' : 'text-[#112b4e]';
+  const itemHoverBg = isDark ? 'hover:brightness-110' : 'hover:brightness-105';
+  const faqTabBg = isDark
+    ? 'bg-gradient-to-r from-[#102b54] via-[#163864] to-[#1f456f]'
+    : 'bg-gradient-to-r from-[#122b50] via-[#173864] to-[#214a74]';
+  const questionColor = 'text-white';
   const answerColor = isDark ? 'text-slate-300' : 'text-slate-700';
-  const hasImage = Boolean(imageUrl);
-  const isSplitLayout = hasImage && (imagePosition === 'left' || imagePosition === 'right');
-
-  const imageBlock = hasImage ? (
-    <div className="overflow-hidden rounded-2xl border border-white/20 shadow-lg">
-      <img
-        src={imageUrl}
-        alt={imageAlt || `${heading} image`}
-        className="h-72 w-full object-cover transition-transform duration-700 hover:scale-105"
-      />
-    </div>
-  ) : null;
+  const answerBg = isDark ? 'bg-[#0f2445]/80' : 'bg-white';
 
   const faqList = (
     <div className="space-y-4">
@@ -42,9 +34,9 @@ const FAQSection = ({ heading, content, background }) => {
         >
           <button
             onClick={() => setOpenIndex(openIndex === index ? null : index)}
-            className={`flex w-full items-center justify-between gap-3 p-6 text-left transition-colors ${itemHoverBg}`}
+            className={`flex w-full items-start justify-between gap-4 rounded-2xl p-6 text-left transition-all ${faqTabBg} ${itemHoverBg}`}
           >
-            <span className={`flex items-center gap-2 font-serif text-lg font-bold ${questionColor}`}>
+            <span className={`flex w-full items-start gap-3 font-serif text-[19px] font-bold leading-relaxed md:text-[21px] ${questionColor}`}>
               <MessageCircleQuestion className={`h-4 w-4 ${isDark ? 'text-[#f4d98e]' : 'text-[#c9a84c]'}`} />
               {item.question}
             </span>
@@ -61,7 +53,7 @@ const FAQSection = ({ heading, content, background }) => {
             }`}
           >
             <div className="overflow-hidden">
-              <div className={`border-t-2 ${itemBorder} p-6`}>
+              <div className={`border-t ${itemBorder} ${answerBg} p-6`}>
                 <p className={`font-sans ${answerColor}`}>{item.answer}</p>
               </div>
             </div>
@@ -77,23 +69,11 @@ const FAQSection = ({ heading, content, background }) => {
         <div className="absolute right-8 bottom-6 h-48 w-48 rounded-full bg-[#c9a84c]/30 blur-3xl" />
       </div>
 
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 md:px-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
         <h2 className={`mb-8 font-serif text-3xl font-bold md:text-4xl ${headingColor}`}>
           {heading}
         </h2>
-        {isSplitLayout ? (
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-            {imagePosition === 'left' && imageBlock}
-            {faqList}
-            {imagePosition === 'right' && imageBlock}
-          </div>
-        ) : (
-          <>
-            {imagePosition === 'top' && <div className="mb-8">{imageBlock}</div>}
-            {faqList}
-            {imagePosition === 'bottom' && <div className="mt-8">{imageBlock}</div>}
-          </>
-        )}
+        {faqList}
       </div>
     </section>
   );

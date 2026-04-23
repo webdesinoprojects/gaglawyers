@@ -19,7 +19,7 @@ const SECTION_COMPONENTS = {
   testimonials: TestimonialsSection,
 };
 
-const SectionRenderer = ({ section, sectionIndex = 0 }) => {
+const SectionRenderer = ({ section, sectionIndex = 0, serviceSlug = '' }) => {
   const Component = SECTION_COMPONENTS[section.type];
 
   if (!Component) {
@@ -33,6 +33,8 @@ const SectionRenderer = ({ section, sectionIndex = 0 }) => {
         heading={section.heading}
         content={section.content}
         background={section.background}
+        serviceSlug={serviceSlug}
+        section={section}
       />
     </RevealOnScroll>
   );

@@ -1,5 +1,5 @@
 /** Session cache key for FloatingWidgets + disclaimer-related fetches */
-export const WIDGET_SETTINGS_CACHE_KEY = 'gag-widget-settings-v2';
+export const WIDGET_SETTINGS_CACHE_KEY = 'gag-widget-settings-v3';
 
 /** Bump so other tabs can refetch widget settings (sessionStorage is per-tab). */
 export const SETTINGS_REV_KEY = 'gag-settings-rev';
