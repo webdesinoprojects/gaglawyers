@@ -423,9 +423,15 @@ const PageContentManager = () => {
     { id: 'home', label: 'Home Page' },
     { id: 'about', label: 'About Page' },
     { id: 'firm', label: 'The Firm' },
+    { id: 'team', label: 'Team Page' },
+    { id: 'services', label: 'Services Page' },
+    { id: 'blog', label: 'Blog Page' },
     { id: 'contact', label: 'Contact Page' },
     { id: 'awards', label: 'Awards Page' },
     { id: 'gallery', label: 'Gallery Page' },
+    { id: 'affiliation', label: 'Affiliation Page' },
+    { id: 'privacyPolicy', label: 'Privacy Policy' },
+    { id: 'termsOfService', label: 'Terms of Service' },
   ];
 
   useEffect(() => {
@@ -501,6 +507,219 @@ const PageContentManager = () => {
           title: 'About Us - The Firm | GAG Lawyers',
           description: 'Founded by Advocate Rahul Grover, GAG Lawyers provides high-quality legal services across India and abroad.',
           keywords: 'about gag lawyers, rahul grover advocate, law firm india',
+        },
+        isPublished: true,
+      },
+      team: {
+        pageName: 'team',
+        sections: {
+          hero: {
+            badge: 'Meet Our Team',
+            title: 'Our Team',
+            subtitle:
+              'Our strength lies not just in legal knowledge but in the people who apply it with dedication and care.',
+          },
+          introduction: {
+            paragraph1:
+              'At GAG Lawyers - Grover & Grover Advocates, every member of our team shares the same vision: to combine legal excellence with personal commitment so that our clients always feel supported, informed, and represented.',
+            paragraph2:
+              'Leading this vision is our Founder & Owner, Advocate Rahul Grover, whose leadership and experience have shaped the firm into what it is today.',
+          },
+          founder: {
+            heading: 'Our Founder & Owner',
+            highlight: 'A Visionary Leader in Law',
+          },
+        },
+        seo: {
+          title: 'Our Team | GAG Lawyers - Grover & Grover Advocates',
+          description:
+            'Meet our team led by Advocate Rahul Grover. Skilled lawyers and professionals combining legal excellence with personal commitment to client success.',
+          keywords: 'legal team, advocate rahul grover, law firm team, lawyers in india, legal specialists',
+        },
+        isPublished: true,
+      },
+      services: {
+        pageName: 'services',
+        sections: {
+          hero: {
+            eyebrow: 'Practice Areas',
+            heading: 'Legal Excellence Redefined',
+            subheading:
+              'Navigate complex legal challenges with confidence. Our expert team delivers strategic solutions across diverse practice areas.',
+          },
+          whyChoose: {
+            heading: 'Why Choose Us',
+            cards: [
+              {
+                title: 'Expert Legal Team',
+                description:
+                  'Seasoned professionals with decades of combined experience across multiple practice areas.',
+              },
+              {
+                title: 'Proven Success',
+                description:
+                  'Track record of favorable outcomes and satisfied clients across diverse legal matters.',
+              },
+              {
+                title: 'Client-Centric',
+                description:
+                  'Personalized attention and strategic guidance tailored to your specific situation.',
+              },
+            ],
+          },
+        },
+        seo: {
+          title: 'Legal Services | GAG Lawyers - Grover & Grover Advocates',
+          description:
+            'Explore legal services offered by GAG Lawyers across litigation, advisory, documentation, and dispute resolution.',
+          keywords: 'legal services, litigation, corporate advisory, law firm services',
+        },
+        isPublished: true,
+      },
+      blog: {
+        pageName: 'blog',
+        sections: {
+          hero: {
+            heading: 'Legal Insights & Updates',
+            subheading: 'Practical legal guidance, updates, and thought leadership from our team.',
+          },
+        },
+        seo: {
+          title: 'Legal Blog | GAG Lawyers - Grover & Grover Advocates',
+          description:
+            'Read practical legal insights, updates, and analysis from the team at GAG Lawyers.',
+          keywords: 'legal blog, law updates, legal insights, gag lawyers blog',
+        },
+        isPublished: true,
+      },
+      contact: {
+        pageName: 'contact',
+        sections: {
+          hero: {
+            heading: 'Get In Touch',
+            subheading: "Let's discuss how we can help you with your legal needs",
+          },
+          contactInfo: {
+            title: 'Contact Information',
+            emailLabel: 'Email',
+            phoneLabel: 'Phone',
+            addressLabel: 'Office Address',
+          },
+          form: {
+            title: 'Send Us a Message',
+            subtitle: "Fill out the form below and we'll get back to you within 24 hours.",
+          },
+        },
+        seo: {
+          title: 'Contact Us - GAG Lawyers | Legal Consultation',
+          description:
+            'Get in touch with our legal experts. Schedule a consultation for corporate law, litigation, real estate, and family law matters.',
+          keywords: 'contact lawyers, legal consultation, lawyers in delhi, law firm contact',
+        },
+        isPublished: true,
+      },
+      awards: {
+        pageName: 'awards',
+        sections: {
+          hero: {
+            heading: 'Awards & Achievements',
+            subheading:
+              'Recognition for our commitment to excellence, integrity, and client satisfaction.',
+          },
+        },
+        seo: {
+          title: 'Awards & Recognition | GAG Lawyers - Grover & Grover Advocates',
+          description:
+            'Recognition for excellence in litigation, corporate advisory, and legal innovation. Awards highlighting our commitment to client satisfaction.',
+          keywords: 'law firm awards, legal excellence, litigation awards, corporate advisory recognition',
+        },
+        isPublished: true,
+      },
+      gallery: {
+        pageName: 'gallery',
+        sections: {
+          hero: {
+            heading: 'Image Gallery',
+            subheading:
+              'A visual journey into the life of the firm, highlighting milestones, achievements, and the people who make it all possible.',
+          },
+          highlights: {
+            heading: 'Highlights from Our Gallery',
+          },
+        },
+        seo: {
+          title: 'Image Gallery | GAG Lawyers - Grover & Grover Advocates',
+          description:
+            'Visual journey into the life of GAG Lawyers - courtroom advocacy, client engagements, events, milestones, and community outreach.',
+          keywords: 'law firm gallery, courtroom photos, legal events, firm milestones, community outreach',
+        },
+        isPublished: true,
+      },
+      affiliation: {
+        pageName: 'affiliation',
+        sections: {
+          hero: {
+            heading: 'Affiliations & Memberships',
+            subheading:
+              'Our memberships in esteemed legal and industry bodies reflect our commitment to ethical practice, professional growth, and global connectivity.',
+          },
+          affiliations: {
+            heading: 'Key Legal Affiliations',
+          },
+        },
+        seo: {
+          title: 'Affiliation | GAG Lawyers - Grover & Grover Advocates',
+          description:
+            'Explore professional affiliations and legal networks associated with GAG Lawyers.',
+          keywords: 'law firm affiliation, legal networks, professional associations',
+        },
+        isPublished: true,
+      },
+      privacyPolicy: {
+        pageName: 'privacyPolicy',
+        sections: {
+          hero: {
+            heading: 'Privacy Policy',
+            lastUpdated: 'March 20, 2024',
+          },
+          introduction: {
+            heading: 'Introduction',
+            body:
+              'This Privacy Policy explains how GAG Lawyers collects, uses, discloses, and protects your personal information when you visit our website or use our legal services.',
+          },
+          rights: {
+            heading: 'Your Rights',
+          },
+        },
+        seo: {
+          title: 'Privacy Policy | GAG Lawyers',
+          description:
+            'Read the privacy policy of GAG Lawyers to understand how your information is collected, used, and protected.',
+          keywords: 'privacy policy, data protection, gag lawyers privacy',
+        },
+        isPublished: true,
+      },
+      termsOfService: {
+        pageName: 'termsOfService',
+        sections: {
+          hero: {
+            heading: 'Terms of Service',
+            lastUpdated: 'March 20, 2024',
+          },
+          agreement: {
+            heading: 'Agreement to Terms',
+            body:
+              'By accessing or using the GAG Lawyers website or engaging our legal services, you agree to be bound by these Terms of Service.',
+          },
+          legalDisclaimer: {
+            heading: 'Legal Information Disclaimer',
+          },
+        },
+        seo: {
+          title: 'Terms of Service | GAG Lawyers',
+          description:
+            'Review the terms of service governing use of the GAG Lawyers website and legal information.',
+          keywords: 'terms of service, legal terms, gag lawyers terms',
         },
         isPublished: true,
       },

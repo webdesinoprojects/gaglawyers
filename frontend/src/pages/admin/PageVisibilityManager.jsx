@@ -126,7 +126,7 @@ const PageVisibilityManager = () => {
     {
       key: 'privacyPolicy',
       name: 'Privacy Policy',
-      path: '/privacy-policy',
+      path: '/privacy',
       icon: FileText,
       description: 'Privacy policy',
       category: 'Legal',
@@ -135,7 +135,7 @@ const PageVisibilityManager = () => {
     {
       key: 'termsOfService',
       name: 'Terms of Service',
-      path: '/terms-of-service',
+      path: '/terms',
       icon: FileText,
       description: 'Terms of service',
       category: 'Legal',

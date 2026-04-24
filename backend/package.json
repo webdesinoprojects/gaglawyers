@@ -28,6 +28,9 @@
     "generate-service-slugs": "node generate-service-slugs.js",
     "add-writ-petition": "node add-writ-petition-content.js",
     "update-all-titles": "node update-all-services-titles-v3.js",
+    "replace-gallery-from-temp": "node replace-gallery-from-temp.js",
+    "replace-team-from-folder": "node replace-team-from-folder.js",
+    "sync-page-content-templates": "node scripts/sync-page-content-templates-safe.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

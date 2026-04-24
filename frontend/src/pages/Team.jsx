@@ -72,6 +72,11 @@ const Team = () => {
     },
   ];
 
+  const founderMember = teamMembers.find((member) => {
+    const normalizedName = member?.name?.toLowerCase() || '';
+    return normalizedName.includes('rahul grover');
+  });
+
   return (
     <div>
       <SEOHead 
@@ -129,7 +134,7 @@ const Team = () => {
             </h2>
             <div className="h-1 w-24 bg-gradient-to-r from-gold to-gold/50 mx-auto rounded-full mb-6"></div>
             <p className="font-sans text-xl text-gray-600">
-              Advocate Rahul Grover
+              {founderMember?.name || 'Advocate Rahul Grover'}
             </p>
           </div>
 
@@ -139,8 +144,11 @@ const Team = () => {
                 <div className="absolute -inset-4 bg-gradient-to-br from-gold/20 to-navy/20 rounded-3xl blur-2xl"></div>
                 <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
                   <img
-                    src="https://images.unsplash.com/photo-1556157382-97eda2d62296?w=600&h=750&fit=crop"
-                    alt="Advocate Rahul Grover"
+                    src={
+                      founderMember?.imageUrl ||
+                      'https://images.unsplash.com/photo-1556157382-97eda2d62296?w=600&h=750&fit=crop'
+                    }
+                    alt={founderMember?.name || 'Advocate Rahul Grover'}
                     className="w-full h-full object-cover"
                   />
                 </div>
