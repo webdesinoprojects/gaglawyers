@@ -121,9 +121,9 @@ const Services = () => {
   return (
     <div className="bg-slate-50 overflow-hidden">
       <SEOHead
-        title="Legal Services - GAG Lawyers | Practice Areas"
-        description="Explore comprehensive legal services by GAG Lawyers across core practice areas with dedicated representation and strategy-focused advice."
-        keywords="legal services delhi, advocates, litigation, legal consultation, law firm practice areas"
+        title="Legal Services - 25+ Practice Areas | GAG Lawyers"
+        description="Expert legal services across 25+ practice areas including corporate law, criminal defense, civil litigation, family law, real estate, and intellectual property. Trusted advocates in Delhi and across India."
+        keywords="legal services delhi, advocates, litigation, legal consultation, law firm practice areas, corporate law, criminal defense, family law"
       />
 
       {/* HERO SECTION WITH PARALLAX */}

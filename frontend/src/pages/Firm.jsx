@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Building2, Target, Eye, Heart } from 'lucide-react';
+import SEOHead from '../components/SEOHead';
 import API_BASE_URL from '../config/api';
 
 const Firm = () => {
@@ -65,6 +66,12 @@ const Firm = () => {
 
   return (
     <div>
+      <SEOHead 
+        title="The Firm - Our Legacy | GAG Lawyers"
+        description="Founded in 1998, GAG Lawyers has grown into one of India's most respected law firms. Learn about our history, mission, vision, and core values that guide our practice."
+        keywords="law firm history, legal services india, grover advocates, firm mission vision, legal excellence"
+      />
+      
       <section className="bg-navy text-white py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="font-serif text-4xl lg:text-5xl font-bold mb-4">

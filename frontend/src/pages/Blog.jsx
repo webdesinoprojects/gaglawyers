@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, User, ArrowRight } from 'lucide-react';
+import SEOHead from '../components/SEOHead';
 import API_BASE_URL from '../config/api';
 
 const Blog = () => {
@@ -70,6 +71,12 @@ const Blog = () => {
 
   return (
     <div>
+      <SEOHead 
+        title="Legal Insights & News | GAG Lawyers Blog"
+        description="Stay informed with expert legal analysis, case updates, and insights on Indian law. Read articles on corporate law, litigation, real estate, family law, and more from GAG Lawyers."
+        keywords="legal blog, law articles, indian law updates, legal insights, corporate law news, litigation updates"
+      />
+      
       <section className="bg-navy text-white py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="font-serif text-4xl lg:text-5xl font-bold mb-4">
