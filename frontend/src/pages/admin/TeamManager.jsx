@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
 import Button from '../../components/Button';
 import ImageUploader from '../../components/ImageUploader';
+import RichTextEditor from '../../components/admin/RichTextEditor';
 import API_BASE_URL from '../../config/api';
 
 const TeamManager = () => {
@@ -104,6 +105,8 @@ const TeamManager = () => {
     setIsEditing(false);
   };
 
+  const stripHtml = (value) => String(value || '').replace(/<[^>]*>/g, '').trim();
+
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
@@ -159,19 +162,15 @@ const TeamManager = () => {
               </div>
             </div>
 
-            <div>
-              <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
-                Bio
-              </label>
-              <textarea
-                name="bio"
-                value={formData.bio}
-                onChange={handleChange}
-                required
-                rows="3"
-                className="w-full px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans"
-              />
-            </div>
+            <RichTextEditor
+              id="member-bio"
+              label="Bio"
+              value={formData.bio}
+              onChange={(nextBio) => setFormData({ ...formData, bio: nextBio })}
+              required
+              minHeightClass="min-h-[180px]"
+              helpText="Use formatting tools to structure biography content."
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
@@ -222,7 +221,7 @@ const TeamManager = () => {
             <div className="p-4 space-y-2">
               <h3 className="font-serif text-lg font-semibold text-navy">{member.name}</h3>
               <p className="font-sans text-sm text-gold">{member.designation}</p>
-              <p className="font-sans text-sm text-gray-600 line-clamp-2">{member.bio}</p>
+              <p className="font-sans text-sm text-gray-600 line-clamp-2">{stripHtml(member.bio)}</p>
               
               <div className="flex space-x-2 pt-3">
                 <button

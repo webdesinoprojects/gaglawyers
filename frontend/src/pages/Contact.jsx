@@ -10,6 +10,23 @@ const PANEL = '#112240';
 const MAP_EMBED_SRC =
   'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6998.3752460208125!2d77.13081933769948!3d28.71393836202312!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d010b75f3e47d%3A0x4e92383cc436853f!2sGAG%20Lawyers%20-%20Grover%20%26%20Grover%2C%20Advocates%20%7C%20Best%20Divorce%20Lawyer%20in%20Delhi%2C%20Property%20Lawyer%20in%20Delhi%2C%20Civil%20%26%20Criminal%20Lawyers!5e0!3m2!1sen!2sin!4v1775508641842!5m2!1sen!2sin';
 
+const DEFAULT_OTHER_OFFICES = [
+  {
+    heading: 'Mumbai Office',
+    address: 'Maker Chamber VI, Nariman Point, Mumbai, Maharashtra 400021',
+    email: 'mumbai@gaglawyers.com',
+    phone: '+91 22 4012 3456',
+    mapEmbedUrl: 'https://www.google.com/maps?q=Nariman%20Point%2C%20Mumbai&output=embed',
+  },
+  {
+    heading: 'Chandigarh Office',
+    address: 'SCO 17, Sector 17-C, Chandigarh, 160017',
+    email: 'chandigarh@gaglawyers.com',
+    phone: '+91 172 405 8899',
+    mapEmbedUrl: 'https://www.google.com/maps?q=Sector%2017%20Chandigarh&output=embed',
+  },
+];
+
 const Contact = () => {
   const captchaRef = useRef(null);
   const [formData, setFormData] = useState({
@@ -23,9 +40,15 @@ const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
   const [captchaToken, setCaptchaToken] = useState(null);
+  const [otherOffices, setOtherOffices] = useState(DEFAULT_OTHER_OFFICES);
+  const [contactEmails, setContactEmails] = useState(['contact@gaglawyers.com']);
+  const [contactPhones, setContactPhones] = useState(['+91 99962 63370']);
+  const [officeAddresses, setOfficeAddresses] = useState([OFFICE_ADDRESS_LINES.join(', ')]);
 
   useEffect(() => {
     fetchServices();
+    fetchContactInfoSettings();
+    fetchOtherOffices();
   }, []);
 
   const fetchServices = async () => {
@@ -37,6 +60,78 @@ const Contact = () => {
       }
     } catch (error) {
       console.error('Error fetching services:', error);
+    }
+  };
+
+  const fetchOtherOffices = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/settings/otherOffices`);
+      const data = await response.json();
+      if (!data.success) return;
+
+      const value = data?.data?.settingValue;
+      if (!Array.isArray(value)) return;
+
+      const normalized = value
+        .map((office) => ({
+          heading: String(office?.heading || '').trim(),
+          address: String(office?.address || '').trim(),
+          email: String(office?.email || '').trim(),
+          phone: String(office?.phone || '').trim(),
+          mapEmbedUrl: String(office?.mapEmbedUrl || '').trim(),
+        }))
+        .filter((office) => office.heading && office.address);
+
+      if (normalized.length > 0) {
+        setOtherOffices(normalized);
+      }
+    } catch (error) {
+      console.error('Error fetching other offices:', error);
+    }
+  };
+
+  const fetchContactInfoSettings = async () => {
+    const normalizeList = (value) => {
+      if (!Array.isArray(value)) return [];
+      return value
+        .map((item) => String(item || '').trim())
+        .filter(Boolean);
+    };
+
+    try {
+      const [emailsRes, phonesRes, addressesRes, legacyEmailRes, legacyPhoneRes, legacyAddressRes] =
+        await Promise.all([
+          fetch(`${API_BASE_URL}/api/settings/contactEmails`),
+          fetch(`${API_BASE_URL}/api/settings/contactPhones`),
+          fetch(`${API_BASE_URL}/api/settings/officeAddresses`),
+          fetch(`${API_BASE_URL}/api/settings/email`),
+          fetch(`${API_BASE_URL}/api/settings/phoneNumber`),
+          fetch(`${API_BASE_URL}/api/settings/address`),
+        ]);
+
+      const [emailsData, phonesData, addressesData, legacyEmailData, legacyPhoneData, legacyAddressData] =
+        await Promise.all([
+          emailsRes.json(),
+          phonesRes.json(),
+          addressesRes.json(),
+          legacyEmailRes.json(),
+          legacyPhoneRes.json(),
+          legacyAddressRes.json(),
+        ]);
+
+      const emailList = normalizeList(emailsData?.data?.settingValue);
+      const phoneList = normalizeList(phonesData?.data?.settingValue);
+      const addressList = normalizeList(addressesData?.data?.settingValue);
+
+      const fallbackEmail = String(legacyEmailData?.data?.settingValue || 'contact@gaglawyers.com').trim();
+      const fallbackPhone = String(legacyPhoneData?.data?.settingValue || '+91 99962 63370').trim();
+      const fallbackAddress = String(legacyAddressData?.data?.settingValue || OFFICE_ADDRESS_LINES.join(', ')).trim();
+
+      setContactEmails(emailList.length > 0 ? emailList : [fallbackEmail]);
+      setContactPhones(phoneList.length > 0 ? phoneList : [fallbackPhone]);
+      setOfficeAddresses(addressList.length > 0 ? addressList : [fallbackAddress]);
+    } catch (error) {
+      console.error('Error fetching contact settings:', error);
     }
   };
 
@@ -159,12 +254,17 @@ const Contact = () => {
                       <p className="font-sans text-[0.6875rem] font-semibold uppercase tracking-[0.28em] text-[#C9A84C]">
                         Email
                       </p>
-                      <a
-                        href="mailto:contact@gaglawyers.com"
-                        className="mt-1.5 block font-sans text-base text-white hover:text-[#C9A84C] transition-colors break-all"
-                      >
-                        contact@gaglawyers.com
-                      </a>
+                      <div className="mt-1.5 space-y-1.5">
+                        {contactEmails.map((email, index) => (
+                          <a
+                            key={`${email}-${index}`}
+                            href={`mailto:${email}`}
+                            className="block font-sans text-base text-white hover:text-[#C9A84C] transition-colors break-all"
+                          >
+                            {email}
+                          </a>
+                        ))}
+                      </div>
                     </div>
                   </li>
 
@@ -176,16 +276,21 @@ const Contact = () => {
                       <p className="font-sans text-[0.6875rem] font-semibold uppercase tracking-[0.28em] text-[#C9A84C]">
                         Phone
                       </p>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                        <a
-                          href="tel:+919996263370"
-                          className="font-sans text-base text-white hover:text-[#C9A84C] transition-colors"
-                        >
-                          +91 99962 63370
-                        </a>
+                      <div className="mt-1.5 space-y-1.5">
+                        {contactPhones.map((phone, index) => (
+                          <a
+                            key={`${phone}-${index}`}
+                            href={`tel:${phone.replace(/\s+/g, '')}`}
+                            className="block font-sans text-base text-white hover:text-[#C9A84C] transition-colors"
+                          >
+                            {phone}
+                          </a>
+                        ))}
+                        <div>
                         <span className="inline-flex items-center rounded-full bg-[#1A3D2E] px-2.5 py-0.5 font-sans text-[0.625rem] font-semibold uppercase tracking-wide text-[#6EE7B7] ring-1 ring-[#22C55E]/40">
                           WhatsApp Available
                         </span>
+                        </div>
                       </div>
                     </div>
                   </li>
@@ -198,14 +303,13 @@ const Contact = () => {
                       <p className="font-sans text-[0.6875rem] font-semibold uppercase tracking-[0.28em] text-[#C9A84C]">
                         Office Address
                       </p>
-                      <p className="mt-1.5 font-sans text-base text-white/95 leading-relaxed">
-                        {OFFICE_ADDRESS_LINES.map((line, i) => (
-                          <React.Fragment key={line}>
-                            {i > 0 && <br />}
-                            {line}
-                          </React.Fragment>
+                      <div className="mt-1.5 space-y-2.5">
+                        {officeAddresses.map((address, index) => (
+                          <p key={`${address}-${index}`} className="font-sans text-base text-white/95 leading-relaxed">
+                            {address}
+                          </p>
                         ))}
-                      </p>
+                      </div>
                     </div>
                   </li>
                 </ul>
@@ -378,6 +482,66 @@ const Contact = () => {
                   </button>
                 </form>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[#0B1526] pb-16 lg:pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-lg border border-white/10 bg-[#112240] p-6 md:p-8 lg:p-10">
+            <h2 className="font-serif text-2xl md:text-3xl font-bold text-white relative inline-block">
+              Other Offices
+              <span className="absolute -bottom-2 left-0 h-0.5 w-12 rounded-full bg-[#C9A84C]" aria-hidden />
+            </h2>
+            <p className="mt-6 font-sans text-sm md:text-[0.9375rem] text-[#9CA8B8] leading-relaxed">
+              You can also reach us at our other office locations.
+            </p>
+
+            <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {otherOffices.map((office, index) => (
+                <article
+                  key={`${office.heading}-${index}`}
+                  className="rounded-md border border-white/10 bg-[#0B1526] p-5"
+                >
+                  <h3 className="font-serif text-xl font-semibold text-white">{office.heading}</h3>
+
+                  <div className="mt-4 space-y-3">
+                    <p className="font-sans text-sm text-white/90 leading-relaxed">
+                      <span className="text-[#C9A84C] font-semibold">Address:</span> {office.address}
+                    </p>
+                    {office.email ? (
+                      <p className="font-sans text-sm text-white/90">
+                        <span className="text-[#C9A84C] font-semibold">Email:</span>{' '}
+                        <a href={`mailto:${office.email}`} className="hover:text-[#C9A84C] transition-colors">
+                          {office.email}
+                        </a>
+                      </p>
+                    ) : null}
+                    {office.phone ? (
+                      <p className="font-sans text-sm text-white/90">
+                        <span className="text-[#C9A84C] font-semibold">Contact:</span>{' '}
+                        <a href={`tel:${office.phone.replace(/\s+/g, '')}`} className="hover:text-[#C9A84C] transition-colors">
+                          {office.phone}
+                        </a>
+                      </p>
+                    ) : null}
+                  </div>
+
+                  {office.mapEmbedUrl ? (
+                    <div className="mt-5 overflow-hidden rounded-[8px] border border-[#C9A84C]/70 ring-1 ring-[#C9A84C]/20 shadow-lg shadow-black/25">
+                      <iframe
+                        title={`${office.heading} on Google Maps`}
+                        src={office.mapEmbedUrl}
+                        className="w-full border-0 block h-[240px]"
+                        allowFullScreen
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                      />
+                    </div>
+                  ) : null}
+                </article>
+              ))}
             </div>
           </div>
         </div>

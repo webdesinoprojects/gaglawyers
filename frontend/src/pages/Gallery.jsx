@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { X, ZoomIn, Camera, Users, Award, BookOpen, Heart, TrendingUp, Scale } from 'lucide-react';
+import { X, ZoomIn, Camera, Users, Award, BookOpen, Heart, TrendingUp, Scale, ChevronLeft, ChevronRight } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import API_BASE_URL from '../config/api';
 
 const Gallery = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedIndex, setSelectedIndex] = useState(null);
   const [activeCategory, setActiveCategory] = useState('all');
 
   useEffect(() => {
@@ -94,6 +94,51 @@ const Gallery = () => {
   const filteredImages = activeCategory === 'all'
     ? displayImages
     : displayImages.filter(img => img.category === activeCategory);
+  const selectedImage = selectedIndex !== null ? filteredImages[selectedIndex] : null;
+
+  const closeLightbox = () => setSelectedIndex(null);
+
+  const openPrev = () => {
+    if (!filteredImages.length) return;
+    setSelectedIndex((prev) => {
+      if (prev === null) return null;
+      return (prev - 1 + filteredImages.length) % filteredImages.length;
+    });
+  };
+
+  const openNext = () => {
+    if (!filteredImages.length) return;
+    setSelectedIndex((prev) => {
+      if (prev === null) return null;
+      return (prev + 1) % filteredImages.length;
+    });
+  };
+
+  useEffect(() => {
+    if (selectedIndex === null) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') closeLightbox();
+      if (event.key === 'ArrowLeft') openPrev();
+      if (event.key === 'ArrowRight') openNext();
+    };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedIndex, filteredImages.length]);
+
+  useEffect(() => {
+    if (selectedIndex === null) return;
+    if (selectedIndex >= filteredImages.length) {
+      setSelectedIndex(null);
+    }
+  }, [activeCategory, filteredImages.length, selectedIndex]);
 
   const highlights = [
     {
@@ -243,7 +288,7 @@ const Gallery = () => {
                 <div
                   key={index}
                   className="group relative aspect-[4/3] bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer border border-gray-100"
-                  onClick={() => setSelectedImage(image)}
+                  onClick={() => setSelectedIndex(index)}
                 >
                   <img
                     src={image.imageUrl}
@@ -304,22 +349,58 @@ const Gallery = () => {
       {/* Image Modal */}
       {selectedImage && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm p-4"
-          onClick={() => setSelectedImage(null)}
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-sm p-3 sm:p-4"
+          onClick={closeLightbox}
+          role="presentation"
         >
           <button
-            onClick={() => setSelectedImage(null)}
-            className="absolute top-6 right-6 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all hover:scale-110"
+            type="button"
+            onClick={closeLightbox}
+            className="absolute top-[calc(var(--site-header-height)+0.75rem)] right-4 sm:right-6 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all hover:scale-110 z-10"
+            aria-label="Close image preview"
           >
             <X size={24} />
           </button>
-          <div className="max-w-6xl max-h-[90vh] w-full">
-            <img
-              src={selectedImage.imageUrl}
-              alt={selectedImage.title}
-              className="w-full h-full object-contain rounded-2xl"
-            />
-            <div className="text-center mt-6">
+
+          {filteredImages.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openPrev();
+                }}
+                className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all z-10"
+                aria-label="Previous image"
+              >
+                <ChevronLeft size={24} />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openNext();
+                }}
+                className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all z-10"
+                aria-label="Next image"
+              >
+                <ChevronRight size={24} />
+              </button>
+            </>
+          )}
+
+          <div
+            className="w-full max-w-[min(96vw,1400px)] h-[calc(100dvh-var(--site-header-height)-2.5rem)] sm:h-[calc(100dvh-var(--site-header-height)-3rem)] flex flex-col items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-full flex-1 min-h-0 flex items-center justify-center rounded-2xl overflow-hidden">
+              <img
+                src={selectedImage.imageUrl}
+                alt={selectedImage.title}
+                className="max-w-full max-h-full w-auto h-auto object-contain select-none"
+              />
+            </div>
+            <div className="text-center mt-4 sm:mt-5">
               <p className="text-white font-sans text-xl font-semibold mb-2">
                 {selectedImage.title}
               </p>

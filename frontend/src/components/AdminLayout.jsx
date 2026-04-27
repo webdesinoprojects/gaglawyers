@@ -81,7 +81,7 @@ const AdminLayout = () => {
     const results = [];
 
     try {
-      const [servicesRes, teamRes, blogRes] = await Promise.all([
+      const [servicesRes, teamRes, blogRes, careersRes] = await Promise.all([
         fetch(`${API_BASE_URL}/api/services?compact=1`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
@@ -91,17 +91,22 @@ const AdminLayout = () => {
         fetch(`${API_BASE_URL}/api/blog?search=${encodeURIComponent(query)}&limit=10&page=1`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
+        fetch(`${API_BASE_URL}/api/careers/admin`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ]);
 
       const servicesData = await servicesRes.json();
       const teamData = await teamRes.json();
       const blogData = await blogRes.json();
+      const careersData = await careersRes.json();
 
       if (requestId !== searchRequestRef.current) return;
 
       const services = Array.isArray(servicesData?.data) ? servicesData.data : [];
       const teamMembers = Array.isArray(teamData?.data) ? teamData.data : [];
       const blogPosts = Array.isArray(blogData?.data) ? blogData.data : [];
+      const careerOpenings = Array.isArray(careersData?.data) ? careersData.data : [];
 
       if (servicesData.success && services.length > 0) {
         services
@@ -149,11 +154,31 @@ const AdminLayout = () => {
           .slice(0, 5)
           .forEach(item => {
             results.push({
-              type: 'Blog Post',
+              type: item.contentType === 'newsletter' ? 'Newsletter' : 'Article',
               icon: BookOpen,
               title: item.title,
               subtitle: item.author?.name || item.category || '',
-              path: '/admin/blog',
+              path: '/admin/resource-center',
+            });
+          });
+      }
+
+      if (careersData.success && careerOpenings.length > 0) {
+        careerOpenings
+          .filter(item =>
+            item.title?.toLowerCase().includes(normalizedQuery) ||
+            item.location?.toLowerCase().includes(normalizedQuery) ||
+            item.employmentType?.toLowerCase().includes(normalizedQuery) ||
+            item.description?.toLowerCase().includes(normalizedQuery)
+          )
+          .slice(0, 5)
+          .forEach(item => {
+            results.push({
+              type: 'Career Opening',
+              icon: Briefcase,
+              title: item.title,
+              subtitle: `${item.location} • ${item.employmentType}`,
+              path: '/admin/careers',
             });
           });
       }
@@ -205,12 +230,13 @@ const AdminLayout = () => {
     {
       title: 'Content Management',
       items: [
-        { name: 'Blog Posts', path: '/admin/blog', icon: BookOpen },
+        { name: 'Resource Center', path: '/admin/resource-center', icon: BookOpen },
         { name: 'Team Members', path: '/admin/team', icon: Users },
         { name: 'Services', path: '/admin/services', icon: Briefcase },
         { name: 'Gallery', path: '/admin/gallery', icon: Image },
         { name: 'Awards', path: '/admin/awards', icon: Award },
         { name: 'Reviews', path: '/admin/reviews', icon: Star },
+        { name: 'Careers', path: '/admin/careers', icon: Briefcase },
       ],
     },
     {
@@ -361,7 +387,7 @@ const AdminLayout = () => {
                 )}
                 <input
                   type="text"
-                  placeholder="Search services, team, blog posts..."
+                  placeholder="Search services, team, resource entries..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => searchResults.length > 0 && setShowSearchResults(true)}

@@ -6,7 +6,7 @@ const escapeRegExp = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const getAllPosts = async (req, res) => {
   try {
-    const { category, published, page = 1, limit = 10, search } = req.query;
+    const { category, contentType, published, page = 1, limit = 10, search } = req.query;
     const filter = {};
     
     if (published === 'true') {
@@ -17,6 +17,10 @@ const getAllPosts = async (req, res) => {
     
     if (category) {
       filter.category = category;
+    }
+
+    if (contentType && ['article', 'newsletter'].includes(String(contentType))) {
+      filter.contentType = String(contentType);
     }
 
     if (search && String(search).trim()) {
@@ -90,7 +94,7 @@ const getPostBySlug = async (req, res) => {
 
 const createPost = async (req, res) => {
   try {
-    const { title, tags, isPublished, ...rest } = req.body;
+    const { title, tags, isPublished, contentType, ...rest } = req.body;
     
     const baseSlug = req.body.slug || generateSlug(title);
     const slug = await generateUniqueSlug(BlogPost, baseSlug);
@@ -101,6 +105,7 @@ const createPost = async (req, res) => {
       slug,
       author: req.user._id,
       isPublished: isPublished || false,
+      contentType: ['article', 'newsletter'].includes(String(contentType)) ? String(contentType) : 'article',
     };
     
     if (tags && typeof tags === 'string') {
@@ -147,7 +152,7 @@ const updatePost = async (req, res) => {
       }
     }
 
-    const { title, tags, isPublished, slug, ...rest } = req.body;
+    const { title, tags, isPublished, slug, contentType, ...rest } = req.body;
     const updateData = { ...rest };
     
     if (title && title !== oldPost.title) {
@@ -175,6 +180,10 @@ const updatePost = async (req, res) => {
       if (isPublished && !oldPost.isPublished && !oldPost.publishedAt) {
         updateData.publishedAt = new Date();
       }
+    }
+
+    if (contentType !== undefined && ['article', 'newsletter'].includes(String(contentType))) {
+      updateData.contentType = String(contentType);
     }
 
     const post = await BlogPost.findByIdAndUpdate(req.params.id, updateData, {

@@ -1,6 +1,25 @@
 const SiteSettings = require('../models/SiteSettings');
 const { OFFICE_ADDRESS_LINE } = require('../config/officeAddress');
 
+const DEFAULT_OTHER_OFFICES = [
+  {
+    heading: 'Mumbai Office',
+    address: 'Maker Chamber VI, Nariman Point, Mumbai, Maharashtra 400021',
+    email: 'mumbai@gaglawyers.com',
+    phone: '+91 22 4012 3456',
+    mapEmbedUrl:
+      'https://www.google.com/maps?q=Nariman%20Point%2C%20Mumbai&output=embed',
+  },
+  {
+    heading: 'Chandigarh Office',
+    address: 'SCO 17, Sector 17-C, Chandigarh, 160017',
+    email: 'chandigarh@gaglawyers.com',
+    phone: '+91 172 405 8899',
+    mapEmbedUrl:
+      'https://www.google.com/maps?q=Sector%2017%20Chandigarh&output=embed',
+  },
+];
+
 const getSetting = async (req, res) => {
   try {
     const { key } = req.params;
@@ -26,6 +45,10 @@ The rules of the Bar Council of India prohibit law firms from soliciting work or
         phoneNumber: '+919996263370',
         email: 'contact@gaglawyers.com',
         address: OFFICE_ADDRESS_LINE,
+        contactEmails: ['contact@gaglawyers.com'],
+        contactPhones: ['+91 99962 63370'],
+        officeAddresses: [OFFICE_ADDRESS_LINE],
+        otherOffices: DEFAULT_OTHER_OFFICES,
       };
 
       return res.status(200).json({

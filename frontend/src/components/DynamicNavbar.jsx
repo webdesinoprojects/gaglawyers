@@ -20,7 +20,8 @@ const DEFAULT_MENU_ITEMS = [
   { label: 'Home', url: '/' },
   { label: 'About', url: '/about' },
   { label: 'Services', url: '/services' },
-  { label: 'Blog', url: '/blog' },
+  { label: 'Resource Center', url: '/blog' },
+  { label: 'Careers', url: '/careers' },
   { label: 'Contact', url: '/contact' },
 ];
 
@@ -29,6 +30,7 @@ const DynamicNavbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
+  const [resourceDropdownOpen, setResourceDropdownOpen] = useState(false);
   const [homeAnchorsOpen, setHomeAnchorsOpen] = useState(false);
   const [homePageNavOpen, setHomePageNavOpen] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
@@ -48,6 +50,7 @@ const DynamicNavbar = () => {
     setIsMobileMenuOpen(false);
     setAboutDropdownOpen(false);
     setServicesDropdownOpen(false);
+    setResourceDropdownOpen(false);
     setHomeAnchorsOpen(false);
   }, [location.pathname]);
 
@@ -114,7 +117,19 @@ const DynamicNavbar = () => {
 
   // Build nav links with dropdowns
   const menuItemsToRender = menuItems.length > 0 ? menuItems : DEFAULT_MENU_ITEMS;
-  const navLinks = menuItemsToRender.map(item => {
+  const normalizedMenuItems = [...menuItemsToRender];
+  const hasCareers = normalizedMenuItems.some((item) => item.url === '/careers' || item.label === 'Careers');
+  if (!hasCareers) {
+    const contactIndex = normalizedMenuItems.findIndex((item) => item.url === '/contact' || item.label === 'Contact');
+    const careersItem = { label: 'Careers', url: '/careers' };
+    if (contactIndex >= 0) {
+      normalizedMenuItems.splice(contactIndex, 0, careersItem);
+    } else {
+      normalizedMenuItems.push(careersItem);
+    }
+  }
+
+  const navLinks = normalizedMenuItems.map(item => {
     if (item.label === 'About') {
       return {
         ...item,
@@ -137,6 +152,18 @@ const DynamicNavbar = () => {
           name: service.name || service.title,
           path: `/${service.slug}`
         }))
+      };
+    } else if (item.label === 'Blog' || item.label === 'Resource Center') {
+      return {
+        ...item,
+        label: 'Resource Center',
+        url: '/blog',
+        hasDropdown: true,
+        dropdownType: 'resource',
+        submenu: [
+          { name: 'Articles', path: '/blog' },
+          { name: 'Newsletter', path: '/newsletter' },
+        ],
       };
     }
     return item;
@@ -187,8 +214,16 @@ const DynamicNavbar = () => {
                 <div
                   key={link.label}
                   className="relative group"
-                  onMouseEnter={() => (link.dropdownType === 'about' ? setAboutDropdownOpen(true) : setServicesDropdownOpen(true))}
-                  onMouseLeave={() => (link.dropdownType === 'about' ? setAboutDropdownOpen(false) : setServicesDropdownOpen(false))}
+                  onMouseEnter={() => {
+                    if (link.dropdownType === 'about') setAboutDropdownOpen(true);
+                    else if (link.dropdownType === 'services') setServicesDropdownOpen(true);
+                    else if (link.dropdownType === 'resource') setResourceDropdownOpen(true);
+                  }}
+                  onMouseLeave={() => {
+                    if (link.dropdownType === 'about') setAboutDropdownOpen(false);
+                    else if (link.dropdownType === 'services') setServicesDropdownOpen(false);
+                    else if (link.dropdownType === 'resource') setResourceDropdownOpen(false);
+                  }}
                 >
                   <div className="flex items-center gap-0">
                     <Link
@@ -205,7 +240,8 @@ const DynamicNavbar = () => {
                       type="button"
                       aria-expanded={
                         (link.dropdownType === 'about' && aboutDropdownOpen) ||
-                        (link.dropdownType === 'services' && servicesDropdownOpen)
+                        (link.dropdownType === 'services' && servicesDropdownOpen) ||
+                        (link.dropdownType === 'resource' && resourceDropdownOpen)
                       }
                       aria-haspopup="true"
                       aria-label={`${link.label} submenu`}
@@ -218,8 +254,10 @@ const DynamicNavbar = () => {
                         e.preventDefault();
                         if (link.dropdownType === 'about') {
                           setAboutDropdownOpen((o) => !o);
-                        } else {
+                        } else if (link.dropdownType === 'services') {
                           setServicesDropdownOpen((o) => !o);
+                        } else if (link.dropdownType === 'resource') {
+                          setResourceDropdownOpen((o) => !o);
                         }
                       }}
                     >
@@ -227,7 +265,8 @@ const DynamicNavbar = () => {
                         size={16}
                         className={`transition-transform duration-200 ${
                           (link.dropdownType === 'about' && aboutDropdownOpen) ||
-                          (link.dropdownType === 'services' && servicesDropdownOpen)
+                          (link.dropdownType === 'services' && servicesDropdownOpen) ||
+                          (link.dropdownType === 'resource' && resourceDropdownOpen)
                             ? 'rotate-180'
                             : ''
                         }`}
@@ -243,7 +282,8 @@ const DynamicNavbar = () => {
                         : 'w-56'
                     } ${
                       (link.dropdownType === 'about' && aboutDropdownOpen) ||
-                      (link.dropdownType === 'services' && servicesDropdownOpen)
+                      (link.dropdownType === 'services' && servicesDropdownOpen) ||
+                      (link.dropdownType === 'resource' && resourceDropdownOpen)
                         ? 'opacity-100 visible translate-y-0 pointer-events-auto'
                         : 'opacity-0 invisible -translate-y-2 pointer-events-none'
                     }`}
@@ -255,16 +295,6 @@ const DynamicNavbar = () => {
                     >
                       {link.submenu && link.submenu.length > 0 ? (
                         <div>
-                          {link.dropdownType === 'services' && (
-                            <div className="sticky top-0 z-10 border-b border-gray-100 bg-white/95 backdrop-blur px-3 py-2">
-                              <Link
-                                to="/services"
-                                className="block rounded-md px-3 py-2 text-sm font-semibold text-navy hover:bg-navy hover:text-white transition-colors"
-                              >
-                                View All Services ({link.submenu.length})
-                              </Link>
-                            </div>
-                          )}
                           <div
                             className={
                               link.dropdownType === 'services'
@@ -272,31 +302,59 @@ const DynamicNavbar = () => {
                                 : ''
                             }
                           >
-                            <div
-                              className={
-                                link.dropdownType === 'services'
-                                  ? 'grid grid-cols-1 lg:grid-cols-2 gap-1'
-                                  : ''
-                              }
-                            >
-                              {link.submenu.map((sublink) => (
-                                <Link
-                                  key={sublink.path}
-                                  to={sublink.path}
-                                  className={`group relative block px-3 py-2.5 font-sans transition-all duration-200 rounded-md ${
-                                    link.dropdownType === 'services' ? 'text-sm' : 'text-xs'
-                                  } ${
-                                    location.pathname === sublink.path
-                                      ? 'bg-gold/15 text-gold font-semibold shadow-sm'
-                                      : 'text-gray-700 hover:text-white hover:bg-navy hover:shadow-md font-medium'
-                                  }`}
-                                >
-                                  <span className="relative z-10 group-hover:translate-x-0.5 transition-transform duration-200">
-                                    {sublink.name}
-                                  </span>
-                                </Link>
-                              ))}
-                            </div>
+                            {link.dropdownType === 'services' ? (
+                              <div className="grid grid-cols-1 lg:grid-cols-3">
+                                {[
+                                  link.submenu.slice(0, 19),
+                                  link.submenu.slice(19, 38),
+                                  link.submenu.slice(38, 56),
+                                ].map((columnLinks, columnIndex) => (
+                                  <div
+                                    key={`services-col-${columnIndex}`}
+                                    className="px-2"
+                                    style={
+                                      columnIndex < 2
+                                        ? { borderRight: '1px solid #e5e7eb' }
+                                        : undefined
+                                    }
+                                  >
+                                    {columnLinks.map((sublink) => (
+                                      <Link
+                                        key={sublink.path}
+                                        to={sublink.path}
+                                        className={`group relative block px-3 py-2.5 font-sans text-sm transition-all duration-200 rounded-md ${
+                                          location.pathname === sublink.path
+                                            ? 'bg-gold/15 text-gold font-semibold shadow-sm'
+                                            : 'text-gray-700 hover:text-white hover:bg-navy hover:shadow-md font-medium'
+                                        }`}
+                                      >
+                                        <span className="relative z-10 group-hover:translate-x-0.5 transition-transform duration-200">
+                                          {sublink.name}
+                                        </span>
+                                      </Link>
+                                    ))}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div>
+                                {link.submenu.map((sublink) => (
+                                  <Link
+                                    key={sublink.path}
+                                    to={sublink.path}
+                                    className={`group relative block px-3 py-2.5 font-sans text-xs transition-all duration-200 rounded-md ${
+                                      location.pathname === sublink.path
+                                        ? 'bg-gold/15 text-gold font-semibold shadow-sm'
+                                        : 'text-gray-700 hover:text-white hover:bg-navy hover:shadow-md font-medium'
+                                    }`}
+                                  >
+                                    <span className="relative z-10 group-hover:translate-x-0.5 transition-transform duration-200">
+                                      {sublink.name}
+                                    </span>
+                                  </Link>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
                       ) : (
@@ -348,7 +406,7 @@ const DynamicNavbar = () => {
                     <a
                       key={item.hash}
                       href={`/#${item.hash}`}
-                      className="block px-3 py-2.5 font-sans text-xs text-gray-700 hover:bg-gray-100 hover:text-navy rounded-md mx-1"
+                      className="block px-3 py-2.5 font-sans text-xs text-gray-700 hover:text-white hover:bg-navy hover:shadow-md font-medium rounded-md mx-1 transition-all duration-200"
                     >
                       {item.label}
                     </a>
@@ -452,38 +510,35 @@ const DynamicNavbar = () => {
                       type="button"
                       aria-expanded={
                         (link.dropdownType === 'about' && aboutDropdownOpen) ||
-                        (link.dropdownType === 'services' && servicesDropdownOpen)
+                        (link.dropdownType === 'services' && servicesDropdownOpen) ||
+                        (link.dropdownType === 'resource' && resourceDropdownOpen)
                       }
                       aria-label={`Toggle ${link.label} submenu`}
                       className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg text-white transition-colors hover:bg-white/10 hover:text-gold"
                       onClick={() =>
                         link.dropdownType === 'about'
                           ? setAboutDropdownOpen(!aboutDropdownOpen)
-                          : setServicesDropdownOpen(!servicesDropdownOpen)
+                          : link.dropdownType === 'services'
+                            ? setServicesDropdownOpen(!servicesDropdownOpen)
+                            : setResourceDropdownOpen(!resourceDropdownOpen)
                       }
                     >
                       <ChevronDown
                         size={16}
                         className={`transition-transform duration-200 ${
                           (link.dropdownType === 'about' && aboutDropdownOpen) ||
-                          (link.dropdownType === 'services' && servicesDropdownOpen)
+                          (link.dropdownType === 'services' && servicesDropdownOpen) ||
+                          (link.dropdownType === 'resource' && resourceDropdownOpen)
                             ? 'rotate-180'
                             : ''
                         }`}
                       />
                     </button>
                   </div>
-                  {((link.dropdownType === 'about' && aboutDropdownOpen) || (link.dropdownType === 'services' && servicesDropdownOpen)) && (
+                  {((link.dropdownType === 'about' && aboutDropdownOpen) ||
+                    (link.dropdownType === 'services' && servicesDropdownOpen) ||
+                    (link.dropdownType === 'resource' && resourceDropdownOpen)) && (
                     <div className={`pl-4 space-y-1 ${link.dropdownType === 'services' ? 'max-h-64 overflow-y-auto services-sidebar-scroll' : ''}`}>
-                      {link.dropdownType === 'services' && (
-                        <Link
-                          to="/services"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="block py-2 font-sans text-sm font-semibold text-gold hover:text-white"
-                        >
-                          View All Services ({link.submenu.length})
-                        </Link>
-                      )}
                       {link.submenu && link.submenu.length > 0 ? (
                         link.submenu.map((sublink) => (
                           <Link

@@ -10,6 +10,7 @@ const AdminDashboard = () => {
     services: 0,
     contacts: 0,
     blog: 0,
+    careers: 0,
   });
 
   useEffect(() => {
@@ -20,7 +21,7 @@ const AdminDashboard = () => {
     const token = localStorage.getItem('adminToken');
     
     try {
-      const [teamRes, servicesRes, contactsRes, blogRes] = await Promise.all([
+      const [teamRes, servicesRes, contactsRes, blogRes, careersRes] = await Promise.all([
         fetch(`${API_BASE_URL}/api/team`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
@@ -33,12 +34,16 @@ const AdminDashboard = () => {
         fetch(`${API_BASE_URL}/api/blog`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
+        fetch(`${API_BASE_URL}/api/careers/admin`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ]);
 
       const teamData = await teamRes.json();
       const servicesData = await servicesRes.json();
       const contactsData = await contactsRes.json();
       const blogData = await blogRes.json();
+      const careersData = await careersRes.json();
 
       setStats({
         team: teamData.count || 0,
@@ -46,6 +51,7 @@ const AdminDashboard = () => {
         services: servicesData.count || 0,
         contacts: contactsData.count || 0,
         blog: blogData.count || 0,
+        careers: careersData.count || 0,
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -84,19 +90,30 @@ const AdminDashboard = () => {
       link: '/admin/contacts'
     },
     { 
-      title: 'Blog Posts', 
+      title: 'Resource Entries', 
       value: stats.blog, 
       icon: BookOpen, 
       color: 'from-orange-500 to-orange-600',
       bgColor: 'bg-orange-50',
       textColor: 'text-orange-600',
-      change: `${stats.blog} published`,
-      link: '/admin/blog'
+      change: `${stats.blog} total`,
+      link: '/admin/resource-center'
+    },
+    {
+      title: 'Career Openings',
+      value: stats.careers,
+      icon: Briefcase,
+      color: 'from-indigo-500 to-indigo-600',
+      bgColor: 'bg-indigo-50',
+      textColor: 'text-indigo-600',
+      change: `${stats.careers} total`,
+      link: '/admin/careers',
     },
   ];
 
   const quickActions = [
-    { title: 'Create Blog Post', description: 'Write and publish new content', link: '/admin/blog', icon: BookOpen, color: 'text-orange-600' },
+    { title: 'Manage Resource Center', description: 'Articles and newsletter content', link: '/admin/resource-center', icon: BookOpen, color: 'text-orange-600' },
+    { title: 'Manage Careers', description: 'Control open positions on website', link: '/admin/careers', icon: Briefcase, color: 'text-indigo-600' },
     { title: 'Add Team Member', description: 'Add new lawyer to the team', link: '/admin/team', icon: Users, color: 'text-blue-600' },
     { title: 'Manage Gallery', description: 'Upload and organize images', link: '/admin/gallery', icon: Eye, color: 'text-purple-600' },
     { title: 'Site Settings', description: 'Configure website settings', link: '/admin/settings', icon: TrendingUp, color: 'text-green-600' },
@@ -111,7 +128,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         {statCards.map((stat, index) => {
           const Icon = stat.icon;
           return (

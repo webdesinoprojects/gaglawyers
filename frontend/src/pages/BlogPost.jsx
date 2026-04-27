@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, User, ArrowLeft, Eye, Clock, Share2, Mail } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
@@ -10,6 +10,71 @@ const BlogPost = () => {
   const [relatedPosts, setRelatedPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const escapeHtml = (value) =>
+    String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+  const buildHtmlFromPlainText = (rawText) => {
+    const blocks = rawText
+      .split(/\n\s*\n+/)
+      .map((b) => b.trim())
+      .filter(Boolean);
+
+    return blocks
+      .map((block) => {
+        const lines = block
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean);
+        if (lines.length === 0) return '';
+
+        if (lines.every((line) => /^[-*•]\s+/.test(line))) {
+          const items = lines
+            .map((line) => `<li>${escapeHtml(line.replace(/^[-*•]\s+/, ''))}</li>`)
+            .join('');
+          return `<ul>${items}</ul>`;
+        }
+
+        const firstLine = lines[0];
+        const headingCandidate =
+          lines.length >= 2 &&
+          firstLine.length <= 90 &&
+          !/[.?!]$/.test(firstLine) &&
+          /^[A-Z]/.test(firstLine);
+
+        if (headingCandidate) {
+          const paragraph = lines.slice(1).map((line) => escapeHtml(line)).join(' ');
+          return `<h3>${escapeHtml(firstLine)}</h3><p>${paragraph}</p>`;
+        }
+
+        return `<p>${lines.map((line) => escapeHtml(line)).join('<br />')}</p>`;
+      })
+      .join('');
+  };
+
+  const normalizeArticleContent = (rawContent) => {
+    const content = String(rawContent || '').replace(/\r\n/g, '\n').trim();
+    if (!content) return '<p>Content unavailable.</p>';
+
+    const hasHtmlTags = /<[a-z][\s\S]*>/i.test(content);
+    if (!hasHtmlTags) {
+      return buildHtmlFromPlainText(content);
+    }
+
+    return content
+      .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, '')
+      .replace(/\son\w+="[^"]*"/gi, '')
+      .replace(/\son\w+='[^']*'/gi, '')
+      .replace(/\sstyle="[^"]*"/gi, '')
+      .replace(/\sstyle='[^']*'/gi, '')
+      .replace(/<font[^>]*>/gi, '')
+      .replace(/<\/font>/gi, '');
+  };
+
   useEffect(() => {
     fetchPost();
     window.scrollTo(0, 0);
@@ -20,6 +85,10 @@ const BlogPost = () => {
       const response = await fetch(`${API_BASE_URL}/api/blog/${slug}`);
       const data = await response.json();
       if (data.success) {
+        if (data.data.externalUrl) {
+          window.location.href = data.data.externalUrl;
+          return;
+        }
         setPost(data.data);
         // Fetch related posts from same category
         if (data.data.category) {
@@ -63,6 +132,10 @@ const BlogPost = () => {
   };
 
   const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const normalizedContent = useMemo(
+    () => normalizeArticleContent(post?.content),
+    [post?.content]
+  );
 
   if (loading) {
     return (
@@ -252,7 +325,7 @@ const BlogPost = () => {
             <div className="lg:col-span-8">
               <div className="bg-white rounded-2xl shadow-lg p-8 lg:p-12">
                 <div
-                  className="prose prose-lg max-w-none
+                  className="blog-article-content prose prose-lg max-w-none
                     prose-headings:font-serif prose-headings:font-bold prose-headings:text-navy
                     prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:pb-3 prose-h2:border-b prose-h2:border-gray-200
                     prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4
@@ -266,7 +339,7 @@ const BlogPost = () => {
                     prose-code:text-navy prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:font-mono prose-code:text-sm
                     prose-pre:bg-navy prose-pre:text-white prose-pre:rounded-lg prose-pre:p-6
                     prose-img:rounded-xl prose-img:shadow-lg prose-img:my-8"
-                  dangerouslySetInnerHTML={{ __html: post.content }}
+                  dangerouslySetInnerHTML={{ __html: normalizedContent }}
                 />
 
                 {/* Tags */}

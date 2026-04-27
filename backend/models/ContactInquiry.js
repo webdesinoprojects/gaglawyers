@@ -25,6 +25,22 @@ const contactInquirySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  resumeUrl: {
+    type: String,
+    default: '',
+  },
+  resumePublicId: {
+    type: String,
+    default: '',
+  },
+  resumeOriginalName: {
+    type: String,
+    default: '',
+  },
+  resumeBytes: {
+    type: Number,
+    default: 0,
+  },
   status: {
     type: String,
     enum: ['new', 'in-progress', 'resolved'],

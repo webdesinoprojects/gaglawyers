@@ -9,6 +9,7 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
+  const [resourceDropdownOpen, setResourceDropdownOpen] = useState(false);
   const [services, setServices] = useState([]);
   const location = useLocation();
 
@@ -68,7 +69,16 @@ const Navbar = () => {
         path: `/${service.slug}`
       }))
     },
-    { name: 'Blog', path: '/blog' },
+    {
+      name: 'Resource Center',
+      path: '/blog',
+      hasDropdown: true,
+      dropdownType: 'resource',
+      submenu: [
+        { name: 'Articles', path: '/blog' },
+        { name: 'Newsletter', path: '/newsletter' },
+      ],
+    },
     { name: 'Contact', path: '/contact' },
   ];
 
@@ -109,8 +119,16 @@ const Navbar = () => {
                 <div
                   key={link.name}
                   className="relative group"
-                  onMouseEnter={() => (link.dropdownType === 'about' ? setAboutDropdownOpen(true) : setServicesDropdownOpen(true))}
-                  onMouseLeave={() => (link.dropdownType === 'about' ? setAboutDropdownOpen(false) : setServicesDropdownOpen(false))}
+                  onMouseEnter={() => {
+                    if (link.dropdownType === 'about') setAboutDropdownOpen(true);
+                    else if (link.dropdownType === 'services') setServicesDropdownOpen(true);
+                    else if (link.dropdownType === 'resource') setResourceDropdownOpen(true);
+                  }}
+                  onMouseLeave={() => {
+                    if (link.dropdownType === 'about') setAboutDropdownOpen(false);
+                    else if (link.dropdownType === 'services') setServicesDropdownOpen(false);
+                    else if (link.dropdownType === 'resource') setResourceDropdownOpen(false);
+                  }}
                 >
                   <div className="flex items-center gap-0">
                     <Link
@@ -127,7 +145,8 @@ const Navbar = () => {
                       type="button"
                       aria-expanded={
                         (link.dropdownType === 'about' && aboutDropdownOpen) ||
-                        (link.dropdownType === 'services' && servicesDropdownOpen)
+                        (link.dropdownType === 'services' && servicesDropdownOpen) ||
+                        (link.dropdownType === 'resource' && resourceDropdownOpen)
                       }
                       aria-haspopup="true"
                       aria-label={`${link.name} submenu`}
@@ -140,8 +159,10 @@ const Navbar = () => {
                         e.preventDefault();
                         if (link.dropdownType === 'about') {
                           setAboutDropdownOpen((o) => !o);
-                        } else {
+                        } else if (link.dropdownType === 'services') {
                           setServicesDropdownOpen((o) => !o);
+                        } else if (link.dropdownType === 'resource') {
+                          setResourceDropdownOpen((o) => !o);
                         }
                       }}
                     >
@@ -149,7 +170,8 @@ const Navbar = () => {
                         size={16}
                         className={`transition-transform duration-200 ${
                           (link.dropdownType === 'about' && aboutDropdownOpen) ||
-                          (link.dropdownType === 'services' && servicesDropdownOpen)
+                          (link.dropdownType === 'services' && servicesDropdownOpen) ||
+                          (link.dropdownType === 'resource' && resourceDropdownOpen)
                             ? 'rotate-180'
                             : ''
                         }`}
@@ -164,7 +186,8 @@ const Navbar = () => {
                         : 'w-56'
                     } ${
                       (link.dropdownType === 'about' && aboutDropdownOpen) ||
-                      (link.dropdownType === 'services' && servicesDropdownOpen)
+                      (link.dropdownType === 'services' && servicesDropdownOpen) ||
+                      (link.dropdownType === 'resource' && resourceDropdownOpen)
                         ? 'opacity-100 visible translate-y-0 pointer-events-auto'
                         : 'opacity-0 invisible -translate-y-2 pointer-events-none'
                     }`}
@@ -176,16 +199,6 @@ const Navbar = () => {
                     >
                       {link.submenu.length > 0 ? (
                         <div>
-                          {link.dropdownType === 'services' && (
-                            <div className="sticky top-0 z-10 border-b border-gray-100 bg-white/95 backdrop-blur px-3 py-2">
-                              <Link
-                                to="/services"
-                                className="block rounded-md px-3 py-2 text-sm font-semibold text-navy hover:bg-navy hover:text-white transition-colors"
-                              >
-                                View All Services ({link.submenu.length})
-                              </Link>
-                            </div>
-                          )}
                           <div
                             className={
                               link.dropdownType === 'services'
@@ -193,29 +206,55 @@ const Navbar = () => {
                                 : ''
                             }
                           >
-                            <div
-                              className={
-                                link.dropdownType === 'services'
-                                  ? 'grid grid-cols-1 lg:grid-cols-2 gap-1'
-                                  : ''
-                              }
-                            >
-                              {link.submenu.map((sublink) => (
-                                <Link
-                                  key={sublink.path}
-                                  to={sublink.path}
-                                  className={`block px-3 py-2.5 font-sans transition-colors rounded-md ${
-                                    link.dropdownType === 'services' ? 'text-sm' : 'text-xs'
-                                  } ${
-                                    location.pathname === sublink.path
-                                      ? 'bg-gold/10 text-gold font-medium'
-                                      : 'text-gray-700 hover:bg-gray-100 hover:text-navy'
-                                  }`}
-                                >
-                                  {sublink.name}
-                                </Link>
-                              ))}
-                            </div>
+                            {link.dropdownType === 'services' ? (
+                              <div className="grid grid-cols-1 lg:grid-cols-3">
+                                {[
+                                  link.submenu.slice(0, 19),
+                                  link.submenu.slice(19, 38),
+                                  link.submenu.slice(38, 56),
+                                ].map((columnLinks, columnIndex) => (
+                                  <div
+                                    key={`services-col-${columnIndex}`}
+                                    className="px-2"
+                                    style={
+                                      columnIndex < 2
+                                        ? { borderRight: '1px solid #e5e7eb' }
+                                        : undefined
+                                    }
+                                  >
+                                    {columnLinks.map((sublink) => (
+                                      <Link
+                                        key={sublink.path}
+                                        to={sublink.path}
+                                        className={`block px-3 py-2.5 font-sans text-sm transition-colors rounded-md ${
+                                          location.pathname === sublink.path
+                                            ? 'bg-gold/10 text-gold font-medium'
+                                            : 'text-gray-700 hover:bg-gray-100 hover:text-navy'
+                                        }`}
+                                      >
+                                        {sublink.name}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div>
+                                {link.submenu.map((sublink) => (
+                                  <Link
+                                    key={sublink.path}
+                                    to={sublink.path}
+                                    className={`block px-3 py-2.5 font-sans text-xs transition-colors rounded-md ${
+                                      location.pathname === sublink.path
+                                        ? 'bg-gold/10 text-gold font-medium'
+                                        : 'text-gray-700 hover:bg-gray-100 hover:text-navy'
+                                    }`}
+                                  >
+                                    {sublink.name}
+                                  </Link>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
                       ) : (
@@ -276,38 +315,35 @@ const Navbar = () => {
                       type="button"
                       aria-expanded={
                         (link.dropdownType === 'about' && aboutDropdownOpen) ||
-                        (link.dropdownType === 'services' && servicesDropdownOpen)
+                        (link.dropdownType === 'services' && servicesDropdownOpen) ||
+                        (link.dropdownType === 'resource' && resourceDropdownOpen)
                       }
                       aria-label={`Toggle ${link.name} submenu`}
                       className="p-2 text-white hover:text-gold transition-colors flex-shrink-0"
                       onClick={() =>
                         link.dropdownType === 'about'
                           ? setAboutDropdownOpen(!aboutDropdownOpen)
-                          : setServicesDropdownOpen(!servicesDropdownOpen)
+                          : link.dropdownType === 'services'
+                            ? setServicesDropdownOpen(!servicesDropdownOpen)
+                            : setResourceDropdownOpen(!resourceDropdownOpen)
                       }
                     >
                       <ChevronDown
                         size={16}
                         className={`transition-transform duration-200 ${
                           (link.dropdownType === 'about' && aboutDropdownOpen) ||
-                          (link.dropdownType === 'services' && servicesDropdownOpen)
+                          (link.dropdownType === 'services' && servicesDropdownOpen) ||
+                          (link.dropdownType === 'resource' && resourceDropdownOpen)
                             ? 'rotate-180'
                             : ''
                         }`}
                       />
                     </button>
                   </div>
-                  {((link.dropdownType === 'about' && aboutDropdownOpen) || (link.dropdownType === 'services' && servicesDropdownOpen)) && (
+                  {((link.dropdownType === 'about' && aboutDropdownOpen) ||
+                    (link.dropdownType === 'services' && servicesDropdownOpen) ||
+                    (link.dropdownType === 'resource' && resourceDropdownOpen)) && (
                     <div className={`pl-4 space-y-1 ${link.dropdownType === 'services' ? 'max-h-64 overflow-y-auto services-sidebar-scroll' : ''}`}>
-                      {link.dropdownType === 'services' && (
-                        <Link
-                          to="/services"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="block py-2 font-sans text-sm font-semibold text-gold hover:text-white"
-                        >
-                          View All Services ({link.submenu.length})
-                        </Link>
-                      )}
                       {link.submenu.length > 0 ? (
                         link.submenu.map((sublink) => (
                           <Link

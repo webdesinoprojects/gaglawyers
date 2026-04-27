@@ -13,6 +13,18 @@ const NavigationManager = () => {
   });
   const [loading, setLoading] = useState(false);
 
+  const normalizeNavItems = (items = []) =>
+    items.map((item) => {
+      const label = item.label === 'Blog' ? 'Resource Center' : item.label;
+      const url = label === 'Resource Center' ? '/blog' : item.url;
+      return {
+        ...item,
+        label,
+        url,
+        children: Array.isArray(item.children) ? normalizeNavItems(item.children) : [],
+      };
+    });
+
   useEffect(() => {
     fetchMenus();
   }, []);
@@ -40,7 +52,10 @@ const NavigationManager = () => {
       const response = await fetch(`${API_BASE_URL}/api/cms/navigation/${location}`);
       const data = await response.json();
       if (data.success) {
-        setMenuData(data.data);
+        setMenuData({
+          ...data.data,
+          items: normalizeNavItems(data.data.items || []),
+        });
       }
     } catch (error) {
       console.error('Error fetching menu:', error);
@@ -86,13 +101,17 @@ const NavigationManager = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
+      const payload = {
+        ...menuData,
+        items: normalizeNavItems(menuData.items || []),
+      };
       const response = await fetch(`${API_BASE_URL}/api/cms/navigation/${menuData.menuLocation}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(menuData),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -160,7 +179,7 @@ const NavigationManager = () => {
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-navy">Menu Items</h3>
               <button
                 type="button"
@@ -171,6 +190,11 @@ const NavigationManager = () => {
                 Add Item
               </button>
             </div>
+            {menuData.menuLocation === 'header' && (
+              <p className="text-xs text-gray-500 mb-4">
+                Use label `Resource Center` for `/blog` to automatically show `Articles` and `Newsletter` dropdown on the live navbar.
+              </p>
+            )}
 
             <div className="space-y-4">
               {menuData.items && menuData.items.map((item, index) => (

@@ -7,6 +7,13 @@ import AppointmentSection from '../components/home/AppointmentSection';
 import BlockRenderer from '../components/blocks/BlockRenderer';
 import API_BASE_URL from '../config/api';
 
+const normalizeInlineHtml = (value, fallback = '') => {
+  if (!value) return fallback;
+  const raw = String(value);
+  const hasHtml = /<\/?[a-z][\s\S]*>/i.test(raw);
+  return hasHtml ? raw : raw.replace(/\n/g, '<br />');
+};
+
 const HomeDynamic = () => {
   const [services, setServices] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -155,13 +162,12 @@ const HomeDynamic = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
               {teamMembers[0] && (
-                <div className="lg:col-span-3 flex flex-col md:flex-row items-center gap-8 bg-gradient-to-br from-navy/5 to-gold/5 rounded-2xl p-8 border border-navy/10">
-                  <div className="relative group flex-shrink-0">
-                    <div className="absolute inset-0 bg-gradient-to-br from-gold to-navy rounded-2xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                <div className="lg:col-span-3 flex flex-col items-center gap-8 rounded-2xl border border-navy/10 bg-gradient-to-br from-navy/5 to-gold/5 overflow-hidden pr-8 pt-8 pb-8 md:flex-row md:items-stretch lg:pr-10 lg:pt-10 lg:pb-10 transition-all duration-300 hover:shadow-2xl hover:border-gold hover:scale-[1.01]">
+                  <div className="relative self-stretch w-full lg:w-[22rem] lg:min-w-[22rem] min-h-0">
                     <img
                       src={teamMembers[0].imageUrl}
                       alt={teamMembers[0].name}
-                      className="relative w-48 h-48 md:w-64 md:h-64 object-cover rounded-2xl shadow-xl"
+                      className="h-full w-full object-contain object-bottom"
                     />
                   </div>
                   <div className="flex-1 text-center md:text-left">
@@ -174,15 +180,19 @@ const HomeDynamic = () => {
                     <p className="font-sans text-lg text-gold font-semibold mb-4">
                       {teamMembers[0].designation}
                     </p>
-                    <p className="font-sans text-gray-600 leading-relaxed mb-6">
-                      {teamMembers[0].bio}
-                    </p>
+                    <div
+                      className="font-sans text-gray-600 leading-relaxed mb-6 [&_p]:mb-3 [&_p:last-child]:mb-0"
+                      dangerouslySetInnerHTML={{ __html: normalizeInlineHtml(teamMembers[0].bio) }}
+                    />
                     <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                       <span className="px-3 py-1 bg-navy/10 text-navy text-xs font-sans font-medium rounded-full">
-                        20+ Years Experience
+                        High Court Advocate
                       </span>
                       <span className="px-3 py-1 bg-navy/10 text-navy text-xs font-sans font-medium rounded-full">
-                        Supreme Court Advocate
+                        Courtroom Strategy Experts
+                      </span>
+                      <span className="px-3 py-1 bg-navy/10 text-navy text-xs font-sans font-medium rounded-full">
+                        Dispute Resolution Specialists
                       </span>
                     </div>
                   </div>
@@ -198,7 +208,7 @@ const HomeDynamic = () => {
                     <img
                       src={member.imageUrl}
                       alt={member.name}
-                      className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-72 object-contain object-top bg-grey-light group-hover:scale-110 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-navy/80 via-navy/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
@@ -209,9 +219,10 @@ const HomeDynamic = () => {
                     <p className="font-sans text-sm text-gold font-semibold mb-3">
                       {member.designation}
                     </p>
-                    <p className="font-sans text-sm text-gray-600 line-clamp-3">
-                      {member.bio}
-                    </p>
+                    <div
+                      className="font-sans text-sm text-gray-600 line-clamp-3 [&_p]:m-0"
+                      dangerouslySetInnerHTML={{ __html: normalizeInlineHtml(member.bio) }}
+                    />
                   </div>
                 </div>
               ))}

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Edit, Trash2, Save, X, Star } from 'lucide-react';
 import Button from '../../components/Button';
 import ImageUploader from '../../components/ImageUploader';
+import RichTextEditor from '../../components/admin/RichTextEditor';
 import API_BASE_URL from '../../config/api';
 
 const ReviewManager = () => {
@@ -155,6 +156,8 @@ const ReviewManager = () => {
     ));
   };
 
+  const stripHtml = (value) => String(value || '').replace(/<[^>]*>/g, '').trim();
+
   return (
     <div>
       {error && (
@@ -221,21 +224,16 @@ const ReviewManager = () => {
               </div>
             </div>
 
-            <div>
-              <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
-                Review Content * <span className="text-gray-500">({formData.content.length}/500)</span>
-              </label>
-              <textarea
-                name="content"
-                value={formData.content}
-                onChange={handleChange}
-                required
-                maxLength={500}
-                rows="4"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy/20 font-sans"
-                placeholder="Write the client's testimonial here..."
-              />
-            </div>
+            <RichTextEditor
+              id="review-content"
+              label="Review Content"
+              value={formData.content}
+              onChange={(nextContent) => setFormData({ ...formData, content: nextContent })}
+              required
+              maxLength={500}
+              minHeightClass="min-h-[180px]"
+              helpText="Formatting is supported. Keep testimonial text concise for better card readability."
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -368,9 +366,11 @@ const ReviewManager = () => {
 
             {/* Card Body - Content */}
             <div className="p-6 flex-1">
-              <p className="font-sans text-sm text-gray-700 line-clamp-4 leading-relaxed">
-                "{review.content}"
-              </p>
+              <div
+                className="font-sans text-sm text-gray-700 line-clamp-4 leading-relaxed [&_p]:m-0 [&_strong]:font-semibold"
+                title={stripHtml(review.content)}
+                dangerouslySetInnerHTML={{ __html: review.content || '' }}
+              />
             </div>
 
             {/* Card Footer - Status & Actions */}

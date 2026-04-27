@@ -8,11 +8,13 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Services from './pages/Services';
 import Contact from './pages/Contact';
+import Careers from './pages/Careers';
 import Firm from './pages/Firm';
 import Team from './pages/Team';
 import Awards from './pages/Awards';
 import Gallery from './pages/Gallery';
 import Blog from './pages/Blog';
+import Newsletter from './pages/Newsletter';
 import BlogPost from './pages/BlogPost';
 import SlugPageRouter from './pages/SlugPageRouter';
 import LocationPage from './pages/LocationPage';
@@ -27,10 +29,11 @@ import AdminDashboard from './pages/admin/Dashboard';
 import ContactForms from './pages/admin/ContactForms';
 import SiteSettings from './pages/admin/SiteSettings';
 import TeamManager from './pages/admin/TeamManager';
-import BlogManager from './pages/admin/BlogManager';
+import ResourceCenterManager from './pages/admin/ResourceCenterManager';
 import ReviewManager from './pages/admin/ReviewManager';
 import AwardManager from './pages/admin/AwardManager';
 import GalleryManager from './pages/admin/GalleryManager';
+import CareerManager from './pages/admin/CareerManager';
 import ServiceManager from './pages/admin/ServiceManager';
 import ServiceImport from './pages/admin/ServiceImport';
 import PageContentManager from './pages/admin/PageContentManager';
@@ -64,7 +67,8 @@ function App() {
             }
           >
             <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="blog" element={<BlogManager />} />
+            <Route path="resource-center" element={<ResourceCenterManager />} />
+            <Route path="blog" element={<Navigate to="/admin/resource-center" replace />} />
             <Route path="pages" element={<PageContentManager />} />
             <Route path="page-visibility" element={<PageVisibilityManager />} />
             <Route path="team" element={<TeamManager />} />
@@ -73,6 +77,7 @@ function App() {
             <Route path="gallery" element={<GalleryManager />} />
             <Route path="awards" element={<AwardManager />} />
             <Route path="reviews" element={<ReviewManager />} />
+            <Route path="careers" element={<CareerManager />} />
             <Route path="locations" element={<LocationManager />} />
             <Route path="seo" element={<SEOManager />} />
             <Route path="contacts" element={<ContactForms />} />
@@ -91,8 +96,10 @@ function App() {
             <Route path="services" element={<PageVisibilityWrapper pageKey="services"><Services /></PageVisibilityWrapper>} />
             <Route path="services/:slug" element={<RedirectToSlug />} />
             <Route path="blog" element={<PageVisibilityWrapper pageKey="blog"><Blog /></PageVisibilityWrapper>} />
+            <Route path="newsletter" element={<PageVisibilityWrapper pageKey="newsletter"><Newsletter /></PageVisibilityWrapper>} />
             <Route path="blog/:slug" element={<BlogPost />} />
             <Route path="contact" element={<PageVisibilityWrapper pageKey="contact"><Contact /></PageVisibilityWrapper>} />
+            <Route path="careers" element={<PageVisibilityWrapper pageKey="careers"><Careers /></PageVisibilityWrapper>} />
             <Route path="affiliation" element={<PageVisibilityWrapper pageKey="affiliation"><Affiliation /></PageVisibilityWrapper>} />
             <Route path="privacy" element={<PageVisibilityWrapper pageKey="privacyPolicy"><PrivacyPolicy /></PageVisibilityWrapper>} />
             <Route path="terms" element={<PageVisibilityWrapper pageKey="termsOfService"><TermsOfService /></PageVisibilityWrapper>} />

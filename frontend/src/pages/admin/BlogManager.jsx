@@ -3,9 +3,15 @@ import { Plus, Edit, Trash2, Save, X, Eye, EyeOff, ChevronLeft, ChevronRight, Se
 import Button from '../../components/Button';
 import ImageUploader from '../../components/ImageUploader';
 import TagInput from '../../components/TagInput';
+import RichTextEditor from '../../components/admin/RichTextEditor';
 import API_BASE_URL from '../../config/api';
 
-const BlogManager = () => {
+const BlogManager = ({
+  contentType = 'article',
+  managerTitle = 'Articles Manager',
+  managerSubtitle = 'Create and manage articles',
+  createLabel = 'New Article',
+}) => {
   const [posts, setPosts] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
@@ -16,8 +22,10 @@ const BlogManager = () => {
   const [searchDraft, setSearchDraft] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [formData, setFormData] = useState({
+    contentType,
     title: '',
     slug: '',
+    externalUrl: '',
     excerpt: '',
     content: '',
     featuredImage: '',
@@ -47,7 +55,15 @@ const BlogManager = () => {
 
   useEffect(() => {
     fetchPosts();
-  }, [filter, pagination.page, debouncedSearch]);
+  }, [filter, pagination.page, debouncedSearch, contentType]);
+
+  useEffect(() => {
+    resetForm();
+    setFilter('all');
+    setPagination({ page: 1, pages: 1, total: 0 });
+    setSearchDraft('');
+    setDebouncedSearch('');
+  }, [contentType]);
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -60,7 +76,7 @@ const BlogManager = () => {
         ? `&search=${encodeURIComponent(debouncedSearch)}`
         : '';
       const response = await fetch(
-        `${API_BASE_URL}/api/blog?page=${pagination.page}&limit=10${publishedParam}${searchParam}`,
+        `${API_BASE_URL}/api/blog?page=${pagination.page}&limit=10&contentType=${encodeURIComponent(contentType)}${publishedParam}${searchParam}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -132,6 +148,8 @@ const BlogManager = () => {
     setFormData({
       title: post.title,
       slug: post.slug,
+      externalUrl: post.externalUrl || '',
+      contentType: post.contentType || contentType,
       excerpt: post.excerpt,
       content: post.content,
       featuredImage: post.featuredImage,
@@ -197,6 +215,8 @@ const BlogManager = () => {
     setFormData({
       title: '',
       slug: '',
+      externalUrl: '',
+      contentType,
       excerpt: '',
       content: '',
       featuredImage: '',
@@ -225,12 +245,12 @@ const BlogManager = () => {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="font-serif text-3xl font-bold text-navy mb-2">Blog Manager</h1>
-          <p className="font-sans text-gray-600">Create and manage blog posts</p>
+          <h1 className="font-serif text-3xl font-bold text-navy mb-2">{managerTitle}</h1>
+          <p className="font-sans text-gray-600">{managerSubtitle}</p>
         </div>
         <Button variant="primary" onClick={() => setIsEditing(true)}>
           <Plus className="inline mr-2" size={20} />
-          New Post
+          {createLabel}
         </Button>
       </div>
 
@@ -238,7 +258,7 @@ const BlogManager = () => {
         <div className="bg-white rounded-sm shadow-md p-6 mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-serif text-xl font-bold text-navy">
-              {editingPost ? 'Edit Post' : 'Create New Post'}
+              {editingPost ? 'Edit Entry' : `Create ${contentType === 'newsletter' ? 'Newsletter' : 'Article'}`}
             </h2>
             <button type="button" onClick={resetForm}>
               <X className="text-gray-500 hover:text-navy" size={24} />
@@ -252,9 +272,9 @@ const BlogManager = () => {
                 <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
                   Title *
                 </label>
-                <input
-                  type="text"
-                  name="title"
+              <input
+                type="text"
+                name="title"
                   value={formData.title}
                   onChange={handleChange}
                   required
@@ -279,6 +299,21 @@ const BlogManager = () => {
 
             <div>
               <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
+                External URL (optional)
+              </label>
+              <input
+                type="url"
+                name="externalUrl"
+                value={formData.externalUrl}
+                onChange={handleChange}
+                placeholder="https://www.gaglawyers.com/blogs/example-slug"
+                className="w-full px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans"
+              />
+            </div>
+            <input type="hidden" name="contentType" value={formData.contentType} />
+
+            <div>
+              <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
                 Excerpt * <span className="text-gray-500">({formData.excerpt.length}/200)</span>
               </label>
               <textarea
@@ -292,20 +327,15 @@ const BlogManager = () => {
               />
             </div>
 
-            <div>
-              <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
-                Content *
-              </label>
-              <textarea
-                name="content"
-                value={formData.content}
-                onChange={handleChange}
-                required
-                rows="12"
-                className="w-full px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans font-mono text-sm"
-                placeholder="Write your blog content here. HTML is supported."
-              />
-            </div>
+            <RichTextEditor
+              id="blog-content"
+              label="Content"
+              value={formData.content}
+              onChange={(nextContent) => setFormData({ ...formData, content: nextContent })}
+              required
+              minHeightClass="min-h-[320px]"
+              helpText="Use the toolbar for rich formatting, or switch to HTML mode for direct source editing."
+            />
 
             {/* Featured Image & Category */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -468,12 +498,12 @@ const BlogManager = () => {
         </div>
       ) : posts.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-sm">
-          <p className="font-sans text-gray-500">
-            {debouncedSearch
-              ? 'No posts match your search.'
-              : 'No posts found. Create your first post!'}
-          </p>
-        </div>
+              <p className="font-sans text-gray-500">
+                {debouncedSearch
+                  ? 'No posts match your search.'
+                  : `No ${contentType === 'newsletter' ? 'newsletters' : 'articles'} found. Create your first one!`}
+              </p>
+            </div>
       ) : (
         <>
           <div className="space-y-4">
@@ -516,6 +546,9 @@ const BlogManager = () => {
                         
                         <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 font-sans">
                           <span className="px-2 py-1 bg-grey-light rounded-sm">{post.category}</span>
+                          {post.externalUrl && (
+                            <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-sm">External link</span>
+                          )}
                           {post.tags && post.tags.length > 0 && (
                             <span>{post.tags.slice(0, 3).join(', ')}</span>
                           )}

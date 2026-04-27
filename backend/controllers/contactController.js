@@ -1,10 +1,40 @@
 const ContactInquiry = require('../models/ContactInquiry');
 const nodemailer = require('nodemailer');
 const { verifyRecaptcha } = require('../utils/verifyRecaptcha');
+const cloudinary = require('../config/cloudinary');
+
+const uploadResumeToCloudinary = (fileBuffer, originalName = 'resume') =>
+  new Promise((resolve, reject) => {
+    const baseName = String(originalName || 'resume')
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[^a-zA-Z0-9-_]/g, '-')
+      .slice(0, 80);
+
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'gaglawyers/careers/resumes',
+        resource_type: 'raw',
+        public_id: `${Date.now()}-${baseName || 'resume'}`,
+        overwrite: false,
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        return resolve(result);
+      }
+    );
+
+    stream.end(fileBuffer);
+  });
 
 const createContactInquiry = async (req, res) => {
   try {
     const { name, email, phone, serviceOfInterest, message, captchaToken } = req.body;
+    let resumeMeta = {
+      resumeUrl: '',
+      resumePublicId: '',
+      resumeOriginalName: '',
+      resumeBytes: 0,
+    };
 
     const isCaptchaValid = await verifyRecaptcha(captchaToken, req.ip);
     if (!isCaptchaValid) {
@@ -21,12 +51,31 @@ const createContactInquiry = async (req, res) => {
       });
     }
 
+    if (req.file) {
+      try {
+        const uploadResult = await uploadResumeToCloudinary(req.file.buffer, req.file.originalname);
+        resumeMeta = {
+          resumeUrl: uploadResult.secure_url || uploadResult.url || '',
+          resumePublicId: uploadResult.public_id || '',
+          resumeOriginalName: req.file.originalname || '',
+          resumeBytes: req.file.size || 0,
+        };
+      } catch (uploadError) {
+        return res.status(500).json({
+          success: false,
+          message: 'Resume upload failed. Please try again.',
+          error: uploadError.message,
+        });
+      }
+    }
+
     const inquiry = await ContactInquiry.create({
       name,
       email,
       phone,
       serviceOfInterest,
       message,
+      ...resumeMeta,
     });
 
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
@@ -58,6 +107,7 @@ const createContactInquiry = async (req, res) => {
             <p><strong>Service:</strong> ${serviceOfInterest}</p>
             <p><strong>Message:</strong></p>
             <p>${message}</p>
+            ${resumeMeta.resumeUrl ? `<p><strong>Resume:</strong> <a href="${resumeMeta.resumeUrl}" target="_blank" rel="noopener noreferrer">${resumeMeta.resumeOriginalName || 'View Resume'}</a></p>` : ''}
           `,
         });
       } catch (emailError) {
@@ -140,7 +190,7 @@ const updateContactStatus = async (req, res) => {
 
 const deleteContactInquiry = async (req, res) => {
   try {
-    const inquiry = await ContactInquiry.findByIdAndDelete(req.params.id);
+    const inquiry = await ContactInquiry.findById(req.params.id);
 
     if (!inquiry) {
       return res.status(404).json({
@@ -148,6 +198,16 @@ const deleteContactInquiry = async (req, res) => {
         message: 'Inquiry not found',
       });
     }
+
+    if (inquiry.resumePublicId) {
+      try {
+        await cloudinary.uploader.destroy(inquiry.resumePublicId, { resource_type: 'raw' });
+      } catch (cloudinaryError) {
+        console.error('Cloudinary resume deletion error:', cloudinaryError);
+      }
+    }
+
+    await ContactInquiry.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
       success: true,

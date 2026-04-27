@@ -3,8 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   ArrowRight,
   Quote,
-  ChevronLeft,
-  ChevronRight,
   Shield,
   Users,
   Award,
@@ -52,6 +50,13 @@ const scrollMainOffset = () => {
   return Number.isFinite(px) ? px + 8 : 120;
 };
 
+const normalizeInlineHtml = (value, fallback = '') => {
+  if (!value) return fallback;
+  const raw = String(value);
+  const hasHtml = /<\/?[a-z][\s\S]*>/i.test(raw);
+  return hasHtml ? raw : raw.replace(/\n/g, '<br />');
+};
+
 const Home = () => {
   const location = useLocation();
   const appointmentCaptchaRef = useRef(null);
@@ -63,7 +68,6 @@ const Home = () => {
   const [awards, setAwards] = useState([]);
   const [pageContent, setPageContent] = useState(null);
   const [loading, setLoading] = useState(true);
-  const scrollContainerRef = useRef(null);
 
   const [appointmentForm, setAppointmentForm] = useState({
     name: '',
@@ -105,13 +109,14 @@ const Home = () => {
     return () => clearTimeout(t);
   }, [location.hash, loading]);
 
+
   const fetchDynamicContent = async () => {
     const parseJson = async (url) => {
       const res = await fetch(url);
       return res.json();
     };
 
-    const servicesPromise = parseJson(`${API_BASE_URL}/api/services?compact=1&limit=8`)
+    const servicesPromise = parseJson(`${API_BASE_URL}/api/services?compact=1&limit=16`)
       .then((servicesData) => {
         if (servicesData.success && servicesData.data.length > 0) {
           setServices(servicesData.data);
@@ -141,7 +146,7 @@ const Home = () => {
         console.error('Error fetching home page content:', error);
       });
 
-    const blogPromise = parseJson(`${API_BASE_URL}/api/blog?limit=6`)
+    const blogPromise = parseJson(`${API_BASE_URL}/api/blog?limit=6&contentType=article`)
       .then((blogData) => {
         if (blogData.success && blogData.data.length > 0) {
           setBlogPosts(blogData.data);
@@ -186,18 +191,6 @@ const Home = () => {
     ]);
 
     setLoading(false);
-  };
-
-  const scroll = (direction) => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = 400;
-      const newScrollPosition =
-        scrollContainerRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
-      scrollContainerRef.current.scrollTo({
-        left: newScrollPosition,
-        behavior: 'smooth',
-      });
-    }
   };
 
   const handleAppointmentChange = (e) => {
@@ -397,13 +390,17 @@ const Home = () => {
     heading: 'What Our Clients Say',
     subheading: 'Trusted by leading businesses and individuals across India',
   };
+  const getArticleUrl = (post) => post.externalUrl || `/blog/${post.slug}`;
+  const isExternalArticle = (post) => Boolean(post.externalUrl && /^https?:\/\//i.test(post.externalUrl));
+  const isMarqueeEnabled = reviews.length > 1;
+  const marqueeReviews = isMarqueeEnabled ? [...reviews, ...reviews] : reviews;
   const cf = home.consultationForm;
   const ctaConsult = home.consultationCta;
 
   const bookAppointmentForm = (formId = 'book-appointment') => (
     <div
       id={formId}
-      className="scroll-mt-[var(--site-header-height)] rounded-2xl shadow-2xl border border-white/25 bg-white/95 backdrop-blur-md lg:max-h-[min(75vh,640px)] lg:overflow-y-auto lg:overscroll-contain"
+      className="scroll-mt-[var(--site-header-height)] rounded-2xl shadow-2xl border border-white/25 bg-white/95 backdrop-blur-md h-full"
     >
       <div className="p-6 lg:p-7">
         <div className="text-center mb-6">
@@ -611,7 +608,33 @@ const Home = () => {
                 </div>
               </div>
 
-              <div className="lg:col-span-5 lg:sticky lg:top-28">{bookAppointmentForm('book-appointment')}</div>
+              <div className="lg:col-span-5 lg:sticky lg:top-28 space-y-6">
+                {bookAppointmentForm('book-appointment')}
+
+                {services.length > 8 && (
+                  <div className="rounded-2xl border border-gold/30 bg-[#112240] p-5 shadow-lg shadow-black/20">
+                    <p className="font-sans text-[11px] uppercase tracking-[0.2em] text-gold/90 mb-2">
+                      More Services
+                    </p>
+                    <h3 className="font-serif text-xl font-bold text-white mb-4">
+                      Explore More Practice Areas
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {services.slice(8, 12).map((service) => (
+                        <Link
+                          key={`more-${service._id}`}
+                          to={`/${service.slug}`}
+                          className="group rounded-lg border border-gold/20 bg-[#0B1F3A] px-4 py-3 transition-all hover:border-gold/50 hover:bg-[#0e2748]"
+                        >
+                          <span className="font-sans text-sm font-semibold text-white group-hover:text-gold transition-colors line-clamp-2">
+                            {service.name || service.title}
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </SectionReveal>
         </div>
@@ -764,12 +787,12 @@ const Home = () => {
               </div>
 
               {teamMembers[0] && (
-                <div className="mb-14 flex flex-col lg:flex-row items-center gap-10 rounded-2xl border-l-4 border-gold bg-white shadow-xl p-8 lg:p-10">
-                  <div className="relative flex-shrink-0 group">
+                <div className="mb-14 flex flex-col items-center gap-10 rounded-2xl border-l-4 border-gold bg-white shadow-xl overflow-hidden pr-8 pt-8 pb-8 lg:flex-row lg:items-stretch lg:pr-10 lg:pt-10 lg:pb-10 transition-all duration-300 hover:shadow-2xl hover:border-gold hover:scale-[1.01]">
+                  <div className="relative self-stretch w-full lg:w-[28rem] lg:min-w-[28rem] min-h-0">
                     <img
                       src={teamMembers[0].imageUrl}
                       alt={teamMembers[0].name}
-                      className="w-52 h-52 lg:w-64 lg:h-64 object-cover rounded-2xl shadow-xl"
+                      className="h-full w-full object-contain object-bottom"
                     />
                   </div>
                   <div className="flex-1 text-center lg:text-left">
@@ -778,13 +801,19 @@ const Home = () => {
                     </div>
                     <h3 className="font-serif text-3xl font-bold text-navy mb-2">{teamMembers[0].name}</h3>
                     <p className="font-sans text-lg text-gold font-semibold mb-4">{teamMembers[0].designation}</p>
-                    <p className="font-sans text-gray-600 leading-relaxed mb-5">{teamMembers[0].bio}</p>
+                    <div
+                      className="font-sans text-gray-600 leading-relaxed mb-5 [&_p]:mb-3 [&_p:last-child]:mb-0"
+                      dangerouslySetInnerHTML={{ __html: normalizeInlineHtml(teamMembers[0].bio) }}
+                    />
                     <div className="flex flex-wrap gap-3 justify-center lg:justify-start items-center">
                       <span className="px-3 py-1 bg-navy/10 text-navy text-xs font-sans font-medium rounded-full border border-gold/30">
-                        {home.teamSection.badgeA}
+                        High Court Advocate
                       </span>
                       <span className="px-3 py-1 bg-navy/10 text-navy text-xs font-sans font-medium rounded-full border border-gold/30">
-                        {home.teamSection.badgeB}
+                        Courtroom Strategy Experts
+                      </span>
+                      <span className="px-3 py-1 bg-navy/10 text-navy text-xs font-sans font-medium rounded-full border border-gold/30">
+                        Dispute Resolution Specialists
                       </span>
                       {teamMembers[0].linkedinUrl && (
                         <a
@@ -813,7 +842,7 @@ const Home = () => {
                       <img
                         src={member.imageUrl}
                         alt={member.name}
-                        className="w-full h-72 object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-72 object-contain object-top bg-grey-light group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-navy/90 via-navy/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6">
                         {member.linkedinUrl ? (
@@ -833,8 +862,7 @@ const Home = () => {
                       <h3 className="font-serif text-xl font-bold text-navy mb-1 group-hover:text-gold transition-colors">
                         {member.name}
                       </h3>
-                      <p className="font-sans text-sm text-gold font-semibold mb-3">{member.designation}</p>
-                      <p className="font-sans text-sm text-gray-600 line-clamp-4">{member.bio}</p>
+                      <p className="font-sans text-sm text-gold font-semibold">{member.designation}</p>
                     </div>
                   </div>
                 ))}
@@ -890,35 +918,15 @@ const Home = () => {
             </div>
           ) : reviews.length > 0 ? (
             <div className="relative">
-              {reviews.length > 2 && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => scroll('left')}
-                    className="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 z-20 w-12 h-12 items-center justify-center bg-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 border border-gray-100"
-                    aria-label="Scroll left"
-                  >
-                    <ChevronLeft className="w-6 h-6 text-navy" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => scroll('right')}
-                    className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 z-20 w-12 h-12 items-center justify-center bg-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 border border-gray-100"
-                    aria-label="Scroll right"
-                  >
-                    <ChevronRight className="w-6 h-6 text-navy" />
-                  </button>
-                </>
-              )}
-
-              <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-[#0B1F3A] to-transparent z-10 pointer-events-none" />
-              <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#0B1F3A] to-transparent z-10 pointer-events-none" />
-
-              <div ref={scrollContainerRef} className="overflow-x-auto scrollbar-hide pb-4 scroll-smooth">
-                <div className="flex gap-6 px-2 lg:px-14">
-                  {reviews.map((review) => (
+              <div className="testimonial-marquee overflow-hidden pb-4">
+                <div
+                  className={`flex gap-5 sm:gap-6 px-2 lg:px-6 w-max ${
+                    isMarqueeEnabled ? 'testimonial-marquee-track' : ''
+                  }`}
+                >
+                  {marqueeReviews.map((review, idx) => (
                     <TestimonialCard
-                      key={review._id}
+                      key={`${review._id}-${idx}`}
                       content={review.content}
                       author={review.clientName}
                       designation={review.designation}
@@ -1024,13 +1032,23 @@ const Home = () => {
                     className="group bg-white rounded-xl overflow-hidden border-l-4 border-gold hover:shadow-2xl hover:shadow-gold/10 transition-all duration-300 flex flex-col"
                   >
                     {post.featuredImage && (
-                      <Link to={`/blog/${post.slug}`} className="aspect-video overflow-hidden block">
-                        <img
-                          src={post.featuredImage}
-                          alt=""
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      </Link>
+                      isExternalArticle(post) ? (
+                        <a href={getArticleUrl(post)} className="aspect-video overflow-hidden block">
+                          <img
+                            src={post.featuredImage}
+                            alt=""
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        </a>
+                      ) : (
+                        <Link to={getArticleUrl(post)} className="aspect-video overflow-hidden block">
+                          <img
+                            src={post.featuredImage}
+                            alt=""
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        </Link>
+                      )
                     )}
                     <div className="p-6 flex flex-col flex-1">
                       {post.category && (
@@ -1039,7 +1057,11 @@ const Home = () => {
                         </span>
                       )}
                       <h3 className="font-serif text-xl font-bold text-navy mb-3 group-hover:text-gold transition-colors line-clamp-2">
-                        <Link to={`/blog/${post.slug}`}>{post.title}</Link>
+                        {isExternalArticle(post) ? (
+                          <a href={getArticleUrl(post)}>{post.title}</a>
+                        ) : (
+                          <Link to={getArticleUrl(post)}>{post.title}</Link>
+                        )}
                       </h3>
                       {post.excerpt && (
                         <p className="font-sans text-sm text-gray-600 leading-relaxed mb-4 line-clamp-3 flex-1">
@@ -1055,13 +1077,23 @@ const Home = () => {
                             year: 'numeric',
                           })}
                         </span>
-                        <Link
-                          to={`/blog/${post.slug}`}
-                          className="text-sm font-sans font-semibold text-navy group-hover:text-gold inline-flex items-center gap-1"
-                        >
-                          Read more
-                          <ArrowRight size={14} />
-                        </Link>
+                        {isExternalArticle(post) ? (
+                          <a
+                            href={getArticleUrl(post)}
+                            className="text-sm font-sans font-semibold text-navy group-hover:text-gold inline-flex items-center gap-1"
+                          >
+                            Read more
+                            <ArrowRight size={14} />
+                          </a>
+                        ) : (
+                          <Link
+                            to={getArticleUrl(post)}
+                            className="text-sm font-sans font-semibold text-navy group-hover:text-gold inline-flex items-center gap-1"
+                          >
+                            Read more
+                            <ArrowRight size={14} />
+                          </Link>
+                        )}
                       </div>
                     </div>
                   </article>

@@ -5,6 +5,23 @@ import API_BASE_URL from '../../config/api';
 import { OFFICE_ADDRESS_LINE } from '../../constants/officeAddress';
 import { invalidatePublicWidgetSettingsCache } from '../../utils/widgetSettingsCache';
 
+const DEFAULT_OTHER_OFFICES = [
+  {
+    heading: 'Mumbai Office',
+    address: 'Maker Chamber VI, Nariman Point, Mumbai, Maharashtra 400021',
+    email: 'mumbai@gaglawyers.com',
+    phone: '+91 22 4012 3456',
+    mapEmbedUrl: 'https://www.google.com/maps?q=Nariman%20Point%2C%20Mumbai&output=embed',
+  },
+  {
+    heading: 'Chandigarh Office',
+    address: 'SCO 17, Sector 17-C, Chandigarh, 160017',
+    email: 'chandigarh@gaglawyers.com',
+    phone: '+91 172 405 8899',
+    mapEmbedUrl: 'https://www.google.com/maps?q=Sector%2017%20Chandigarh&output=embed',
+  },
+];
+
 const SiteSettings = () => {
   const [settings, setSettings] = useState({
     disclaimerEnabled: true,
@@ -23,6 +40,10 @@ The rules of the Bar Council of India prohibit law firms from soliciting work or
     phoneNumber: '+919996263370',
     email: 'contact@gaglawyers.com',
     address: OFFICE_ADDRESS_LINE,
+    contactEmails: ['contact@gaglawyers.com'],
+    contactPhones: ['+91 99962 63370'],
+    officeAddresses: [OFFICE_ADDRESS_LINE],
+    otherOffices: DEFAULT_OTHER_OFFICES,
     copyProtectionEnabled: false,
     rightClickDisabled: false,
   });
@@ -46,7 +67,7 @@ The rules of the Bar Council of India prohibit law firms from soliciting work or
         data.data.forEach(setting => {
           settingsMap[setting.settingKey] = setting.settingValue;
         });
-        setSettings({ ...settings, ...settingsMap });
+        setSettings((prev) => ({ ...prev, ...settingsMap }));
       }
     } catch (error) {
       console.error('Error fetching settings:', error);
@@ -59,6 +80,57 @@ The rules of the Bar Council of India prohibit law firms from soliciting work or
       ...settings,
       [name]: type === 'checkbox' ? checked : value,
     });
+  };
+
+  const handleOfficeChange = (index, field, value) => {
+    setSettings((prev) => ({
+      ...prev,
+      otherOffices: (prev.otherOffices || []).map((office, officeIndex) =>
+        officeIndex === index ? { ...office, [field]: value } : office
+      ),
+    }));
+  };
+
+  const addOffice = () => {
+    setSettings((prev) => ({
+      ...prev,
+      otherOffices: [
+        ...(prev.otherOffices || []),
+        { heading: '', address: '', email: '', phone: '', mapEmbedUrl: '' },
+      ],
+    }));
+  };
+
+  const removeOffice = (index) => {
+    setSettings((prev) => ({
+      ...prev,
+      otherOffices: (prev.otherOffices || []).filter((_, officeIndex) => officeIndex !== index),
+    }));
+  };
+
+  const handleListItemChange = (key, index, value) => {
+    setSettings((prev) => ({
+      ...prev,
+      [key]: Array.isArray(prev[key])
+        ? prev[key].map((item, itemIndex) => (itemIndex === index ? value : item))
+        : [],
+    }));
+  };
+
+  const addListItem = (key) => {
+    setSettings((prev) => ({
+      ...prev,
+      [key]: [...(Array.isArray(prev[key]) ? prev[key] : []), ''],
+    }));
+  };
+
+  const removeListItem = (key, index) => {
+    setSettings((prev) => ({
+      ...prev,
+      [key]: Array.isArray(prev[key])
+        ? prev[key].filter((_, itemIndex) => itemIndex !== index)
+        : [],
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -213,6 +285,184 @@ The rules of the Bar Council of India prohibit law firms from soliciting work or
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy font-sans"
               />
+            </div>
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <div className="border border-gray-200 rounded-sm p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-serif text-base font-semibold text-navy">Contact Emails</h3>
+                <button
+                  type="button"
+                  onClick={() => addListItem('contactEmails')}
+                  className="text-sm text-navy font-medium hover:underline"
+                >
+                  Add
+                </button>
+              </div>
+              <div className="space-y-2">
+                {(settings.contactEmails || []).length === 0 ? (
+                  <p className="font-sans text-sm text-gray-500">No emails added yet.</p>
+                ) : (
+                  (settings.contactEmails || []).map((emailItem, index) => (
+                    <div key={`email-${index}`} className="border border-gray-200 rounded-sm p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="font-sans text-xs font-semibold text-gray-700">
+                          Email {index + 1}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => removeListItem('contactEmails', index)}
+                          className="text-red-600 text-xs font-medium hover:text-red-700"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      <input
+                        type="email"
+                        value={emailItem || ''}
+                        onChange={(e) => handleListItemChange('contactEmails', index, e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy font-sans text-sm"
+                        placeholder="office@gaglawyers.com"
+                      />
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="border border-gray-200 rounded-sm p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-serif text-base font-semibold text-navy">Contact Phones</h3>
+                <button
+                  type="button"
+                  onClick={() => addListItem('contactPhones')}
+                  className="text-sm text-navy font-medium hover:underline"
+                >
+                  Add
+                </button>
+              </div>
+              <div className="space-y-2">
+                {(settings.contactPhones || []).length === 0 ? (
+                  <p className="font-sans text-sm text-gray-500">No phone numbers added yet.</p>
+                ) : (
+                  (settings.contactPhones || []).map((phoneItem, index) => (
+                    <div key={`phone-${index}`} className="border border-gray-200 rounded-sm p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="font-sans text-xs font-semibold text-gray-700">
+                          Phone {index + 1}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => removeListItem('contactPhones', index)}
+                          className="text-red-600 text-xs font-medium hover:text-red-700"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        value={phoneItem || ''}
+                        onChange={(e) => handleListItemChange('contactPhones', index, e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy font-sans text-sm"
+                        placeholder="+91 ..."
+                      />
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+          </div>
+
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-serif text-lg font-semibold text-navy">Other Offices</h3>
+              <Button type="button" variant="outline" onClick={addOffice}>
+                Add another office
+              </Button>
+            </div>
+
+            <div className="space-y-5">
+              {(settings.otherOffices || []).map((office, index) => (
+                <div key={`office-${index}`} className="border border-gray-200 rounded-sm p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="font-sans text-sm font-semibold text-gray-800">
+                      Office {index + 1}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => removeOffice(index)}
+                      className="text-red-600 text-sm font-medium hover:text-red-700"
+                    >
+                      Remove
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
+                        Office Heading
+                      </label>
+                      <input
+                        type="text"
+                        value={office.heading || ''}
+                        onChange={(e) => handleOfficeChange(index, 'heading', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy font-sans"
+                        placeholder="e.g. Mumbai Office"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        value={office.email || ''}
+                        onChange={(e) => handleOfficeChange(index, 'email', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy font-sans"
+                        placeholder="office@gaglawyers.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
+                        Contact Number
+                      </label>
+                      <input
+                        type="text"
+                        value={office.phone || ''}
+                        onChange={(e) => handleOfficeChange(index, 'phone', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy font-sans"
+                        placeholder="+91 ..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
+                        Google Maps Embed URL
+                      </label>
+                      <input
+                        type="text"
+                        value={office.mapEmbedUrl || ''}
+                        onChange={(e) => handleOfficeChange(index, 'mapEmbedUrl', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy font-sans"
+                        placeholder="https://www.google.com/maps?q=...&output=embed"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
+                        Address
+                      </label>
+                      <textarea
+                        value={office.address || ''}
+                        onChange={(e) => handleOfficeChange(index, 'address', e.target.value)}
+                        rows="2"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy font-sans"
+                        placeholder="Full office address"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

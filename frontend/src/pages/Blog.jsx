@@ -14,7 +14,7 @@ const Blog = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/blog?published=true`);
+      const response = await fetch(`${API_BASE_URL}/api/blog?published=true&contentType=article`);
       const data = await response.json();
       if (data.success) {
         setPosts(data.data);
@@ -68,6 +68,9 @@ const Blog = () => {
       day: 'numeric',
     });
   };
+
+  const getPostUrl = (post) => post.externalUrl || `/blog/${post.slug}`;
+  const isExternalPost = (post) => Boolean(post.externalUrl && /^https?:\/\//i.test(post.externalUrl));
 
   return (
     <div>
@@ -142,13 +145,23 @@ const Blog = () => {
                       {post.excerpt}
                     </p>
                     
-                    <Link
-                      to={`/blog/${post.slug}`}
-                      className="inline-flex items-center space-x-2 font-sans text-navy font-medium hover:text-gold transition-colors"
-                    >
-                      <span>Read Article</span>
-                      <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                    </Link>
+                    {isExternalPost(post) ? (
+                      <a
+                        href={getPostUrl(post)}
+                        className="inline-flex items-center space-x-2 font-sans text-navy font-medium hover:text-gold transition-colors"
+                      >
+                        <span>Read Article</span>
+                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                      </a>
+                    ) : (
+                      <Link
+                        to={getPostUrl(post)}
+                        className="inline-flex items-center space-x-2 font-sans text-navy font-medium hover:text-gold transition-colors"
+                      >
+                        <span>Read Article</span>
+                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    )}
                   </div>
                 </article>
               ))}

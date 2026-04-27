@@ -271,7 +271,7 @@ const Footer = () => {
 
             {/* Quick Links */}
             <div>
-              <h4 className="font-serif text-lg font-semibold mb-6 text-white">Quick Links</h4>
+              <h4 className="font-serif text-lg font-semibold mb-6 text-gold">Quick Links</h4>
               <ul className="space-y-3 font-sans text-sm">
                 <li>
                   <Link to="/about" className="text-gray-300 hover:text-gold transition-all duration-200 hover:translate-x-1 inline-block">
@@ -294,6 +294,11 @@ const Footer = () => {
                   </Link>
                 </li>
                 <li>
+                  <Link to="/careers" className="text-gray-300 hover:text-gold transition-all duration-200 hover:translate-x-1 inline-block">
+                    Careers
+                  </Link>
+                </li>
+                <li>
                   <Link to="/contact" className="text-gray-300 hover:text-gold transition-all duration-200 hover:translate-x-1 inline-block">
                     Contact
                   </Link>
@@ -311,7 +316,7 @@ const Footer = () => {
 
             {/* Practice areas */}
             <div>
-              <h4 className="font-serif text-lg font-semibold mb-6 text-white">Practice Areas</h4>
+              <h4 className="font-serif text-lg font-semibold mb-6 text-gold">Practice Areas</h4>
               <ul className="space-y-2.5 font-sans text-sm">
                 <li>
                   <Link
@@ -336,7 +341,7 @@ const Footer = () => {
 
             {/* Contact Section */}
             <div>
-              <h4 className="font-serif text-lg font-semibold mb-6 text-white">Contact Info</h4>
+              <h4 className="font-serif text-lg font-semibold mb-6 text-gold">Contact Info</h4>
               <ul className="space-y-4 font-sans text-sm">
                 <li className="flex items-start gap-3">
                   <Phone size={20} className="mt-0.5 flex-shrink-0 text-gold" />

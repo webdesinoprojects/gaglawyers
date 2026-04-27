@@ -21,6 +21,11 @@ const blogPostSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  externalUrl: {
+    type: String,
+    default: '',
+    trim: true,
+  },
   featuredImage: {
     type: String,
     default: '',
@@ -33,6 +38,12 @@ const blogPostSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
+  },
+  contentType: {
+    type: String,
+    enum: ['article', 'newsletter'],
+    default: 'article',
+    index: true,
   },
   category: {
     type: String,
