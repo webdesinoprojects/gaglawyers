@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Phone, Mail, ArrowRight, CheckCircle, ChevronRight, Scale, MessageCircleQuestion } from 'lucide-react';
+import { MapPin, Phone, Mail, ArrowRight, CheckCircle, ChevronRight, Scale, MessageCircleQuestion, Home, AlertCircle, Loader2 } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
+import SectionRenderer from '../components/sections/SectionRenderer';
 import API_BASE_URL from '../config/api';
 
 const parseServiceAndCityFromSlug = (slug = '') => {
@@ -101,6 +102,55 @@ const withLocationAnswer = (answer, city) => {
   return `${answer.trim()} This guidance is specifically relevant for matters in ${city}.`;
 };
 
+const withLocationHeading = (heading, city) => {
+  const safeHeading = (heading || '').trim();
+  if (!safeHeading) return `Legal Support in ${city}`;
+  if (hasCityReference(safeHeading, city)) return safeHeading;
+  return `${safeHeading} in ${city}`;
+};
+
+const withLocationBody = (body, city) => {
+  if (!body || typeof body !== 'string') return body;
+  if (hasCityReference(body, city)) return body;
+  return `${body.trim()}\n\nThis section is tailored for legal matters in ${city}.`;
+};
+
+const localizeSectionForCity = (section, city) => {
+  const next = {
+    ...section,
+    heading: withLocationHeading(section?.heading, city),
+    content: { ...(section?.content || {}) },
+  };
+
+  if (next.type === 'overview' && typeof next.content.body === 'string') {
+    next.content.body = withLocationBody(next.content.body, city);
+  }
+
+  if (next.type === 'faq' && Array.isArray(next.content.items)) {
+    next.content.items = next.content.items.map((item) => ({
+      ...item,
+      question: withLocationQuestion(item?.question, city),
+      answer: withLocationAnswer(item?.answer, city),
+    }));
+  }
+
+  if (next.type === 'benefits' && Array.isArray(next.content.items)) {
+    next.content.items = next.content.items.map((item) => ({
+      ...item,
+      description: withLocationAnswer(item?.description, city),
+    }));
+  }
+
+  if (next.type === 'process' && Array.isArray(next.content.steps)) {
+    next.content.steps = next.content.steps.map((step) => ({
+      ...step,
+      description: withLocationAnswer(step?.description, city),
+    }));
+  }
+
+  return next;
+};
+
 const LocationPageDynamic = () => {
   const { slug } = useParams();
   const [pageData, setPageData] = useState(null);
@@ -191,13 +241,14 @@ const LocationPageDynamic = () => {
     const serviceName = serviceData?.name || pageData?.serviceName || pageData?.service?.name || 'Legal Service';
     const templateMode = pageData?.content?.templateMode === 'custom' ? 'custom' : 'service';
 
-    const serviceSections = Array.isArray(serviceData?.sections)
+    const serviceSectionsRaw = Array.isArray(serviceData?.sections)
       ? serviceData.sections.map((section) => ({
           ...section,
           heading: localizeText(section.heading, city),
           content: localizeObject(section.content || {}, city),
         }))
       : [];
+    const serviceSections = serviceSectionsRaw.map((section) => localizeSectionForCity(section, city));
 
     const heroSection = serviceSections.find((section) => section.type === 'hero');
     const contentSections = serviceSections.filter((section) => section.type !== 'hero');
@@ -213,6 +264,10 @@ const LocationPageDynamic = () => {
       templateMode === 'custom'
         ? (fallbackSections.length > 0 ? fallbackSections : contentSections)
         : (contentSections.length > 0 ? contentSections : fallbackSections);
+    const serviceStyledSections =
+      templateMode === 'service'
+        ? (serviceSections.length > 0 ? serviceSections : fallbackSections)
+        : [];
     const images = getLocationImages(pageData);
 
     const heading =
@@ -233,38 +288,118 @@ const LocationPageDynamic = () => {
     ];
 
     const seo = pageData?.seo || {};
-    return { city, serviceName, heading, intro, sections, images, highlights, seo };
+    return { city, serviceName, heading, intro, sections, serviceStyledSections, images, highlights, seo, templateMode };
   }, [pageData, serviceData, slug]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="animate-spin w-12 h-12 border-4 border-navy border-t-transparent rounded-full"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5]">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-[#c9a84c] animate-spin mx-auto mb-4" />
+          <p className="text-gray-600 font-sans">Loading service...</p>
+        </div>
       </div>
     );
   }
 
   if (error || !template) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5]">
         <div className="text-center">
-          <h1 className="mb-4 max-w-[90vw] font-serif text-2xl font-bold leading-snug text-navy md:text-4xl md:leading-tight">
-            Page Not Found
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h1 className="mb-4 max-w-[90vw] font-serif text-2xl font-bold leading-snug text-[#1a2744] md:text-4xl md:leading-tight">
+            Service Not Found
           </h1>
-          <p className="font-sans text-gray-600 mb-8">The page you&apos;re looking for doesn&apos;t exist.</p>
-          <Link to="/">
-            <button className="px-6 py-3 bg-navy text-white font-sans font-semibold rounded-md hover:bg-navy/90">
-              Go Home
-            </button>
+          <p className="font-sans text-gray-600 mb-8">{error || 'The page you are looking for does not exist.'}</p>
+          <Link
+            to="/services"
+            className="inline-block px-6 py-3 bg-[#c9a84c] text-[#1a2744] font-sans font-bold rounded-lg hover:bg-[#b89840] transition-colors"
+          >
+            View All Services
           </Link>
         </div>
       </div>
     );
   }
 
-  const { city, serviceName, heading, intro, sections, images, highlights, seo } = template;
+  const { city, serviceName, heading, intro, sections, serviceStyledSections, images, highlights, seo, templateMode } = template;
   const heroImage = images[0];
   const galleryImages = images.filter((img) => img.url);
+  const pageTag = `${serviceName} in ${city}`;
+
+  if (templateMode === 'service') {
+    return (
+      <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f7f8fb_0%,_#f1f3f7_45%,_#edf0f5_100%)]">
+        <SEOHead
+          title={seo?.title || `${serviceName} in ${city} | GAG Lawyers`}
+          description={seo?.description || `Expert ${serviceName.toLowerCase()} services in ${city}.`}
+          keywords={seo?.keywords || `${serviceName}, ${city}, lawyers`}
+        />
+
+        <div className="sticky top-0 z-30 border-b border-white/60 bg-white/85 backdrop-blur">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center gap-2 text-sm font-sans text-slate-600">
+              <Link to="/" className="rounded-md p-1 text-slate-500 transition-colors hover:text-[#c9a84c]">
+                <Home size={16} />
+              </Link>
+              <ChevronRight size={16} className="text-slate-300" />
+              <Link to="/services" className="transition-colors hover:text-[#c9a84c]">
+                Services
+              </Link>
+              <ChevronRight size={16} className="text-slate-300" />
+              <span className="rounded-full bg-slate-100 px-3 py-1 font-semibold text-[#1a2744]">
+                {pageTag}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {serviceStyledSections.length > 0 ? (
+          serviceStyledSections.map((section, index) => {
+            const isHowGroverSection = /how grover/i.test(section?.heading || '');
+
+            if (isHowGroverSection) {
+              const teamImageSrc = section?.content?.imageUrl || null;
+              const teamImageAlt = section?.content?.imageAlt || 'Grover & Grover Advocates team';
+
+              return (
+                <div key={section._id || `section-${index}`} className="mx-auto max-w-7xl px-4 py-10 sm:px-6 md:px-8">
+                  <div className={teamImageSrc ? 'section-split' : ''}>
+                    <div className={teamImageSrc ? 'section-split__text' : ''}>
+                      <SectionRenderer section={section} sectionIndex={index} serviceSlug={slug} />
+                    </div>
+                    {teamImageSrc && (
+                      <div className="section-split__image">
+                        <img
+                          src={teamImageSrc}
+                          alt={teamImageAlt}
+                          loading="lazy"
+                          style={{ borderRadius: '12px', width: '100%', objectFit: 'cover', maxHeight: '360px' }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <SectionRenderer
+                key={section._id || `section-${index}`}
+                section={section}
+                sectionIndex={index}
+                serviceSlug={slug}
+              />
+            );
+          })
+        ) : (
+          <div className="py-20 text-center">
+            <p className="text-gray-600 font-sans">No content available for this service yet.</p>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   const renderSectionBlock = (section, index) => {
     const sectionType = section.type;

@@ -157,6 +157,8 @@ export const DEFAULT_AWARDS_HOME = {
   title: 'Awards & Recognition',
   subtitle: 'Highlights from our journey—honouring excellence in advocacy and client service.',
   viewAllText: 'View all awards',
+  galleryTitle: 'From Our Image Gallery',
+  galleryImageIds: [],
 };
 
 export const DEFAULT_CONSULTATION_CTA = {

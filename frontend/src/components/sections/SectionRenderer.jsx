@@ -5,6 +5,7 @@ import BenefitsSection from './BenefitsSection';
 import ProcessSection from './ProcessSection';
 import FAQSection from './FAQSection';
 import TestimonialsSection from './TestimonialsSection';
+import CTABannerSection from './CTABannerSection';
 import RevealOnScroll from './RevealOnScroll';
 
 /**
@@ -17,6 +18,7 @@ const SECTION_COMPONENTS = {
   process: ProcessSection,
   faq: FAQSection,
   testimonials: TestimonialsSection,
+  cta: CTABannerSection,
 };
 
 const SectionRenderer = ({ section, sectionIndex = 0, serviceSlug = '' }) => {

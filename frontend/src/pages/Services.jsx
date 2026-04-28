@@ -1,11 +1,9 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { 
   ArrowRight, 
   Scale, 
-  ShieldCheck, 
   Sparkles, 
   Search,
-  Filter,
   CheckCircle2,
   Star,
   TrendingUp,
@@ -27,9 +25,12 @@ const Services = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedService, setSelectedService] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
+  const [hoveredFeaturedServiceId, setHoveredFeaturedServiceId] = useState(null);
+  const [activeFeaturedIndex, setActiveFeaturedIndex] = useState(0);
   const [scrollY, setScrollY] = useState(0);
+  const featuredCarouselRef = useRef(null);
+  const featuredCardRefs = useRef([]);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -53,11 +54,14 @@ const Services = () => {
               'Strategic legal representation tailored to your specific matter.',
             cardImageUrl: service.cardImageUrl || '',
             cardImageAlt: service.cardImageAlt || service.name || 'Legal service',
+            isFeatured: Boolean(
+              service.servicesPageSettings?.isFeatured ||
+              service.isFeatured ||
+              service.featured
+            ),
+            featuredOrder: Number(service.servicesPageSettings?.displayOrder || 0),
           }));
           setServices(mapped);
-          if (mapped.length > 0) {
-            setSelectedService(mapped[0]);
-          }
         }
       } catch (error) {
         console.error('Error fetching services:', error);
@@ -75,6 +79,32 @@ const Services = () => {
       service.summary.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [services, searchTerm]);
+
+  const featuredServices = useMemo(() => {
+    const explicitFeatured = services
+      .filter((service) => service.isFeatured)
+      .sort((a, b) => a.featuredOrder - b.featuredOrder || a.title.localeCompare(b.title));
+    if (explicitFeatured.length > 0) {
+      return explicitFeatured.slice(0, 5);
+    }
+    return services.slice(0, 5);
+  }, [services]);
+
+  useEffect(() => {
+    if (featuredServices.length <= 1) return undefined;
+
+    const interval = setInterval(() => {
+      setActiveFeaturedIndex((prev) => (prev + 1) % featuredServices.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [featuredServices]);
+
+  useEffect(() => {
+    if (activeFeaturedIndex >= featuredServices.length) {
+      setActiveFeaturedIndex(0);
+    }
+  }, [activeFeaturedIndex, featuredServices.length]);
 
   const faqs = [
     {
@@ -124,10 +154,11 @@ const Services = () => {
         title="Legal Services - 25+ Practice Areas | GAG Lawyers"
         description="Expert legal services across 25+ practice areas including corporate law, criminal defense, civil litigation, family law, real estate, and intellectual property. Trusted advocates in Delhi and across India."
         keywords="legal services delhi, advocates, litigation, legal consultation, law firm practice areas, corporate law, criminal defense, family law"
+        canonical="https://www.gaglawyers.com/services"
       />
 
       {/* HERO SECTION WITH PARALLAX */}
-      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[85vh] flex items-start justify-center overflow-hidden pt-8 pb-20 md:pt-10 md:pb-24">
         {/* Animated Background */}
         <div 
           className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900"
@@ -158,15 +189,15 @@ const Services = () => {
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 backdrop-blur-sm px-6 py-3 mb-8 animate-fade-in">
-            <Sparkles className="h-5 w-5 text-amber-400 animate-pulse" />
-            <span className="font-sans text-sm font-semibold uppercase tracking-wider text-amber-300">
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/35 bg-slate-900/35 backdrop-blur-md px-5 py-2.5 mb-6 md:mb-8 shadow-[0_8px_30px_rgba(2,6,23,0.35)] animate-fade-in">
+            <Sparkles className="h-4 w-4 md:h-5 md:w-5 text-amber-400 animate-pulse" />
+            <span className="font-sans text-xs md:text-sm font-semibold uppercase tracking-[0.14em] text-amber-300">
               {services.length}+ Practice Areas
             </span>
           </div>
 
           {/* Main Heading */}
-          <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight animate-slide-up">
+          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-6 leading-[1.05] animate-slide-up">
             Legal Excellence
             <span className="block mt-2 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent animate-gradient">
               Redefined
@@ -198,14 +229,14 @@ const Services = () => {
           </div>
 
           {/* Stats */}
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto animate-slide-up delay-300">
+          <div className="mt-12 md:mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-4xl mx-auto animate-slide-up delay-300">
             {[
               { icon: Award, label: 'Years Experience', value: '25+' },
               { icon: Users, label: 'Happy Clients', value: '1000+' },
               { icon: TrendingUp, label: 'Success Rate', value: '95%' },
               { icon: Scale, label: 'Practice Areas', value: services.length },
             ].map((stat, index) => (
-              <div key={index} className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105">
+              <div key={index} className="bg-white/5 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105">
                 <stat.icon className="h-8 w-8 text-amber-400 mx-auto mb-3" />
                 <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
                 <div className="text-sm text-slate-400">{stat.label}</div>
@@ -285,11 +316,6 @@ const Services = () => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
                     
-                    {/* Floating Badge */}
-                    <div className="absolute top-4 right-4 bg-amber-500 text-slate-900 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
-                      Active
-                    </div>
-
                     {/* Quick Action Button */}
                     <Link
                       to={`/${service.slug}`}
@@ -363,72 +389,91 @@ const Services = () => {
         </div>
       </section>
 
-      {/* FEATURED SERVICE SPOTLIGHT */}
-      {selectedService && (
+      {/* FEATURED SERVICES CAROUSEL */}
+      {featuredServices.length > 0 && (
         <section className="py-20 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=2000&q=80')] bg-cover bg-center opacity-5" />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
           
           <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-6">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-full text-amber-300 text-sm font-semibold">
-                  <Star className="h-4 w-4" />
-                  Featured Service
-                </div>
-                <h2 className="font-serif text-4xl md:text-5xl font-bold leading-tight">
-                  {selectedService.title}
-                </h2>
-                <p className="text-lg text-slate-300 leading-relaxed">
-                  {selectedService.summary}
-                </p>
-                
-                <div className="grid grid-cols-2 gap-4 py-6">
-                  {[
-                    { icon: ShieldCheck, text: 'Trusted Expertise' },
-                    { icon: Clock, text: 'Quick Response' },
-                    { icon: Award, text: 'Proven Track Record' },
-                    { icon: Users, text: 'Client-Focused' },
-                  ].map((item, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
-                        <item.icon className="h-5 w-5 text-amber-400" />
-                      </div>
-                      <span className="text-sm font-medium">{item.text}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                  <Link
-                    to={`/${selectedService.slug}`}
-                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-slate-900 font-semibold rounded-full hover:bg-slate-100 transition-all duration-300 hover:scale-105"
-                  >
-                    Explore This Service
-                    <ArrowRight className="h-5 w-5" />
-                  </Link>
-                  <Link
-                    to="/contact"
-                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-full hover:bg-white hover:text-slate-900 transition-all duration-300"
-                  >
-                    Schedule Consultation
-                  </Link>
-                </div>
+            <div className="flex items-center justify-between gap-4 mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-full text-amber-300 text-sm font-semibold">
+                <Star className="h-4 w-4" />
+                Featured Services
               </div>
+            </div>
 
-              <div className="relative">
-                <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+            <div
+              ref={featuredCarouselRef}
+              className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth pb-2"
+            >
+              {featuredServices.map((service) => (
+                <article
+                  key={service.id}
+                  ref={(node) => {
+                    const index = featuredServices.findIndex((s) => s.id === service.id);
+                    featuredCardRefs.current[index] = node;
+                  }}
+                  className={`group relative min-w-[260px] max-w-[260px] bg-white/10 border rounded-2xl overflow-hidden backdrop-blur-md shadow-xl flex flex-col h-[430px] transition-all duration-500 ${
+                    featuredServices[activeFeaturedIndex]?.id === service.id
+                      ? 'border-amber-300/90 ring-2 ring-amber-300/50 -translate-y-1 shadow-[0_18px_50px_rgba(245,158,11,0.35)]'
+                      : 'border-white/15 hover:border-amber-300/60 hover:-translate-y-1 hover:shadow-[0_16px_42px_rgba(15,23,42,0.45)]'
+                  }`}
+                  onMouseEnter={() => setHoveredFeaturedServiceId(service.id)}
+                  onFocus={() => setHoveredFeaturedServiceId(service.id)}
+                  onMouseLeave={() => setHoveredFeaturedServiceId(null)}
+                >
                   <img
-                    src={selectedService.cardImageUrl || FALLBACK_CARD_IMAGE}
-                    alt={selectedService.cardImageAlt}
-                    className="w-full h-[500px] object-cover"
+                    src={service.cardImageUrl || FALLBACK_CARD_IMAGE}
+                    alt={service.cardImageAlt}
+                    className="h-36 w-full object-cover"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
-                </div>
-                <div className="absolute -bottom-6 -right-6 w-72 h-72 bg-amber-500/20 rounded-full blur-3xl" />
-                <div className="absolute -top-6 -left-6 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl" />
-              </div>
+                  <div className="p-4 flex flex-col flex-1">
+                    <h3 className="font-serif text-xl font-semibold leading-tight line-clamp-2 mb-2 min-h-[3.5rem]">
+                      {service.title}
+                    </h3>
+                    <p className="text-sm text-slate-300 line-clamp-4">
+                      {service.summary}
+                    </p>
+                    <Link
+                      to={`/${service.slug}`}
+                      className={`mt-auto pt-4 inline-flex items-center gap-2 text-amber-300 font-semibold hover:text-amber-200 transition-all duration-300 ${
+                        hoveredFeaturedServiceId === service.id ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                      }`}
+                    >
+                      View Service
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+
+                  <div
+                    className={`pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-900/85 to-slate-900/25 p-4 flex flex-col justify-end transition-all duration-400 ${
+                      hoveredFeaturedServiceId === service.id ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  >
+                    <p className="text-xs uppercase tracking-[0.16em] text-amber-300 font-semibold mb-2">Featured Service</p>
+                    <h4 className="font-serif text-lg font-bold text-white line-clamp-2">{service.title}</h4>
+                    <p className="text-sm text-slate-200 mt-2 line-clamp-3">{service.summary}</p>
+                    <div className="mt-4 flex items-center gap-4">
+                      <Link
+                        to={`/${service.slug}`}
+                        className="pointer-events-auto inline-flex items-center gap-2 text-white font-semibold text-sm hover:text-amber-200 transition-colors"
+                      >
+                        View Service
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                      <Link
+                        to="/contact"
+                        className="pointer-events-auto inline-flex items-center gap-2 text-amber-300 font-semibold text-sm hover:text-amber-200 transition-colors"
+                      >
+                        Talk to Lawyer
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              ))}
             </div>
           </div>
         </section>

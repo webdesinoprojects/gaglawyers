@@ -316,7 +316,7 @@ const SEOManager = () => {
             h1: selectedItem.seo?.h1 || editData.title
           }
         };
-        method = 'PATCH';
+        method = 'PUT';
       } else if (selectedItem.type === 'blog') {
         endpoint = `${API_BASE_URL}/api/blog/${selectedItem._id}`;
         body = {

@@ -35,7 +35,7 @@ const HeroSection = ({ heading, content, background }) => {
       />
       <div className="absolute inset-0 opacity-60">
         <div className="absolute -left-24 top-14 h-60 w-60 rounded-full bg-[#c9a84c]/30 blur-3xl animate-pulse" />
-        <div className="absolute -right-10 bottom-6 h-72 w-72 rounded-full bg-emerald-300/20 blur-3xl animate-pulse" />
+        <div className="absolute -right-10 bottom-6 h-72 w-72 rounded-full bg-[#c9a84c]/15 blur-3xl animate-pulse" />
       </div>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">

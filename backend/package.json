@@ -34,6 +34,13 @@
     "replace-gallery-from-temp": "node replace-gallery-from-temp.js",
     "replace-team-from-folder": "node replace-team-from-folder.js",
     "sync-page-content-templates": "node scripts/sync-page-content-templates-safe.js",
+    "services:faq-bottom:dry": "node scripts/move-faq-sections-to-bottom.js",
+    "services:faq-bottom:apply": "node scripts/move-faq-sections-to-bottom.js --apply",
+    "services:remove-content-images:dry": "node scripts/remove-service-content-images.js",
+    "services:remove-content-images:apply": "node scripts/remove-service-content-images.js --apply",
+    "locations:enforce-service-template:dry": "node scripts/enforce-location-service-template.js",
+    "locations:enforce-service-template:apply": "node scripts/enforce-location-service-template.js --apply",
+    "services:content-audit": "node scripts/check-duplicate-service-content.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

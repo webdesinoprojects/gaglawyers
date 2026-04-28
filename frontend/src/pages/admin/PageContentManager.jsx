@@ -66,8 +66,10 @@ const RESERVED_SECTION_KEYS = {
     'testimonials',
     'testimonialsIntro',
     'testimonialsScroll',
+    'awardsHome',
     'whyChoose',
     'howWeWork',
+    'consultationCta',
     'teamSection',
     'blogSection',
     'consultationForm',
@@ -113,6 +115,18 @@ function sanitizeSectionKey(raw) {
 
 function isPlainObject(v) {
   return v !== null && typeof v === 'object' && !Array.isArray(v);
+}
+
+function getArrayObjectTemplate(arr = []) {
+  const firstObject = arr.find((item) => isPlainObject(item));
+  if (firstObject) {
+    const template = {};
+    Object.keys(firstObject).forEach((key) => {
+      template[key] = '';
+    });
+    return template;
+  }
+  return { title: '', body: '' };
 }
 
 /**
@@ -166,6 +180,42 @@ function DynamicSectionsEditor({ sections, onChange, subtitle, pageLabel }) {
     const cur = sections[sectionKey];
     const obj = isPlainObject(cur) ? { ...cur } : {};
     obj[fieldKey] = value;
+    onChange({ ...sections, [sectionKey]: obj });
+  };
+
+  const updateNestedObjectField = (sectionKey, fieldKey, nestedKey, value) => {
+    const cur = sections[sectionKey];
+    const obj = isPlainObject(cur) ? { ...cur } : {};
+    const nested = isPlainObject(obj[fieldKey]) ? { ...obj[fieldKey] } : {};
+    nested[nestedKey] = value;
+    obj[fieldKey] = nested;
+    onChange({ ...sections, [sectionKey]: obj });
+  };
+
+  const updateArrayItem = (sectionKey, fieldKey, index, value) => {
+    const cur = sections[sectionKey];
+    const obj = isPlainObject(cur) ? { ...cur } : {};
+    const arr = Array.isArray(obj[fieldKey]) ? [...obj[fieldKey]] : [];
+    arr[index] = value;
+    obj[fieldKey] = arr;
+    onChange({ ...sections, [sectionKey]: obj });
+  };
+
+  const removeArrayItem = (sectionKey, fieldKey, index) => {
+    const cur = sections[sectionKey];
+    const obj = isPlainObject(cur) ? { ...cur } : {};
+    const arr = Array.isArray(obj[fieldKey]) ? [...obj[fieldKey]] : [];
+    arr.splice(index, 1);
+    obj[fieldKey] = arr;
+    onChange({ ...sections, [sectionKey]: obj });
+  };
+
+  const addArrayItem = (sectionKey, fieldKey, itemTemplate = '') => {
+    const cur = sections[sectionKey];
+    const obj = isPlainObject(cur) ? { ...cur } : {};
+    const arr = Array.isArray(obj[fieldKey]) ? [...obj[fieldKey]] : [];
+    arr.push(itemTemplate);
+    obj[fieldKey] = arr;
     onChange({ ...sections, [sectionKey]: obj });
   };
 
@@ -275,18 +325,88 @@ function DynamicSectionsEditor({ sections, onChange, subtitle, pageLabel }) {
                   />
                   {fv ? 'true' : 'false'}
                 </label>
-              ) : (
-                <textarea
-                  value={JSON.stringify(fv, null, 2)}
-                  onChange={(e) => {
-                    try {
-                      updateScalarField(key, fk, JSON.parse(e.target.value));
-                    } catch {
-                      /* ignore */
+              ) : Array.isArray(fv) ? (
+                <div className="space-y-2 rounded-sm border border-gray-200 bg-gray-50 p-3">
+                  {fv.map((item, itemIdx) => (
+                    <div key={`${fk}-${itemIdx}`} className="rounded-sm border border-gray-200 bg-white p-3">
+                      {typeof item === 'string' ? (
+                        <input
+                          type="text"
+                          value={item}
+                          onChange={(e) => updateArrayItem(key, fk, itemIdx, e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-sm font-sans text-sm"
+                        />
+                      ) : isPlainObject(item) ? (
+                        <div className="space-y-2">
+                          {Object.entries(item).map(([ik, iv]) => (
+                            <div key={`${fk}-${itemIdx}-${ik}`}>
+                              <label className="block font-sans text-xs font-medium text-gray-600 mb-1">{ik}</label>
+                              <input
+                                type="text"
+                                value={iv ?? ''}
+                                onChange={(e) =>
+                                  updateArrayItem(key, fk, itemIdx, {
+                                    ...item,
+                                    [ik]: e.target.value,
+                                  })
+                                }
+                                className="w-full px-3 py-2 border border-gray-300 rounded-sm font-sans text-sm"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <input
+                          type="text"
+                          value={item ?? ''}
+                          onChange={(e) => updateArrayItem(key, fk, itemIdx, e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-sm font-sans text-sm"
+                        />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeArrayItem(key, fk, itemIdx)}
+                        className="mt-2 text-xs text-red-600 hover:underline font-sans"
+                      >
+                        Remove item
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      addArrayItem(
+                        key,
+                        fk,
+                        fv.some((x) => isPlainObject(x)) ? getArrayObjectTemplate(fv) : ''
+                      )
                     }
-                  }}
-                  rows={5}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-sm font-mono text-xs focus:ring-2 focus:ring-navy/20"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-navy hover:text-gold font-sans"
+                  >
+                    <Plus size={14} />
+                    Add item
+                  </button>
+                </div>
+              ) : isPlainObject(fv) ? (
+                <div className="space-y-2 rounded-sm border border-gray-200 bg-gray-50 p-3">
+                  {Object.entries(fv).map(([nk, nv]) => (
+                    <div key={`${fk}-${nk}`}>
+                      <label className="block font-sans text-xs font-medium text-gray-600 mb-1">{nk}</label>
+                      <input
+                        type="text"
+                        value={nv ?? ''}
+                        onChange={(e) => updateNestedObjectField(key, fk, nk, e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-sm font-sans text-sm"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  value={fv ?? ''}
+                  onChange={(e) => updateScalarField(key, fk, e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-sm font-sans text-sm"
                 />
               )}
             </div>
@@ -418,6 +538,7 @@ const PageContentManager = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [galleryOptions, setGalleryOptions] = useState([]);
 
   const pages = [
     { id: 'home', label: 'Home Page' },
@@ -436,6 +557,25 @@ const PageContentManager = () => {
 
   useEffect(() => {
     fetchPageContent(selectedPage);
+  }, [selectedPage]);
+
+  useEffect(() => {
+    if (selectedPage !== 'home') return;
+    const token = localStorage.getItem('adminToken');
+    const fetchGalleryOptions = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/gallery`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        if (data.success && Array.isArray(data.data)) {
+          setGalleryOptions(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching gallery options:', error);
+      }
+    };
+    fetchGalleryOptions();
   }, [selectedPage]);
 
   const fetchPageContent = async (pageName) => {
@@ -846,6 +986,9 @@ const PageContentManager = () => {
     const whyCards = sections.whyChoose?.cards?.length ? sections.whyChoose.cards : getDefaultHomeSectionsForAdmin().whyChoose.cards;
     const howSteps = sections.howWeWork?.steps?.length ? sections.howWeWork.steps : getDefaultHomeSectionsForAdmin().howWeWork.steps;
     const ctaItems = sections.ctaBand?.checklist?.length ? sections.ctaBand.checklist : getDefaultHomeSectionsForAdmin().ctaBand.checklist;
+    const selectedAwardGalleryIds = Array.isArray(sections.awardsHome?.galleryImageIds)
+      ? sections.awardsHome.galleryImageIds.map((id) => String(id))
+      : [];
 
     const newSlideTemplate = () => ({
       image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1920&q=80',
@@ -858,6 +1001,17 @@ const PageContentManager = () => {
       ctaSecondaryText: 'Services',
       ctaSecondaryLink: '/services',
     });
+
+    const toggleAwardGalleryImage = (imageId) => {
+      const normalized = String(imageId);
+      const current = Array.isArray(sections.awardsHome?.galleryImageIds)
+        ? sections.awardsHome.galleryImageIds.map((id) => String(id))
+        : [];
+      const next = current.includes(normalized)
+        ? current.filter((id) => id !== normalized)
+        : [...current, normalized];
+      handleSectionChange('awardsHome', 'galleryImageIds', next);
+    };
 
     return (
       <div className="space-y-6">
@@ -1365,6 +1519,75 @@ const PageContentManager = () => {
             placeholder="Scroll hint text"
           />
           <p className="text-xs text-gray-500 font-sans mt-2">Review cards: Reviews Manager.</p>
+        </div>
+
+        <div className="bg-white rounded-sm shadow-sm p-6">
+          <h3 className="font-serif text-xl font-semibold text-navy mb-4">Awards & Recognition (Home)</h3>
+          <input
+            type="text"
+            value={sections.awardsHome?.eyebrow || ''}
+            onChange={(e) => handleSectionChange('awardsHome', 'eyebrow', e.target.value)}
+            className="w-full px-3 py-2 border rounded-sm font-sans text-sm mb-2"
+            placeholder="Eyebrow"
+          />
+          <input
+            type="text"
+            value={sections.awardsHome?.title || ''}
+            onChange={(e) => handleSectionChange('awardsHome', 'title', e.target.value)}
+            className="w-full px-3 py-2 border rounded-sm font-sans text-sm mb-2"
+            placeholder="Title"
+          />
+          <textarea
+            value={sections.awardsHome?.subtitle || ''}
+            onChange={(e) => handleSectionChange('awardsHome', 'subtitle', e.target.value)}
+            rows={2}
+            className="w-full px-3 py-2 border rounded-sm font-sans text-sm mb-2"
+            placeholder="Subtitle"
+          />
+          <input
+            type="text"
+            value={sections.awardsHome?.galleryTitle || ''}
+            onChange={(e) => handleSectionChange('awardsHome', 'galleryTitle', e.target.value)}
+            className="w-full px-3 py-2 border rounded-sm font-sans text-sm mb-2"
+            placeholder="Gallery block title shown under awards"
+          />
+          <input
+            type="text"
+            value={sections.awardsHome?.viewAllText || ''}
+            onChange={(e) => handleSectionChange('awardsHome', 'viewAllText', e.target.value)}
+            className="w-full px-3 py-2 border rounded-sm font-sans text-sm mb-3"
+            placeholder="View all button text"
+          />
+          <p className="text-sm text-gray-600 font-sans mb-3">
+            Select gallery images to display below awards on the home page.
+          </p>
+          <p className="text-xs text-amber-700 font-sans mb-3">
+            Best results: use 4:3 images (for example, 1600 × 1200 px) with faces/subjects near center.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto pr-1">
+            {galleryOptions.map((img) => {
+              const id = String(img?._id || '');
+              const isSelected = selectedAwardGalleryIds.includes(id);
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => toggleAwardGalleryImage(id)}
+                  className={`text-left rounded-lg border overflow-hidden transition-all ${
+                    isSelected ? 'border-navy ring-2 ring-navy/20' : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <img src={img.imageUrl} alt={img.title || 'Gallery image'} className="h-28 w-full object-cover" />
+                  <div className="px-3 py-2">
+                    <p className="font-sans text-xs font-medium text-gray-800 line-clamp-2">
+                      {img.title || 'Untitled image'}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-xs text-gray-500 font-sans">Selected: {selectedAwardGalleryIds.length}</p>
         </div>
 
         <div className="bg-white rounded-sm shadow-sm p-6">

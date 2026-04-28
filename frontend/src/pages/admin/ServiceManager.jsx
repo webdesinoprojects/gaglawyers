@@ -271,6 +271,66 @@ const ServiceManager = () => {
     }
   };
 
+  const handleToggleServiceFeatured = async (service, nextFeatured) => {
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      showToast('Authentication required. Please log in again.', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/services/${service.slug}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          servicesPageSettings: {
+            ...(service.servicesPageSettings || {}),
+            isFeatured: nextFeatured,
+          },
+        }),
+      });
+      const data = await response.json();
+      if (!data.success) {
+        showToast(data.message || 'Failed to update featured status', 'error');
+        return;
+      }
+
+      setServices((prev) =>
+        prev.map((row) =>
+          row.slug === service.slug
+            ? {
+                ...row,
+                servicesPageSettings: {
+                  ...(row.servicesPageSettings || {}),
+                  isFeatured: nextFeatured,
+                },
+              }
+            : row
+        )
+      );
+
+      if (serviceData?.slug === service.slug) {
+        setServiceData((prev) =>
+          prev
+            ? {
+                ...prev,
+                servicesPageSettings: {
+                  ...(prev.servicesPageSettings || {}),
+                  isFeatured: nextFeatured,
+                },
+              }
+            : prev
+        );
+      }
+    } catch (error) {
+      console.error('Error toggling featured status:', error);
+      showToast('Error updating featured status', 'error');
+    }
+  };
+
   // Simple toast notification
   const showToast = (message, type) => {
     // You can replace this with a proper toast library
@@ -300,6 +360,7 @@ const ServiceManager = () => {
         canDeleteService={Boolean(selectedServiceSlug)}
         deletingService={deletingService}
         onToggleServiceActive={handleToggleServiceActive}
+        onToggleServiceFeatured={handleToggleServiceFeatured}
       />
 
       {/* Right Panel - Editor */}

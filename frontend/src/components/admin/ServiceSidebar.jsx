@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Loader2, Plus, Trash2 } from 'lucide-react';
+import { Search, Loader2, Plus, Trash2, Star } from 'lucide-react';
 
 /**
  * Service Sidebar - Left panel with service list
@@ -18,6 +18,7 @@ const ServiceSidebar = ({
   canDeleteService,
   deletingService,
   onToggleServiceActive,
+  onToggleServiceFeatured,
 }) => {
   if (loading) {
     return (
@@ -143,8 +144,27 @@ const ServiceSidebar = ({
                           {service.isActive === false ? 'Off' : 'On'}
                         </button>
                       </div>
-                      <div className="text-xs text-gray-500 truncate mt-0.5">
-                        {service.slug}
+                      <div className="mt-2 flex items-center justify-between">
+                        <div className="text-xs text-gray-500 truncate">
+                          {service.slug}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const currentlyFeatured = Boolean(service.servicesPageSettings?.isFeatured);
+                            onToggleServiceFeatured?.(service, !currentlyFeatured);
+                          }}
+                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                            service.servicesPageSettings?.isFeatured
+                              ? 'bg-amber-100 text-amber-700'
+                              : 'bg-gray-100 text-gray-600'
+                          }`}
+                          title={service.servicesPageSettings?.isFeatured ? 'Featured service' : 'Not featured'}
+                        >
+                          <Star className="h-3 w-3" />
+                          {service.servicesPageSettings?.isFeatured ? 'Featured' : 'Feature'}
+                        </button>
                       </div>
                     </div>
                   </div>

@@ -248,7 +248,7 @@ const LocationManager = () => {
       city: formData.city,
       slug,
       content: {
-        templateMode: formData.templateMode || 'service',
+        templateMode: 'service',
         heading: formData.heading || `${selectedService.name || selectedService.title} in ${formData.city}`,
         intro: formData.intro || `Expert ${(selectedService.name || selectedService.title).toLowerCase()} services in ${formData.city}.`,
         sections: formData.sections.filter(s => s.title && s.content),
@@ -296,7 +296,7 @@ const LocationManager = () => {
       service: page.service?._id || page.service,
       city: page.city,
       slug: page.slug || '',
-      templateMode: page.content?.templateMode || 'service',
+      templateMode: 'service',
       heading: page.content?.heading || '',
       intro: page.content?.intro || '',
       sections: page.content?.sections || DEFAULT_SECTIONS.map((section) => ({ ...section, content: '' })),
@@ -331,7 +331,7 @@ const LocationManager = () => {
       city: formData.city,
       slug,
       content: {
-        templateMode: formData.templateMode || 'service',
+        templateMode: 'service',
         heading: formData.heading,
         intro: formData.intro,
         sections: formData.sections.filter(s => s.title && s.content),
@@ -372,29 +372,6 @@ const LocationManager = () => {
       console.error('Error updating page:', error);
       alert('Error updating page');
     }
-  };
-
-  const addSection = () => {
-    setFormData(prev => ({
-      ...prev,
-      sections: [...prev.sections, { title: '', content: '' }],
-    }));
-  };
-
-  const removeSection = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      sections: prev.sections.filter((_, i) => i !== index),
-    }));
-  };
-
-  const updateSection = (index, field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      sections: prev.sections.map((section, i) => 
-        i === index ? { ...section, [field]: value } : section
-      ),
-    }));
   };
 
   const updateImage = (index, field, value) => {
@@ -745,38 +722,9 @@ const LocationManager = () => {
                   <h3 className="font-serif text-lg font-bold text-gray-800 mb-4">Page Content</h3>
                   
                   <div className="space-y-4">
-                    <div>
-                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-2">
-                        Layout Source
-                      </label>
-                      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                        <label className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="templateModeCreate"
-                            checked={formData.templateMode !== 'custom'}
-                            onChange={() => setFormData(prev => ({ ...prev, templateMode: 'service' }))}
-                            className="mt-1"
-                          />
-                          <span className="text-sm text-gray-700">
-                            <span className="block font-semibold text-gray-900">Centralized Service Template</span>
-                            Uses Service Manager template for all location pages of this service.
-                          </span>
-                        </label>
-                        <label className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="templateModeCreate"
-                            checked={formData.templateMode === 'custom'}
-                            onChange={() => setFormData(prev => ({ ...prev, templateMode: 'custom' }))}
-                            className="mt-1"
-                          />
-                          <span className="text-sm text-gray-700">
-                            <span className="block font-semibold text-gray-900">Custom Location Template</span>
-                            This page will use its own section content from Location Manager.
-                          </span>
-                        </label>
-                      </div>
+                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+                      This page uses <strong>Centralized Service Template</strong>. Any content change in Service Manager
+                      automatically updates all location pages for this service.
                     </div>
 
                     <div>
@@ -890,57 +838,9 @@ const LocationManager = () => {
                       </div>
                     </div>
 
-                    {/* Content Sections */}
-                    {formData.templateMode === 'custom' ? (
-                      <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <label className="block font-sans text-sm font-semibold text-gray-800">
-                            Content Sections
-                          </label>
-                          <button
-                            onClick={addSection}
-                            className="text-sm text-navy hover:text-navy/80 font-sans font-medium"
-                          >
-                            + Add Section
-                          </button>
-                        </div>
-                        
-                        {formData.sections.map((section, index) => (
-                          <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                            <div className="flex items-center justify-between mb-3">
-                              <span className="text-sm font-semibold text-gray-600">Section {index + 1}</span>
-                              {formData.sections.length > 1 && (
-                                <button
-                                  onClick={() => removeSection(index)}
-                                  className="text-red-500 hover:text-red-700 text-sm"
-                                >
-                                  Remove
-                                </button>
-                              )}
-                            </div>
-                            <input
-                              type="text"
-                              value={section.title}
-                              onChange={(e) => updateSection(index, 'title', e.target.value)}
-                              placeholder="Section title"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 font-sans text-sm"
-                            />
-                            <textarea
-                              value={section.content}
-                              onChange={(e) => updateSection(index, 'content', e.target.value)}
-                              placeholder="Section content"
-                              rows="3"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm resize-none"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-                        Section layout/content is controlled centrally from Service Manager for this service.
-                        Switch to <strong>Custom Location Template</strong> if you want this location page to override sections.
-                      </div>
-                    )}
+                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                      Section layout/content is controlled centrally from Service Manager for this service.
+                    </div>
                   </div>
                 </div>
 
@@ -1117,38 +1017,9 @@ const LocationManager = () => {
                   <h3 className="font-serif text-lg font-bold text-gray-800 mb-4">Page Content</h3>
                   
                   <div className="space-y-4">
-                    <div>
-                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-2">
-                        Layout Source
-                      </label>
-                      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                        <label className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="templateModeEdit"
-                            checked={formData.templateMode !== 'custom'}
-                            onChange={() => setFormData(prev => ({ ...prev, templateMode: 'service' }))}
-                            className="mt-1"
-                          />
-                          <span className="text-sm text-gray-700">
-                            <span className="block font-semibold text-gray-900">Centralized Service Template</span>
-                            Uses Service Manager template for all location pages of this service.
-                          </span>
-                        </label>
-                        <label className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="templateModeEdit"
-                            checked={formData.templateMode === 'custom'}
-                            onChange={() => setFormData(prev => ({ ...prev, templateMode: 'custom' }))}
-                            className="mt-1"
-                          />
-                          <span className="text-sm text-gray-700">
-                            <span className="block font-semibold text-gray-900">Custom Location Template</span>
-                            This page will use its own section content from Location Manager.
-                          </span>
-                        </label>
-                      </div>
+                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+                      This page uses <strong>Centralized Service Template</strong>. Any content change in Service Manager
+                      automatically updates all location pages for this service.
                     </div>
 
                     <div>
@@ -1262,57 +1133,9 @@ const LocationManager = () => {
                       </div>
                     </div>
 
-                    {/* Content Sections */}
-                    {formData.templateMode === 'custom' ? (
-                      <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <label className="block font-sans text-sm font-semibold text-gray-800">
-                            Content Sections
-                          </label>
-                          <button
-                            onClick={addSection}
-                            className="text-sm text-navy hover:text-navy/80 font-sans font-medium"
-                          >
-                            + Add Section
-                          </button>
-                        </div>
-                        
-                        {formData.sections.map((section, index) => (
-                          <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                            <div className="flex items-center justify-between mb-3">
-                              <span className="text-sm font-semibold text-gray-600">Section {index + 1}</span>
-                              {formData.sections.length > 1 && (
-                                <button
-                                  onClick={() => removeSection(index)}
-                                  className="text-red-500 hover:text-red-700 text-sm"
-                                >
-                                  Remove
-                                </button>
-                              )}
-                            </div>
-                            <input
-                              type="text"
-                              value={section.title}
-                              onChange={(e) => updateSection(index, 'title', e.target.value)}
-                              placeholder="Section title"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 font-sans text-sm"
-                            />
-                            <textarea
-                              value={section.content}
-                              onChange={(e) => updateSection(index, 'content', e.target.value)}
-                              placeholder="Section content"
-                              rows="3"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm resize-none"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-                        Section layout/content is controlled centrally from Service Manager for this service.
-                        Switch to <strong>Custom Location Template</strong> if you want this location page to override sections.
-                      </div>
-                    )}
+                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                      Section layout/content is controlled centrally from Service Manager for this service.
+                    </div>
                   </div>
                 </div>
 

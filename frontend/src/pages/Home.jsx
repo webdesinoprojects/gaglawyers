@@ -66,6 +66,7 @@ const Home = () => {
   const [blogPosts, setBlogPosts] = useState([]);
   const [teamMembers, setTeamMembers] = useState([]);
   const [awards, setAwards] = useState([]);
+  const [galleryImages, setGalleryImages] = useState([]);
   const [pageContent, setPageContent] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -181,6 +182,16 @@ const Home = () => {
         console.error('Error fetching awards:', error);
       });
 
+    const galleryPromise = parseJson(`${API_BASE_URL}/api/gallery`)
+      .then((galleryData) => {
+        if (galleryData.success && Array.isArray(galleryData.data)) {
+          setGalleryImages(galleryData.data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching gallery images:', error);
+      });
+
     await Promise.allSettled([
       servicesPromise,
       reviewsPromise,
@@ -188,6 +199,7 @@ const Home = () => {
       blogPromise,
       teamPromise,
       awardsPromise,
+      galleryPromise,
     ]);
 
     setLoading(false);
@@ -382,6 +394,14 @@ const Home = () => {
   };
 
   const home = mergeHomeSections(pageContent?.sections);
+  const selectedAwardGalleryImageIds = Array.isArray(home?.awardsHome?.galleryImageIds)
+    ? home.awardsHome.galleryImageIds.map((id) => String(id))
+    : [];
+  const selectedAwardGalleryImages = selectedAwardGalleryImageIds
+    .map((id) => galleryImages.find((img) => String(img?._id) === id))
+    .filter(Boolean);
+  const awardGalleryImagesToShow =
+    selectedAwardGalleryImages.length > 0 ? selectedAwardGalleryImages : galleryImages.slice(0, 6);
   const practiceAreasSection = home.practiceAreas || {
     heading: 'Practice Areas',
     subheading: 'Comprehensive legal expertise across multiple domains',
@@ -541,6 +561,7 @@ const Home = () => {
           pageContent?.seo?.keywords ||
           'lawyers in delhi, advocates in india, corporate law firm, civil litigation, real estate lawyers, family law'
         }
+        canonical={pageContent?.seo?.canonical || 'https://www.gaglawyers.com/'}
       />
 
       <HeroCarousel
@@ -1036,7 +1057,7 @@ const Home = () => {
                         <a href={getArticleUrl(post)} className="aspect-video overflow-hidden block">
                           <img
                             src={post.featuredImage}
-                            alt=""
+                            alt={post.title || 'Legal insights article'}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         </a>
@@ -1044,7 +1065,7 @@ const Home = () => {
                         <Link to={getArticleUrl(post)} className="aspect-video overflow-hidden block">
                           <img
                             src={post.featuredImage}
-                            alt=""
+                            alt={post.title || 'Legal insights article'}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         </Link>
@@ -1146,7 +1167,7 @@ const Home = () => {
                   >
                     <div className="w-20 h-20 flex-shrink-0 rounded-lg bg-gold/10 overflow-hidden flex items-center justify-center">
                       {a.imageUrl ? (
-                        <img src={a.imageUrl} alt="" className="w-full h-full object-contain" />
+                        <img src={a.imageUrl} alt={a.title || 'Award badge'} className="w-full h-full object-contain" />
                       ) : (
                         <Award className="w-10 h-10 text-gold" />
                       )}
@@ -1159,6 +1180,38 @@ const Home = () => {
                   </div>
                 ))}
               </div>
+
+              {awardGalleryImagesToShow.length > 0 && (
+                <div className="mt-10">
+                  <h3 className="mb-5 text-center font-serif text-xl font-semibold text-white md:text-2xl">
+                    {home.awardsHome.galleryTitle || 'From Our Image Gallery'}
+                  </h3>
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    {awardGalleryImagesToShow.map((img) => (
+                      <div
+                        key={img._id}
+                        className="group relative overflow-hidden rounded-xl border border-white/10 bg-[#0B1F3A] shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-gold/40 hover:shadow-2xl hover:shadow-gold/20"
+                      >
+                        <div className="aspect-[4/3] w-full overflow-hidden">
+                          <img
+                            src={img.imageUrl}
+                            alt={img.title || 'Gallery image'}
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            style={{ objectPosition: '50% 35%' }}
+                            loading="lazy"
+                          />
+                        </div>
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#081629]/90 via-[#081629]/25 to-transparent opacity-70 transition-opacity duration-300 group-hover:opacity-100" />
+                        <div className="absolute inset-x-0 bottom-0 p-4">
+                          <p className="translate-y-2 font-sans text-sm text-white/90 transition-all duration-300 group-hover:translate-y-0 group-hover:text-white">
+                            {img.title || 'Gallery image'}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="text-center mt-10">
                 <Link

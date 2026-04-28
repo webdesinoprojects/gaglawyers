@@ -4,7 +4,7 @@ import { Home, ChevronRight, AlertCircle, Loader2 } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import SectionRenderer from '../components/sections/SectionRenderer';
 import API_BASE_URL from '../config/api';
-import { getSectionImage } from '../utils/sectionImages';
+
 
 /**
  * Dynamic Service Page - Fetches content from database
@@ -139,24 +139,26 @@ const ServicePageDynamic = () => {
           const isHowGroverSection = /how grover/i.test(section?.heading || '');
 
           if (isHowGroverSection) {
-            const teamImageSrc = section?.content?.imageUrl || getSectionImage(slug, 'team');
+            const teamImageSrc = section?.content?.imageUrl || null;
             const teamImageAlt =
               section?.content?.imageAlt || 'Grover & Grover Advocates team';
 
             return (
               <div key={section._id} className="mx-auto max-w-7xl px-4 py-10 sm:px-6 md:px-8">
-                <div className="section-split">
-                  <div className="section-split__text">
+                <div className={teamImageSrc ? 'section-split' : ''}>
+                  <div className={teamImageSrc ? 'section-split__text' : ''}>
                     <SectionRenderer section={section} sectionIndex={index} serviceSlug={slug} />
                   </div>
-                  <div className="section-split__image">
-                    <img
-                      src={teamImageSrc}
-                      alt={teamImageAlt}
-                      loading="lazy"
-                      style={{ borderRadius: '12px', width: '100%', objectFit: 'cover', maxHeight: '360px' }}
-                    />
-                  </div>
+                  {teamImageSrc && (
+                    <div className="section-split__image">
+                      <img
+                        src={teamImageSrc}
+                        alt={teamImageAlt}
+                        loading="lazy"
+                        style={{ borderRadius: '12px', width: '100%', objectFit: 'cover', maxHeight: '360px' }}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             );

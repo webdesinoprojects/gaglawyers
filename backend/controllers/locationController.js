@@ -2,6 +2,16 @@ const LocationPage = require('../models/LocationPage');
 const Service = require('../models/Service');
 
 const escapeRegExp = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const forceServiceTemplateMode = (payload = {}) => {
+  if (!payload.content || typeof payload.content !== 'object') return payload;
+  return {
+    ...payload,
+    content: {
+      ...payload.content,
+      templateMode: 'service',
+    },
+  };
+};
 
 const getAllLocationPages = async (req, res) => {
   try {
@@ -190,7 +200,7 @@ const createLocationPage = async (req, res) => {
       });
     }
 
-    const page = await LocationPage.create(req.body);
+    const page = await LocationPage.create(forceServiceTemplateMode(req.body));
     res.status(201).json({
       success: true,
       data: page,
@@ -215,7 +225,7 @@ const updateLocationPage = async (req, res) => {
       });
     }
 
-    const page = await LocationPage.findByIdAndUpdate(req.params.id, req.body, {
+    const page = await LocationPage.findByIdAndUpdate(req.params.id, forceServiceTemplateMode(req.body), {
       new: true,
       runValidators: true,
     });

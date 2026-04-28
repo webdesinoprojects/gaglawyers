@@ -156,6 +156,12 @@ const GalleryManager = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="rounded-sm border border-amber-200 bg-amber-50 p-3">
+              <p className="font-sans text-xs text-amber-900">
+                Recommended image size: <strong>1600 × 1200 px</strong> (4:3 ratio), faces/subjects centered with
+                some top margin. Avoid ultra-wide/tall crops to prevent head cut in card layouts.
+              </p>
+            </div>
             <ImageUploader
               label="Gallery Image"
               currentImage={formData.imageUrl}

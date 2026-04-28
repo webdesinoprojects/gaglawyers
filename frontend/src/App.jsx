@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Layout from './components/Layout';
 import AdminLayout from './components/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import PageVisibilityWrapper from './components/PageVisibilityWrapper';
+import GoogleAnalytics from './components/GoogleAnalytics';
 import Home from './pages/Home';
 import About from './pages/About';
 import Services from './pages/Services';
@@ -42,6 +43,7 @@ import SEOManager from './pages/admin/SEOManager';
 import PageVisibilityManager from './pages/admin/PageVisibilityManager';
 import ComingSoon from './pages/admin/ComingSoon';
 import Affiliation from './pages/Affiliation';
+import API_BASE_URL from './config/api';
 
 const RedirectToSlug = () => {
   const { slug } = useParams();
@@ -49,8 +51,31 @@ const RedirectToSlug = () => {
 };
 
 function App() {
+  const [gaMeasurementId, setGaMeasurementId] = useState(import.meta.env.VITE_GA_MEASUREMENT_ID || '');
+
+  useEffect(() => {
+    const fetchGaFromSettings = async () => {
+      if (gaMeasurementId) return;
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/cms/global-settings`);
+        const data = await response.json();
+        if (data?.success) {
+          const dynamicId = data?.data?.scripts?.googleAnalytics?.trim();
+          if (dynamicId) {
+            setGaMeasurementId(dynamicId);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load Google Analytics ID from settings:', error);
+      }
+    };
+
+    fetchGaFromSettings();
+  }, [gaMeasurementId]);
+  
   return (
     <Router>
+      <GoogleAnalytics measurementId={gaMeasurementId} />
       <DisclaimerProvider>
         <ScrollToTop />
         <ContentProtection />
