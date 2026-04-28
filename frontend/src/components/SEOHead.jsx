@@ -19,10 +19,12 @@ const SEOHead = ({
   robots = 'index, follow',
   language = 'en',
 }) => {
-  const url = typeof window !== 'undefined' ? window.location.href : '';
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://gaglawyers.com';
-  const canonicalUrl = canonical || url;
-  const defaultOgImage = `${origin}/og-image.jpg`;
+  const configuredSiteUrl = (import.meta.env.VITE_SITE_URL || 'https://www.gaglawyers.com').replace(/\/+$/, '');
+  const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/';
+  const currentFullUrl = `${configuredSiteUrl}${currentPath}`;
+  const canonicalUrl = (canonical || currentFullUrl).split('#')[0];
+  const origin = configuredSiteUrl;
+  const defaultOgImage = `${origin}/logo.png`;
   const finalOgImage = ogImage || defaultOgImage;
 
   // Base Organization Schema
@@ -180,7 +182,7 @@ const SEOHead = ({
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta property="og:type" content={type} />
-      <meta property="og:url" content={url} />
+      <meta property="og:url" content={canonicalUrl} />
       <meta property="og:image" content={finalOgImage} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />

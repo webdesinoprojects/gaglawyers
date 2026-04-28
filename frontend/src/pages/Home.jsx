@@ -427,7 +427,7 @@ const Home = () => {
           <div className="inline-flex items-center justify-center w-12 h-12 bg-gold/15 rounded-full mb-3">
             <Calendar className="text-gold" size={26} />
           </div>
-          <h2 className="font-serif text-xl lg:text-2xl font-bold text-navy mb-1">{cf.title}</h2>
+          <h3 className="font-serif text-xl lg:text-2xl font-bold text-navy mb-1">{cf.title}</h3>
           <p className="font-sans text-sm text-gray-600">{cf.subtitle}</p>
         </div>
 
@@ -697,7 +697,7 @@ const Home = () => {
               <span className="inline-block px-4 py-1.5 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
                 {home.whyChoose.eyebrow}
               </span>
-              <h3 className="font-serif text-4xl lg:text-5xl font-bold text-white mb-4">{home.whyChoose.title}</h3>
+              <h2 className="font-serif text-4xl lg:text-5xl font-bold text-white mb-4">{home.whyChoose.title}</h2>
               <p className="font-sans text-base lg:text-lg text-[#E6D5B8] max-w-2xl mx-auto">{home.whyChoose.subtitle}</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -730,7 +730,7 @@ const Home = () => {
               <span className="inline-block px-4 py-1.5 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
                 {home.ourValues.eyebrow}
               </span>
-              <h3 className="font-serif text-4xl lg:text-5xl font-bold text-white mb-4">{home.ourValues.title}</h3>
+              <h2 className="font-serif text-4xl lg:text-5xl font-bold text-white mb-4">{home.ourValues.title}</h2>
               <p className="font-sans text-base lg:text-lg text-[#E6D5B8] max-w-2xl mx-auto">{home.ourValues.subtitle}</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -757,7 +757,7 @@ const Home = () => {
               <span className="inline-block px-4 py-1.5 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
                 {home.howWeWork.eyebrow}
               </span>
-              <h3 className="font-serif text-4xl lg:text-5xl font-bold text-white mb-4">{home.howWeWork.title}</h3>
+              <h2 className="font-serif text-4xl lg:text-5xl font-bold text-white mb-4">{home.howWeWork.title}</h2>
               <p className="font-sans text-base lg:text-lg text-[#E6D5B8] max-w-2xl mx-auto">{home.howWeWork.subtitle}</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">

@@ -160,7 +160,7 @@ const HeroCarousel = ({
           <div className="absolute inset-0">
             <img
               src={resolveHeroSrc(s)}
-              alt=""
+              alt={s.heading ? `${s.heading} ${s.headingAccent || ''}`.trim() : 'GAG Lawyers legal services'}
               className="h-full w-full object-cover object-center"
               loading={index === 0 ? 'eager' : 'lazy'}
               decoding="async"
