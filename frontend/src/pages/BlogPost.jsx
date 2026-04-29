@@ -137,6 +137,12 @@ const BlogPost = () => {
     [post?.content]
   );
 
+  const isNewsletterPost = post?.contentType === 'newsletter';
+  const backListPath = isNewsletterPost ? '/newsletter' : '/articles';
+  const backListLabel = isNewsletterPost ? 'Back to Newsletter' : 'Back to Blog';
+  const exploreLabel = isNewsletterPost ? 'Explore More Newsletter Updates' : 'Explore More Articles';
+  const canonicalPath = isNewsletterPost ? `/newsletter/${post?.slug || slug}` : `/articles/${post?.slug || slug}`;
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-grey-light">
@@ -157,11 +163,11 @@ const BlogPost = () => {
           </h2>
           <p className="font-sans text-gray-600 mb-6">The article you're looking for doesn't exist.</p>
           <Link 
-            to="/blog" 
+            to={backListPath}
             className="inline-flex items-center gap-2 px-6 py-3 bg-navy text-white font-sans font-semibold rounded-md hover:bg-navy/90 transition-colors"
           >
             <ArrowLeft size={18} />
-            Back to Blog
+            {backListLabel}
           </Link>
         </div>
       </div>
@@ -174,6 +180,7 @@ const BlogPost = () => {
         title={`${post.title} | GAG Lawyers Blog`}
         description={post.excerpt || post.content.substring(0, 160).replace(/<[^>]*>/g, '')}
         keywords={post.tags?.join(', ') || 'legal blog, law articles'}
+        canonical={`https://www.gaglawyers.com${canonicalPath}`}
       />
 
       {/* Hero Section with Featured Image */}
@@ -189,11 +196,11 @@ const BlogPost = () => {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
           {/* Breadcrumb */}
           <Link
-            to="/blog"
+            to={backListPath}
             className="inline-flex items-center gap-2 font-sans text-sm text-gray-300 hover:text-gold transition-colors mb-8 group"
           >
             <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-            <span>Back to All Articles</span>
+            <span>{isNewsletterPost ? 'Back to Newsletter' : 'Back to All Articles'}</span>
           </Link>
           
           <div className="max-w-4xl">
@@ -438,7 +445,7 @@ const BlogPost = () => {
                       {relatedPosts.map((relatedPost) => (
                         <Link
                           key={relatedPost._id}
-                          to={`/blog/${relatedPost.slug}`}
+                          to={`/articles/${relatedPost.slug}`}
                           className="block group"
                         >
                           <div className="flex gap-3">
@@ -489,11 +496,11 @@ const BlogPost = () => {
       <section className="bg-white py-12 border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <Link
-            to="/blog"
+            to={backListPath}
             className="inline-flex items-center gap-2 px-8 py-4 bg-navy text-white font-sans font-semibold rounded-lg hover:bg-navy/90 transition-all hover:scale-105"
           >
             <ArrowLeft size={20} />
-            Explore More Articles
+            {exploreLabel}
           </Link>
         </div>
       </section>

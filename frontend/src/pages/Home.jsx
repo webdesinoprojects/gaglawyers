@@ -410,7 +410,7 @@ const Home = () => {
     heading: 'What Our Clients Say',
     subheading: 'Trusted by leading businesses and individuals across India',
   };
-  const getArticleUrl = (post) => post.externalUrl || `/blog/${post.slug}`;
+  const getArticleUrl = (post) => post.externalUrl || `/articles/${post.slug}`;
   const isExternalArticle = (post) => Boolean(post.externalUrl && /^https?:\/\//i.test(post.externalUrl));
   const isMarqueeEnabled = reviews.length > 1;
   const marqueeReviews = isMarqueeEnabled ? [...reviews, ...reviews] : reviews;
@@ -551,11 +551,11 @@ const Home = () => {
       <SEOHead
         title={
           pageContent?.seo?.title ||
-          'GAG Lawyers - Premier Legal Services in India | Grover & Grover Advocates'
+          'GAG Lawyers - Grover & Grover Advocates'
         }
         description={
           pageContent?.seo?.description ||
-          'Expert legal services in corporate law, civil litigation, real estate, and family law. 25+ years of excellence serving clients across India.'
+          'GAG Lawyers - Grover & Grover Advocates: Trusted legal experts for your every need. Your path to legal solutions starts here'
         }
         keywords={
           pageContent?.seo?.keywords ||
@@ -1038,7 +1038,7 @@ const Home = () => {
                   <p className="font-sans text-base lg:text-lg text-gray-600 max-w-2xl">{home.blogSection.subtitle}</p>
                 </div>
                 <Link
-                  to="/blog"
+                  to="/articles"
                   className="hidden sm:inline-flex items-center gap-2 px-6 py-3 bg-gold text-navy font-sans font-semibold rounded-lg hover:brightness-110 transition-all shrink-0 shadow-lg shadow-gold/20"
                 >
                   {home.blogSection.viewAllText}
@@ -1123,7 +1123,7 @@ const Home = () => {
 
               <div className="text-center mt-10 sm:hidden">
                 <Link
-                  to="/blog"
+                  to="/articles"
                   className="inline-flex items-center gap-2 px-8 py-3 bg-gold text-navy font-sans font-semibold rounded-lg hover:brightness-110 transition-all shadow-lg shadow-gold/20"
                 >
                   {home.blogSection.viewAllText}

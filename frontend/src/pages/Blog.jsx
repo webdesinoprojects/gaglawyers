@@ -14,11 +14,24 @@ const Blog = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/blog?published=true&contentType=article`);
-      const data = await response.json();
-      if (data.success) {
-        setPosts(data.data);
+      const pageSize = 100;
+      let page = 1;
+      let totalPages = 1;
+      const allPosts = [];
+
+      while (page <= totalPages) {
+        const response = await fetch(
+          `${API_BASE_URL}/api/blog?published=true&contentType=article&limit=${pageSize}&page=${page}`
+        );
+        const data = await response.json();
+        if (!data.success) break;
+
+        allPosts.push(...(data.data || []));
+        totalPages = Number(data.pages || 1);
+        page += 1;
       }
+
+      setPosts(allPosts);
     } catch (error) {
       console.error('Error fetching blog posts:', error);
     } finally {
@@ -69,7 +82,7 @@ const Blog = () => {
     });
   };
 
-  const getPostUrl = (post) => post.externalUrl || `/blog/${post.slug}`;
+  const getPostUrl = (post) => post.externalUrl || `/articles/${post.slug}`;
   const isExternalPost = (post) => Boolean(post.externalUrl && /^https?:\/\//i.test(post.externalUrl));
 
   return (
@@ -78,6 +91,7 @@ const Blog = () => {
         title="Legal Insights & News | GAG Lawyers Blog"
         description="Stay informed with expert legal analysis, case updates, and insights on Indian law. Read articles on corporate law, litigation, real estate, family law, and more from GAG Lawyers."
         keywords="legal blog, law articles, indian law updates, legal insights, corporate law news, litigation updates"
+        canonical="https://www.gaglawyers.com/articles"
       />
       
       <section className="bg-navy text-white py-16 lg:py-20">

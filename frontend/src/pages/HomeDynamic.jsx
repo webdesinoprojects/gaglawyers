@@ -91,8 +91,8 @@ const HomeDynamic = () => {
   return (
     <div>
       <SEOHead 
-        title={pageContent?.seo?.title || "GAG Lawyers - Premier Legal Services in India | Grover & Grover Advocates"}
-        description={pageContent?.seo?.description || "Expert legal services in corporate law, civil litigation, real estate, and family law. 25+ years of excellence serving clients across India."}
+        title={pageContent?.seo?.title || "GAG Lawyers - Grover & Grover Advocates"}
+        description={pageContent?.seo?.description || "GAG Lawyers - Grover & Grover Advocates: Trusted legal experts for your every need. Your path to legal solutions starts here"}
         keywords={pageContent?.seo?.keywords || "lawyers in delhi, advocates in india, corporate law firm, civil litigation, real estate lawyers, family law"}
       />
 
@@ -257,7 +257,7 @@ const HomeDynamic = () => {
                 </p>
               </div>
               <Link 
-                to="/blog"
+                to="/articles"
                 className="hidden md:inline-flex items-center gap-2 px-6 py-3 bg-navy text-white font-sans font-semibold rounded-lg hover:bg-navy/90 transition-all"
               >
                 View All Articles
@@ -269,7 +269,7 @@ const HomeDynamic = () => {
               {blogPosts.map((post) => (
                 <Link
                   key={post._id}
-                  to={`/blog/${post.slug}`}
+                  to={`/articles/${post.slug}`}
                   className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                 >
                   {post.featuredImage && (

@@ -20,7 +20,7 @@ const DEFAULT_MENU_ITEMS = [
   { label: 'Home', url: '/' },
   { label: 'About', url: '/about' },
   { label: 'Services', url: '/services' },
-  { label: 'Resource Center', url: '/blog' },
+  { label: 'Resource Center', url: '/articles' },
   { label: 'Careers', url: '/careers' },
   { label: 'Contact', url: '/contact' },
 ];
@@ -157,11 +157,11 @@ const DynamicNavbar = () => {
       return {
         ...item,
         label: 'Resource Center',
-        url: '/blog',
+        url: '/articles',
         hasDropdown: true,
         dropdownType: 'resource',
         submenu: [
-          { name: 'Articles', path: '/blog' },
+          { name: 'Articles', path: '/articles' },
           { name: 'Newsletter', path: '/newsletter' },
         ],
       };

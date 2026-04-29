@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-    <loc>/sitemaps/static.xml</loc>
-    <lastmod>2026-04-29</lastmod>
+    <loc>https://www.gaglawyers.com/pages-sitemap.xml</loc>
+    <lastmod>2026-04-29T00:00:00.000Z</lastmod>
   </sitemap>
   <sitemap>
-    <loc>/sitemaps/services.xml</loc>
-    <lastmod>2026-04-29</lastmod>
+    <loc>https://www.gaglawyers.com/services.xml</loc>
+    <lastmod>2026-04-29T00:00:00.000Z</lastmod>
   </sitemap>
   <sitemap>
-    <loc>/sitemaps/blogs.xml</loc>
-    <lastmod>2026-04-29</lastmod>
+    <loc>https://www.gaglawyers.com/blogs.xml</loc>
+    <lastmod>2026-04-29T00:00:00.000Z</lastmod>
   </sitemap>
   <sitemap>
-    <loc>/sitemaps/locations.xml</loc>
-    <lastmod>2026-04-29</lastmod>
+    <loc>https://www.gaglawyers.com/locations.xml</loc>
+    <lastmod>2026-04-29T00:00:00.000Z</lastmod>
   </sitemap>
 </sitemapindex>

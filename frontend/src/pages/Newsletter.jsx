@@ -1,4 +1,5 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Calendar, ArrowRight } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import API_BASE_URL from '../config/api';
@@ -32,7 +33,7 @@ const Newsletter = () => {
       day: 'numeric',
     });
 
-  const getEntryUrl = (entry) => entry.externalUrl || `/blog/${entry.slug}`;
+  const getEntryUrl = (entry) => entry.externalUrl || `/newsletter/${entry.slug}`;
   const isExternalEntry = (entry) => Boolean(entry.externalUrl && /^https?:\/\//i.test(entry.externalUrl));
 
   return (
@@ -41,6 +42,7 @@ const Newsletter = () => {
         title="Newsletter | GAG Lawyers - Resource Center"
         description="Legal newsletter updates and practical insights from GAG Lawyers Resource Center."
         keywords="legal newsletter, law updates, resource center, gag lawyers"
+        canonical="https://www.gaglawyers.com/newsletter"
       />
 
       <section className="bg-gradient-to-br from-navy via-navy/95 to-[#0a1628] text-white py-20 lg:py-28">
@@ -89,13 +91,13 @@ const Newsletter = () => {
                       <ArrowRight size={16} />
                     </a>
                   ) : (
-                    <a
-                      href={getEntryUrl(entry)}
+                    <Link
+                      to={getEntryUrl(entry)}
                       className="inline-flex items-center gap-2 font-sans text-sm font-semibold text-navy group-hover:text-gold transition-colors"
                     >
                       Read more
                       <ArrowRight size={16} />
-                    </a>
+                    </Link>
                   )}
                 </article>
               ))}

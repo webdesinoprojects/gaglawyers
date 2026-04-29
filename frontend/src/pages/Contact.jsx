@@ -5,7 +5,7 @@ import ReCaptcha from '../components/ReCaptcha';
 import API_BASE_URL from '../config/api';
 import { OFFICE_ADDRESS_LINES } from '../constants/officeAddress';
 
-const PANEL = '#112240';
+const PANEL = '#FFFFFF';
 
 const MAP_EMBED_SRC =
   'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6998.3752460208125!2d77.13081933769948!3d28.71393836202312!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d010b75f3e47d%3A0x4e92383cc436853f!2sGAG%20Lawyers%20-%20Grover%20%26%20Grover%2C%20Advocates%20%7C%20Best%20Divorce%20Lawyer%20in%20Delhi%2C%20Property%20Lawyer%20in%20Delhi%2C%20Civil%20%26%20Criminal%20Lawyers!5e0!3m2!1sen!2sin!4v1775508641842!5m2!1sen!2sin';
@@ -201,9 +201,9 @@ const Contact = () => {
   };
 
   const inputClass =
-    'w-full rounded-md border border-white/15 bg-[#0B1526] px-4 py-3 font-sans text-base text-white placeholder:text-gray-500 transition-colors duration-200 focus:border-[#C9A84C] focus:outline-none focus:ring-1 focus:ring-[#C9A84C]/40';
+    'w-full rounded-md border border-slate-300 bg-white px-4 py-3 font-sans text-base text-[#0B1526] placeholder:text-slate-400 transition-colors duration-200 focus:border-[#C9A84C] focus:outline-none focus:ring-1 focus:ring-[#C9A84C]/40';
 
-  const labelClass = 'mb-2 block font-sans text-xs font-medium uppercase tracking-wider text-[#8FA3B8]';
+  const labelClass = 'mb-2 block font-sans text-xs font-medium uppercase tracking-wider text-slate-600';
 
   return (
     <div className="min-h-screen bg-[#0B1526]">
@@ -336,13 +336,13 @@ const Contact = () => {
             {/* RIGHT — Form */}
             <div className="mt-12 lg:mt-0 lg:pl-10 xl:pl-14">
               <div
-                className="rounded-[12px] border border-[#C9A84C]/50 p-6 sm:p-8 md:p-[2rem] shadow-xl shadow-black/25"
+                className="rounded-[12px] border border-[#C9A84C]/35 p-6 sm:p-8 md:p-[2rem] shadow-xl shadow-black/25"
                 style={{ backgroundColor: PANEL }}
               >
-                <h2 className="font-serif text-2xl md:text-3xl lg:text-[2rem] font-bold text-white">
+                <h2 className="font-serif text-2xl md:text-3xl lg:text-[2rem] font-bold text-[#0B1526]">
                   Send Us a Message
                 </h2>
-                <p className="mt-3 font-sans text-sm md:text-[0.9375rem] text-[#8FA3B8] leading-relaxed">
+                <p className="mt-3 font-sans text-sm md:text-[0.9375rem] text-slate-600 leading-relaxed">
                   Fill out the form below and we&apos;ll get back to you within 24 hours.
                 </p>
 
@@ -425,19 +425,19 @@ const Contact = () => {
                         required
                         className={`${inputClass} cursor-pointer pr-11 appearance-none`}
                       >
-                        <option value="" className="bg-[#0B1526] text-gray-400">
+                        <option value="" className="bg-white text-slate-500">
                           Select a practice area
                         </option>
                         {services.map((service) => (
                           <option
                             key={service._id}
                             value={service.name || service.title}
-                            className="bg-[#0B1526] text-white"
+                            className="bg-white text-[#0B1526]"
                           >
                             {service.name || service.title}
                           </option>
                         ))}
-                        <option value="Other" className="bg-[#0B1526] text-white">
+                        <option value="Other" className="bg-white text-[#0B1526]">
                           Other
                         </option>
                       </select>
@@ -503,16 +503,16 @@ const Contact = () => {
               {otherOffices.map((office, index) => (
                 <article
                   key={`${office.heading}-${index}`}
-                  className="rounded-md border border-white/10 bg-[#0B1526] p-5"
+                  className="rounded-md border border-slate-200 bg-white p-5"
                 >
-                  <h3 className="font-serif text-xl font-semibold text-white">{office.heading}</h3>
+                  <h3 className="font-serif text-xl font-semibold text-[#0B1526]">{office.heading}</h3>
 
                   <div className="mt-4 space-y-3">
-                    <p className="font-sans text-sm text-white/90 leading-relaxed">
+                    <p className="font-sans text-sm text-slate-700 leading-relaxed">
                       <span className="text-[#C9A84C] font-semibold">Address:</span> {office.address}
                     </p>
                     {office.email ? (
-                      <p className="font-sans text-sm text-white/90">
+                      <p className="font-sans text-sm text-slate-700">
                         <span className="text-[#C9A84C] font-semibold">Email:</span>{' '}
                         <a href={`mailto:${office.email}`} className="hover:text-[#C9A84C] transition-colors">
                           {office.email}
@@ -520,7 +520,7 @@ const Contact = () => {
                       </p>
                     ) : null}
                     {office.phone ? (
-                      <p className="font-sans text-sm text-white/90">
+                      <p className="font-sans text-sm text-slate-700">
                         <span className="text-[#C9A84C] font-semibold">Contact:</span>{' '}
                         <a href={`tel:${office.phone.replace(/\s+/g, '')}`} className="hover:text-[#C9A84C] transition-colors">
                           {office.phone}

@@ -106,6 +106,17 @@ const Services = () => {
     }
   }, [activeFeaturedIndex, featuredServices.length]);
 
+  useEffect(() => {
+    const container = featuredCarouselRef.current;
+    const card = featuredCardRefs.current[activeFeaturedIndex];
+    if (!container || !card) return;
+
+    container.scrollTo({
+      left: card.offsetLeft,
+      behavior: 'smooth',
+    });
+  }, [activeFeaturedIndex]);
+
   const faqs = [
     {
       question: 'How quickly can I get a consultation?',
@@ -534,7 +545,7 @@ const Services = () => {
 
       {/* FAQ SECTION */}
       <section className="py-20 bg-gradient-to-b from-slate-50 to-white">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="font-serif text-4xl md:text-5xl font-bold text-slate-900 mb-4">
               Frequently Asked Questions
@@ -545,7 +556,7 @@ const Services = () => {
           </div>
           <div className="space-y-4">
             {faqs.map((faq, index) => (
-              <FAQItem key={index} question={faq.question} answer={faq.answer} />
+              <FAQItem key={index} index={index} question={faq.question} answer={faq.answer} />
             ))}
           </div>
         </div>

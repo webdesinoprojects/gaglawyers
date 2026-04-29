@@ -122,11 +122,12 @@ const generateSitemap = async (req, res) => {
   try {
     const baseUrl = getBaseUrl(req);
     const now = toIso(new Date());
-    const sections = ['static', 'services', 'blogs', 'locations'];
-    const entries = sections.map((section) => ({
-      loc: `${baseUrl}/sitemaps/${section}.xml`,
-      lastmod: now,
-    }));
+    const entries = [
+      { loc: `${baseUrl}/pages-sitemap.xml`, lastmod: now },
+      { loc: `${baseUrl}/services.xml`, lastmod: now },
+      { loc: `${baseUrl}/blogs.xml`, lastmod: now },
+      { loc: `${baseUrl}/locations.xml`, lastmod: now },
+    ];
     return sendXml(res, buildSitemapIndexXml(entries));
   } catch (error) {
     console.error('Sitemap index generation error:', error);
@@ -138,19 +139,19 @@ const generateSitemap = async (req, res) => {
   }
 };
 
-const generateSectionSitemap = async (req, res) => {
+const generateNamedSitemap = async (req, res) => {
   try {
-    const section = String(req.params.section || '').toLowerCase();
+    const name = String(req.params.name || '').toLowerCase();
     let entries = [];
 
-    if (section === 'static') entries = await getStaticSitemapEntries(req);
-    else if (section === 'services') entries = await getServicesSitemapEntries(req);
-    else if (section === 'blogs') entries = await getBlogsSitemapEntries(req);
-    else if (section === 'locations') entries = await getLocationsSitemapEntries(req);
+    if (name === 'pages-sitemap') entries = await getStaticSitemapEntries(req);
+    else if (name === 'services') entries = await getServicesSitemapEntries(req);
+    else if (name === 'blogs') entries = await getBlogsSitemapEntries(req);
+    else if (name === 'locations') entries = await getLocationsSitemapEntries(req);
     else {
       return res.status(404).json({
         success: false,
-        message: 'Unknown sitemap section',
+        message: 'Unknown sitemap',
       });
     }
 
@@ -187,6 +188,6 @@ const generateRobotsTxt = (req, res) => {
 
 module.exports = {
   generateSitemap,
-  generateSectionSitemap,
+  generateNamedSitemap,
   generateRobotsTxt,
 };

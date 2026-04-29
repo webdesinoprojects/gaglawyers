@@ -50,6 +50,11 @@ const RedirectToSlug = () => {
   return <Navigate to={`/${slug}`} replace />;
 };
 
+const RedirectBlogToArticles = () => {
+  const { slug } = useParams();
+  return <Navigate to={`/articles/${slug}`} replace />;
+};
+
 function App() {
   const [gaMeasurementId, setGaMeasurementId] = useState(import.meta.env.VITE_GA_MEASUREMENT_ID || '');
 
@@ -120,9 +125,12 @@ function App() {
             <Route path="gallery" element={<PageVisibilityWrapper pageKey="gallery"><Gallery /></PageVisibilityWrapper>} />
             <Route path="services" element={<PageVisibilityWrapper pageKey="services"><Services /></PageVisibilityWrapper>} />
             <Route path="services/:slug" element={<RedirectToSlug />} />
-            <Route path="blog" element={<PageVisibilityWrapper pageKey="blog"><Blog /></PageVisibilityWrapper>} />
+            <Route path="articles" element={<PageVisibilityWrapper pageKey="blog"><Blog /></PageVisibilityWrapper>} />
             <Route path="newsletter" element={<PageVisibilityWrapper pageKey="newsletter"><Newsletter /></PageVisibilityWrapper>} />
-            <Route path="blog/:slug" element={<BlogPost />} />
+            <Route path="newsletter/:slug" element={<BlogPost />} />
+            <Route path="articles/:slug" element={<BlogPost />} />
+            <Route path="blog" element={<Navigate to="/articles" replace />} />
+            <Route path="blog/:slug" element={<RedirectBlogToArticles />} />
             <Route path="contact" element={<PageVisibilityWrapper pageKey="contact"><Contact /></PageVisibilityWrapper>} />
             <Route path="careers" element={<PageVisibilityWrapper pageKey="careers"><Careers /></PageVisibilityWrapper>} />
             <Route path="affiliation" element={<PageVisibilityWrapper pageKey="affiliation"><Affiliation /></PageVisibilityWrapper>} />

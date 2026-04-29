@@ -1,35 +1,35 @@
 import React, { useState } from 'react';
-import { ChevronDown, Plus } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
-const FAQItem = ({ question, answer }) => {
+const FAQItem = ({ question, answer, index = 0 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="mb-4 last:mb-0">
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow duration-300 hover:shadow-lg">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full py-5 px-6 lg:px-8 flex items-center justify-between text-left rounded-lg border-2 transition-all duration-300 ${
-          isOpen
-            ? 'bg-gold/10 border-gold shadow-md'
-            : 'bg-white border-gray-200 hover:border-gold/50 hover:shadow-sm'
-        }`}
+        className="flex w-full items-start justify-between gap-4 rounded-2xl bg-gradient-to-r from-[#122b50] via-[#173864] to-[#214a74] p-5 text-left transition-all hover:brightness-110"
       >
-        <span className="font-serif font-bold text-navy text-base lg:text-lg pr-6 flex-1">
+        <span className="flex w-full items-start gap-3 font-serif text-[15px] font-semibold leading-relaxed text-white md:text-[16px]">
+          <span className="mt-0.5 flex-shrink-0 font-sans text-[11px] font-bold tracking-wider text-[#c9a84c]">
+            {String(index + 1).padStart(2, '0')}
+          </span>
           {question}
         </span>
-        <div className={`flex-shrink-0 transition-transform duration-300 ${
-          isOpen ? 'rotate-45 text-gold' : 'text-navy'
-        }`}>
-          <Plus className="w-5 h-5 lg:w-6 lg:h-6" />
-        </div>
+        <ChevronDown
+          size={20}
+          className={`flex-shrink-0 text-[#c9a84c] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+        />
       </button>
       <div
-        className={`overflow-hidden transition-all duration-300 ${
-          isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        className={`grid transition-all duration-500 ease-out ${
+          isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-80'
         }`}
       >
-        <div className="px-6 lg:px-8 pb-5 pt-3 font-sans text-gray-700 text-base leading-relaxed bg-gold/5 rounded-b-lg">
-          {answer}
+        <div className="overflow-hidden">
+          <div className="border-t border-slate-200 bg-white px-6 py-5">
+            <p className="font-sans leading-relaxed text-slate-700">{answer}</p>
+          </div>
         </div>
       </div>
     </div>

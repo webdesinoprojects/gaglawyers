@@ -3,7 +3,7 @@ import { OFFICE_ADDRESS_LINE } from '../constants/officeAddress';
 
 const SEOHead = ({ 
   title = 'GAG Lawyers - Grover & Grover Advocates',
-  description = 'Premier law firm in India providing expert legal services in corporate law, civil litigation, real estate, and family law.',
+  description = 'GAG Lawyers - Grover & Grover Advocates: Trusted legal experts for your every need. Your path to legal solutions starts here',
   keywords = 'lawyers, advocates, legal services, corporate law, civil litigation, delhi lawyers',
   ogImage = '',
   canonical = '',

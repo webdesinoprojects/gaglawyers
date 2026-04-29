@@ -71,11 +71,11 @@ const Navbar = () => {
     },
     {
       name: 'Resource Center',
-      path: '/blog',
+      path: '/articles',
       hasDropdown: true,
       dropdownType: 'resource',
       submenu: [
-        { name: 'Articles', path: '/blog' },
+        { name: 'Articles', path: '/articles' },
         { name: 'Newsletter', path: '/newsletter' },
       ],
     },
