@@ -49,7 +49,17 @@ export default function DisclaimerModal({ onAgree, onDecline }) {
           <span className="brand-logo-shell">
             <img src="/logo.png" alt="GAG Lawyers" className="h-7 w-auto" />
           </span>
-          <span className="text-xs font-bold tracking-[0.3em] uppercase text-white/80">Disclaimer</span>
+          <div className="flex items-center gap-4">
+            <span className="text-xs font-bold tracking-[0.3em] uppercase text-white/80">Disclaimer</span>
+            <button
+              type="button"
+              onClick={onDecline}
+              aria-label="Close disclaimer"
+              className="text-white/80 hover:text-white text-xl leading-none"
+            >
+              x
+            </button>
+          </div>
         </div>
         <div className="h-[2px] bg-amber-500" />
 
@@ -103,14 +113,7 @@ export default function DisclaimerModal({ onAgree, onDecline }) {
         </div>
 
         <div className="border-t border-slate-100 px-8 py-5">
-          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3">
-            <button
-              type="button"
-              onClick={onDecline}
-              className="border border-slate-300 text-slate-500 hover:bg-slate-50 px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 w-full sm:w-auto"
-            >
-              I Decline
-            </button>
+          <div className="flex justify-end gap-3">
             <button
               type="button"
               onClick={onAgree}

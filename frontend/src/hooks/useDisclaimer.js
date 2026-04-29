@@ -28,7 +28,7 @@ export default function useDisclaimer() {
   }, []);
 
   const decline = useCallback(() => {
-    window.location.href = 'https://www.google.com';
+    setShowDisclaimer(false);
   }, []);
 
   return useMemo(
