@@ -555,7 +555,7 @@ const Home = () => {
           pageContent?.seo?.keywords ||
           'lawyers in delhi, advocates in india, corporate law firm, civil litigation, real estate lawyers, family law'
         }
-        canonical={pageContent?.seo?.canonical || 'https://www.gaglawyers.com/'}
+        canonical="https://www.gaglawyers.com/"
       />
 
       <HeroCarousel
