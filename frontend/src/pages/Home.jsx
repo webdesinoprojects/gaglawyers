@@ -802,15 +802,15 @@ const Home = () => {
               </div>
 
               {teamMembers[0] && (
-                <div className="mb-14 flex flex-col items-center gap-10 rounded-2xl border-l-4 border-gold bg-white shadow-xl overflow-hidden pr-8 pt-8 pb-8 lg:flex-row lg:items-stretch lg:pr-10 lg:pt-10 lg:pb-10 transition-all duration-300 hover:shadow-2xl hover:border-gold hover:scale-[1.01]">
-                  <div className="relative self-stretch w-full lg:w-[28rem] lg:min-w-[28rem] min-h-0">
+                <div className="mb-14 flex flex-col items-center rounded-2xl border-l-4 border-gold bg-white shadow-xl overflow-hidden lg:flex-row lg:items-stretch lg:pr-10 lg:pt-10 lg:pb-10 transition-all duration-300 hover:shadow-2xl hover:border-gold hover:scale-[1.01]">
+                  <div className="relative w-full aspect-[4/5] flex-shrink-0 lg:aspect-auto lg:h-auto lg:w-[28rem] lg:min-w-[28rem]">
                     <img
                       src={teamMembers[0].imageUrl}
                       alt={teamMembers[0].name}
-                      className="h-full w-full object-contain object-bottom"
+                      className="absolute inset-0 h-full w-full object-cover object-top"
                     />
                   </div>
-                  <div className="flex-1 text-center lg:text-left">
+                  <div className="flex-1 p-6 text-center lg:p-0 lg:text-left">
                     <div className="inline-block px-3 py-1 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-3">
                       {home.teamSection.founderBadge}
                     </div>

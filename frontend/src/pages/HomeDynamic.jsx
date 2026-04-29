@@ -163,15 +163,15 @@ const HomeDynamic = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
               {teamMembers[0] && (
-                <div className="lg:col-span-3 flex flex-col items-center gap-8 rounded-2xl border border-navy/10 bg-gradient-to-br from-navy/5 to-gold/5 overflow-hidden pr-8 pt-8 pb-8 md:flex-row md:items-stretch lg:pr-10 lg:pt-10 lg:pb-10 transition-all duration-300 hover:shadow-2xl hover:border-gold hover:scale-[1.01]">
-                  <div className="relative self-stretch w-full lg:w-[22rem] lg:min-w-[22rem] min-h-0">
+                <div className="lg:col-span-3 flex flex-col items-center rounded-2xl border border-navy/10 bg-gradient-to-br from-navy/5 to-gold/5 overflow-hidden md:flex-row md:items-stretch lg:pr-10 lg:pt-10 lg:pb-10 transition-all duration-300 hover:shadow-2xl hover:border-gold hover:scale-[1.01]">
+                  <div className="relative w-full aspect-[4/5] flex-shrink-0 md:aspect-auto md:h-auto md:w-[22rem] md:min-w-[22rem]">
                     <img
                       src={teamMembers[0].imageUrl}
                       alt={teamMembers[0].name}
-                      className="h-full w-full object-contain object-bottom"
+                      className="absolute inset-0 h-full w-full object-cover object-top"
                     />
                   </div>
-                  <div className="flex-1 text-center md:text-left">
+                  <div className="flex-1 p-6 text-center md:p-0 md:text-left">
                     <div className="inline-block px-3 py-1 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-3">
                       Founder
                     </div>

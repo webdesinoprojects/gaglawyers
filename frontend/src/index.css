@@ -257,9 +257,16 @@
     }
 
     .hero-badge {
-      right: 20px;
-      bottom: 20px;
-      padding: 10px 14px;
+      right: 16px;
+      bottom: 16px;
+      padding: 8px 12px;
+      gap: 8px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero-badge {
+      display: none;
     }
   }
 }

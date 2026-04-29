@@ -194,14 +194,14 @@ const DynamicNavbar = () => {
                 className="h-7 w-auto md:h-9 lg:h-11"
               />
             </span>
-            <div className="flex min-w-0 flex-col items-center justify-center gap-0.5 text-center">
+            <div className="flex min-w-0 flex-col items-center justify-center gap-0.5">
               <span
-                className="truncate text-base font-bold leading-none tracking-tight text-white md:text-[22px] lg:text-[22px]"
+                className="whitespace-nowrap text-base font-bold leading-none tracking-tight text-white md:text-[22px] lg:text-[22px]"
                 style={{ fontFamily: '"Baskerville", "Times New Roman", Georgia, serif' }}
               >
                 Grover & Grover
               </span>
-              <span className="font-sans text-[11px] font-normal leading-none tracking-wide text-gold">
+              <span className="whitespace-nowrap font-sans text-[9px] font-normal leading-none tracking-widest text-gold md:text-[11px]">
                 Advocates and Solicitors
               </span>
             </div>

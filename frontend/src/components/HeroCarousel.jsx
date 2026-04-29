@@ -234,19 +234,19 @@ const HeroCarousel = ({
       <button
         type="button"
         onClick={prevSlide}
-        className="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-40 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-gold hover:border-gold hover:text-navy transition-all duration-200"
+        className="hidden sm:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-40 w-10 h-10 sm:w-12 sm:h-12 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-gold hover:border-gold hover:text-navy transition-all duration-200"
         aria-label="Previous slide"
       >
-        <ChevronLeft size={24} strokeWidth={2.5} />
+        <ChevronLeft size={22} strokeWidth={2.5} />
       </button>
 
       <button
         type="button"
         onClick={nextSlide}
-        className="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-40 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-gold hover:border-gold hover:text-navy transition-all duration-200"
+        className="hidden sm:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-40 w-10 h-10 sm:w-12 sm:h-12 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-gold hover:border-gold hover:text-navy transition-all duration-200"
         aria-label="Next slide"
       >
-        <ChevronRight size={24} strokeWidth={2.5} />
+        <ChevronRight size={22} strokeWidth={2.5} />
       </button>
 
       <div

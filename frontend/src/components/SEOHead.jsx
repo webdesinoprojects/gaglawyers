@@ -5,6 +5,8 @@ const SEOHead = ({
   title = 'GAG Lawyers - Grover & Grover Advocates',
   description = 'GAG Lawyers - Grover & Grover Advocates: Trusted legal experts for your every need. Your path to legal solutions starts here',
   keywords = 'lawyers, advocates, legal services, corporate law, civil litigation, delhi lawyers',
+  ogTitle = '',
+  ogDescription = '',
   ogImage = '',
   canonical = '',
   author = 'GAG Lawyers',
@@ -26,6 +28,8 @@ const SEOHead = ({
   const origin = configuredSiteUrl;
   const defaultOgImage = `${origin}/logo.png`;
   const finalOgImage = ogImage || defaultOgImage;
+  const finalOgTitle = ogTitle || title;
+  const finalOgDescription = ogDescription || description;
 
   // Base Organization Schema
   const organizationSchemaData = {
@@ -179,8 +183,8 @@ const SEOHead = ({
       <link rel="canonical" href={canonicalUrl} />
       
       {/* Open Graph Meta Tags */}
-      <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
+      <meta property="og:title" content={finalOgTitle} />
+      <meta property="og:description" content={finalOgDescription} />
       <meta property="og:type" content={type} />
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:image" content={finalOgImage} />
@@ -193,8 +197,8 @@ const SEOHead = ({
       
       {/* Twitter Card Meta Tags */}
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={title} />
-      <meta name="twitter:description" content={description} />
+      <meta name="twitter:title" content={finalOgTitle} />
+      <meta name="twitter:description" content={finalOgDescription} />
       <meta name="twitter:image" content={finalOgImage} />
       <meta name="twitter:site" content="@gaglawyers" />
       <meta name="twitter:creator" content="@gaglawyers" />
