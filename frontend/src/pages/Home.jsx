@@ -549,14 +549,8 @@ const Home = () => {
   return (
     <div>
       <SEOHead
-        title={
-          pageContent?.seo?.title ||
-          'GAG Lawyers - Grover & Grover Advocates'
-        }
-        description={
-          pageContent?.seo?.description ||
-          'GAG Lawyers - Grover & Grover Advocates: Trusted legal experts for your every need. Your path to legal solutions starts here'
-        }
+        title="GAG Lawyers - Grover & Grover Advocates"
+        description="GAG Lawyers - Grover & Grover Advocates: Trusted legal experts for your every need. Your path to legal solutions starts here"
         keywords={
           pageContent?.seo?.keywords ||
           'lawyers in delhi, advocates in india, corporate law firm, civil litigation, real estate lawyers, family law'
