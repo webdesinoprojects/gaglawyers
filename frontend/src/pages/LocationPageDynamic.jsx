@@ -90,29 +90,24 @@ const hasCityReference = (text, city) =>
 
 const withLocationQuestion = (question, city) => {
   if (!question) return `How does this legal process work in ${city}?`;
-  if (hasCityReference(question, city)) return question;
-  const trimmed = question.trim();
-  if (trimmed.endsWith('?')) return `${trimmed.slice(0, -1)} in ${city}?`;
-  return `${trimmed} in ${city}?`;
+  return question;
 };
 
 const withLocationAnswer = (answer, city) => {
   if (!answer) return `This depends on your facts, timeline, and court process in ${city}.`;
   if (hasCityReference(answer, city)) return answer;
-  return `${answer.trim()} This guidance is specifically relevant for matters in ${city}.`;
+  return answer.trim();
 };
 
 const withLocationHeading = (heading, city) => {
   const safeHeading = (heading || '').trim();
   if (!safeHeading) return `Legal Support in ${city}`;
-  if (hasCityReference(safeHeading, city)) return safeHeading;
-  return `${safeHeading} in ${city}`;
+  return safeHeading;
 };
 
 const withLocationBody = (body, city) => {
   if (!body || typeof body !== 'string') return body;
-  if (hasCityReference(body, city)) return body;
-  return `${body.trim()}\n\nThis section is tailored for legal matters in ${city}.`;
+  return body;
 };
 
 const localizeSectionForCity = (section, city) => {
@@ -287,10 +282,10 @@ const LocationPageDynamic = () => {
       `Get dedicated ${serviceName.toLowerCase()} support in ${city} with clear strategy and professional legal execution.`;
 
     const highlights = [
-      `${serviceName} support tailored for ${city}`,
-      `Structured case strategy and documentation workflow in ${city}`,
-      `Transparent timelines, updates, and practical guidance for clients in ${city}`,
-      `Court-ready representation by focused legal professionals serving ${city}`,
+      `${serviceName} support tailored to your case needs`,
+      'Structured case strategy and documentation workflow',
+      'Transparent timelines, updates, and practical legal guidance',
+      'Court-ready representation by focused legal professionals',
     ];
 
     const seo = pageData?.seo || {};
