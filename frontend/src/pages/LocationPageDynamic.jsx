@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { MapPin, Phone, Mail, ArrowRight, CheckCircle, ChevronRight, Scale, MessageCircleQuestion, Home, AlertCircle, Loader2 } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import SectionRenderer from '../components/sections/SectionRenderer';
@@ -153,6 +153,7 @@ const localizeSectionForCity = (section, city) => {
 
 const LocationPageDynamic = () => {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const [pageData, setPageData] = useState(null);
   const [serviceData, setServiceData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -178,6 +179,11 @@ const LocationPageDynamic = () => {
             setPageData(null);
             setServiceData(null);
           }
+          return;
+        }
+
+        if (pageJson.canonicalSlug && pageJson.canonicalSlug !== slug) {
+          navigate(`/${pageJson.canonicalSlug}`, { replace: true });
           return;
         }
 
@@ -231,7 +237,7 @@ const LocationPageDynamic = () => {
       mounted = false;
       controller.abort();
     };
-  }, [slug]);
+  }, [slug, navigate]);
 
   const template = useMemo(() => {
     if (!pageData) return null;

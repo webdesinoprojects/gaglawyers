@@ -19,7 +19,9 @@ export const generateSlug = (text) => {
 
 /**
  * Build canonical location page slug
- * Format: {service-slug}-in-{city-slug}
+ * Format:
+ * - if service ends with "-lawyer": {service-slug}-in-{city-slug}
+ * - otherwise: {service-slug}-lawyer-in-{city-slug}
  * @param {string} serviceSlug - Service slug
  * @param {string} cityDisplayName - City name
  * @returns {string} Location page slug
@@ -29,12 +31,15 @@ export const buildLocationPageSlug = (serviceSlug, cityDisplayName) => {
   const city = generateSlug(String(cityDisplayName || ''));
 
   if (!service || !city) return '';
-  return `${service}-in-${city}`;
+  const needsLawyerSuffix = !service.endsWith('lawyer');
+  return needsLawyerSuffix ? `${service}-lawyer-in-${city}` : `${service}-in-${city}`;
 };
 
 /**
  * Alias: Generate canonical location page slug
- * Format: {service-slug}-in-{city-slug}
+ * Format:
+ * - if service ends with "-lawyer": {service-slug}-in-{city-slug}
+ * - otherwise: {service-slug}-lawyer-in-{city-slug}
  */
 export const generateLocationSlug = (serviceSlug, cityDisplayName) =>
   buildLocationPageSlug(serviceSlug, cityDisplayName);

@@ -1,5 +1,6 @@
 const LocationPage = require('../models/LocationPage');
 const Service = require('../models/Service');
+const { buildLocationPageSlug } = require('../utils/slugify');
 
 const escapeRegExp = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const forceServiceTemplateMode = (payload = {}) => {
@@ -92,9 +93,24 @@ const getAllLocationPages = async (req, res) => {
 
 const getLocationPageBySlug = async (req, res) => {
   try {
-    const page = await LocationPage.findOne({ slug: req.params.slug, isActive: true })
+    const requestedSlug = String(req.params.slug || '').toLowerCase();
+    let page = await LocationPage.findOne({ slug: requestedSlug, isActive: true })
       .populate('service', 'name slug')
       .lean();
+
+    // Backward compatibility for legacy slug shapes (e.g. *-lawyer-lawyer-in-*)
+    if (!page) {
+      const legacyCandidates = [
+        requestedSlug.replace('-lawyer-lawyer-in-', '-lawyer-in-'),
+        requestedSlug.replace('-lawyer-in-', '-in-'),
+      ].filter((x) => x && x !== requestedSlug);
+
+      if (legacyCandidates.length > 0) {
+        page = await LocationPage.findOne({ slug: { $in: legacyCandidates }, isActive: true })
+          .populate('service', 'name slug')
+          .lean();
+      }
+    }
 
     if (!page || !page.service) {
       return res.status(404).json({
@@ -112,6 +128,7 @@ const getLocationPageBySlug = async (req, res) => {
 
     res.status(200).json({
       success: true,
+      canonicalSlug: buildLocationPageSlug(page.service.slug, page.city),
       data: page,
     });
   } catch (error) {

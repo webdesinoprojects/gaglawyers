@@ -311,6 +311,14 @@ const Footer = () => {
                     Book consultation
                   </a>
                 </li>
+                <li>
+                  <a
+                    href="/sitemap.xml"
+                    className="text-gray-300 hover:text-gold transition-all duration-200 hover:translate-x-1 inline-block"
+                  >
+                    Sitemap
+                  </a>
+                </li>
               </ul>
             </div>
 

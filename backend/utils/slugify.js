@@ -10,12 +10,16 @@ const generateSlug = (text) => {
     .replace(/-+$/, '');
 };
 
-/** Canonical location page URL: {service-slug}-lawyer-in-{city-slug} (all lowercase). */
+/** Canonical location page URL:
+ * - if service ends with "-lawyer": {service-slug}-in-{city-slug}
+ * - otherwise: {service-slug}-lawyer-in-{city-slug}
+ */
 const buildLocationPageSlug = (serviceSlug, cityDisplayName) => {
   const s = generateSlug(serviceSlug || '');
   const c = generateSlug(cityDisplayName || '');
   if (!s || !c) return '';
-  return `${s}-lawyer-in-${c}`;
+  const needsLawyerSuffix = !s.endsWith('-lawyer');
+  return needsLawyerSuffix ? `${s}-lawyer-in-${c}` : `${s}-in-${c}`;
 };
 
 const generateUniqueSlug = async (Model, baseSlug, excludeId = null) => {
