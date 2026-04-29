@@ -22,6 +22,14 @@ const toTitleCaseFromSlug = (value = '') =>
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ');
 
+const buildLocationSeoTitle = (serviceName, city) => {
+  const cleanService = String(serviceName || 'Legal Service').trim();
+  const cleanCity = String(city || 'Your City').trim();
+  const endsWithLawyer = /\blawyer\b$/i.test(cleanService);
+  const serviceForTitle = endsWithLawyer ? cleanService : `${cleanService} Lawyer`;
+  return `${serviceForTitle} in ${cleanCity} | GAG Lawyers`;
+};
+
 const deriveServiceSlug = (locationSlug = '', pageData = null) => {
   if (pageData?.service?.slug) return pageData.service.slug;
   const { serviceSlugPart } = parseServiceAndCityFromSlug(locationSlug);
@@ -327,12 +335,13 @@ const LocationPageDynamic = () => {
   const heroImage = images[0];
   const galleryImages = images.filter((img) => img.url);
   const pageTag = `${serviceName} in ${city}`;
+  const normalizedSeoTitle = buildLocationSeoTitle(serviceName, city);
 
   if (templateMode === 'service') {
     return (
       <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f7f8fb_0%,_#f1f3f7_45%,_#edf0f5_100%)]">
         <SEOHead
-          title={seo?.title || `${serviceName} in ${city} | GAG Lawyers`}
+          title={normalizedSeoTitle}
           description={seo?.description || `Expert ${serviceName.toLowerCase()} services in ${city}.`}
           keywords={seo?.keywords || `${serviceName}, ${city}, lawyers`}
         />
@@ -495,7 +504,7 @@ const LocationPageDynamic = () => {
   return (
     <div>
       <SEOHead
-        title={seo?.title || `${serviceName} in ${city} | GAG Lawyers`}
+        title={normalizedSeoTitle}
         description={seo?.description || `Expert ${serviceName.toLowerCase()} services in ${city}.`}
         keywords={seo?.keywords || `${serviceName}, ${city}, lawyers`}
       />
