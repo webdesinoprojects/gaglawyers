@@ -26,11 +26,9 @@ const Services = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [hoveredCard, setHoveredCard] = useState(null);
-  const [hoveredFeaturedServiceId, setHoveredFeaturedServiceId] = useState(null);
-  const [activeFeaturedIndex, setActiveFeaturedIndex] = useState(0);
+  const [isFeaturedCarouselPaused, setIsFeaturedCarouselPaused] = useState(false);
   const [scrollY, setScrollY] = useState(0);
-  const featuredCarouselRef = useRef(null);
-  const featuredCardRefs = useRef([]);
+  const featuredTrackRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -90,32 +88,10 @@ const Services = () => {
     return services.slice(0, 5);
   }, [services]);
 
-  useEffect(() => {
-    if (featuredServices.length <= 1) return undefined;
-
-    const interval = setInterval(() => {
-      setActiveFeaturedIndex((prev) => (prev + 1) % featuredServices.length);
-    }, 3000);
-
-    return () => clearInterval(interval);
+  const marqueeFeaturedServices = useMemo(() => {
+    if (featuredServices.length <= 1) return featuredServices;
+    return [...featuredServices, ...featuredServices];
   }, [featuredServices]);
-
-  useEffect(() => {
-    if (activeFeaturedIndex >= featuredServices.length) {
-      setActiveFeaturedIndex(0);
-    }
-  }, [activeFeaturedIndex, featuredServices.length]);
-
-  useEffect(() => {
-    const container = featuredCarouselRef.current;
-    const card = featuredCardRefs.current[activeFeaturedIndex];
-    if (!container || !card) return;
-
-    container.scrollTo({
-      left: card.offsetLeft,
-      behavior: 'smooth',
-    });
-  }, [activeFeaturedIndex]);
 
   const faqs = [
     {
@@ -414,25 +390,35 @@ const Services = () => {
               </div>
             </div>
 
-            <div
-              ref={featuredCarouselRef}
-              className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth pb-2"
-            >
-              {featuredServices.map((service) => (
+            <div className="overflow-hidden pb-2">
+              <div
+                ref={featuredTrackRef}
+                className={`featured-services-track flex gap-5 w-max ${
+                  isFeaturedCarouselPaused ? 'featured-services-track-paused' : ''
+                }`}
+              >
+              {marqueeFeaturedServices.map((service, index) => (
                 <article
-                  key={service.id}
-                  ref={(node) => {
-                    const index = featuredServices.findIndex((s) => s.id === service.id);
-                    featuredCardRefs.current[index] = node;
+                  key={`${service.id}-${index}`}
+                  className="group relative min-w-[76vw] sm:min-w-[320px] md:min-w-[340px] lg:min-w-[300px] max-w-[76vw] sm:max-w-[320px] md:max-w-[340px] lg:max-w-[300px] bg-white/10 border border-white/15 rounded-2xl overflow-hidden backdrop-blur-md shadow-xl flex flex-col h-[420px] sm:h-[430px] transition-transform duration-300 hover:scale-[1.03]"
+                  onMouseEnter={() => {
+                    setIsFeaturedCarouselPaused(true);
                   }}
-                  className={`group relative min-w-[260px] max-w-[260px] bg-white/10 border rounded-2xl overflow-hidden backdrop-blur-md shadow-xl flex flex-col h-[430px] transition-all duration-500 ${
-                    featuredServices[activeFeaturedIndex]?.id === service.id
-                      ? 'border-amber-300/90 ring-2 ring-amber-300/50 -translate-y-1 shadow-[0_18px_50px_rgba(245,158,11,0.35)]'
-                      : 'border-white/15 hover:border-amber-300/60 hover:-translate-y-1 hover:shadow-[0_16px_42px_rgba(15,23,42,0.45)]'
-                  }`}
-                  onMouseEnter={() => setHoveredFeaturedServiceId(service.id)}
-                  onFocus={() => setHoveredFeaturedServiceId(service.id)}
-                  onMouseLeave={() => setHoveredFeaturedServiceId(null)}
+                  onFocus={() => {
+                    setIsFeaturedCarouselPaused(true);
+                  }}
+                  onMouseLeave={() => {
+                    setIsFeaturedCarouselPaused(false);
+                  }}
+                  onBlur={() => {
+                    setIsFeaturedCarouselPaused(false);
+                  }}
+                  onTouchStart={() => {
+                    setIsFeaturedCarouselPaused(true);
+                  }}
+                  onTouchEnd={() => {
+                    setIsFeaturedCarouselPaused(false);
+                  }}
                 >
                   <img
                     src={service.cardImageUrl || FALLBACK_CARD_IMAGE}
@@ -447,36 +433,17 @@ const Services = () => {
                     <p className="text-sm text-slate-300 line-clamp-4">
                       {service.summary}
                     </p>
-                    <Link
-                      to={`/${service.slug}`}
-                      className={`mt-auto pt-4 inline-flex items-center gap-2 text-amber-300 font-semibold hover:text-amber-200 transition-all duration-300 ${
-                        hoveredFeaturedServiceId === service.id ? 'opacity-0 pointer-events-none' : 'opacity-100'
-                      }`}
-                    >
-                      View Service
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </div>
-
-                  <div
-                    className={`pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-900/85 to-slate-900/25 p-4 flex flex-col justify-end transition-all duration-400 ${
-                      hoveredFeaturedServiceId === service.id ? 'opacity-100' : 'opacity-0'
-                    }`}
-                  >
-                    <p className="text-xs uppercase tracking-[0.16em] text-amber-300 font-semibold mb-2">Featured Service</p>
-                    <h4 className="font-serif text-lg font-bold text-white line-clamp-2">{service.title}</h4>
-                    <p className="text-sm text-slate-200 mt-2 line-clamp-3">{service.summary}</p>
-                    <div className="mt-4 flex items-center gap-4">
+                    <div className="mt-auto pt-4 flex items-center gap-4">
                       <Link
                         to={`/${service.slug}`}
-                        className="pointer-events-auto inline-flex items-center gap-2 text-white font-semibold text-sm hover:text-amber-200 transition-colors"
+                        className="inline-flex items-center gap-2 text-amber-300 font-semibold hover:text-amber-200 transition-colors duration-300"
                       >
                         View Service
                         <ArrowRight className="h-4 w-4" />
                       </Link>
                       <Link
                         to="/contact"
-                        className="pointer-events-auto inline-flex items-center gap-2 text-amber-300 font-semibold text-sm hover:text-amber-200 transition-colors"
+                        className="inline-flex items-center gap-2 text-white font-semibold text-sm hover:text-amber-200 transition-colors"
                       >
                         Talk to Lawyer
                         <ArrowRight className="h-4 w-4" />
@@ -485,6 +452,7 @@ const Services = () => {
                   </div>
                 </article>
               ))}
+              </div>
             </div>
           </div>
         </section>
@@ -599,6 +567,38 @@ const Services = () => {
           </div>
         </div>
       </section>
+
+      <style>{`
+        .featured-services-track {
+          animation: featured-services-marquee 26s linear infinite;
+          will-change: transform;
+        }
+
+        .featured-services-track-paused {
+          animation-play-state: paused;
+        }
+
+        @keyframes featured-services-marquee {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+
+        @media (max-width: 640px) {
+          .featured-services-track {
+            animation-duration: 20s;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .featured-services-track {
+            animation: none;
+          }
+        }
+      `}</style>
     </div>
   );
 };

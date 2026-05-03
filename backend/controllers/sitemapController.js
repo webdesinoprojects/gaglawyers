@@ -65,8 +65,10 @@ const buildSitemapIndexXml = (entries) => {
 };
 
 const sendXml = (res, xml, maxAge = 3600) => {
-  res.header('Content-Type', 'application/xml');
-  res.header('Cache-Control', `public, max-age=${maxAge}`);
+  res.status(200);
+  res.set('Content-Type', 'application/xml; charset=utf-8');
+  res.set('X-Content-Type-Options', 'nosniff');
+  res.set('Cache-Control', `public, max-age=${maxAge}`);
   res.send(xml);
 };
 

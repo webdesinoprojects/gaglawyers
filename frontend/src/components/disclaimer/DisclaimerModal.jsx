@@ -116,6 +116,13 @@ export default function DisclaimerModal({ onAgree, onDecline }) {
           <div className="flex justify-end gap-3">
             <button
               type="button"
+              onClick={onDecline}
+              className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-8 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 w-full sm:w-auto"
+            >
+              I Decline
+            </button>
+            <button
+              type="button"
               onClick={onAgree}
               className="bg-navy hover:bg-navy-dark text-white px-8 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 w-full sm:w-auto shadow-md hover:shadow-lg"
             >

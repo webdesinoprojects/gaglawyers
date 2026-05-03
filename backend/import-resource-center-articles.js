@@ -102,15 +102,23 @@ const main = async () => {
 
     for (const article of deduped.values()) {
       const baseSlug = generateSlug(article.title);
-      const externalUrl = `https://www.gaglawyers.com/blogs/${baseSlug}`;
       const publishedAt = parseDate(article.dateStr);
       const category = pickCategory(article.title);
       const tags = buildTags(article.title);
-      const content = `<p>${article.excerpt}</p><p>Read full article on GAG Lawyers Resource Center.</p>`;
+      const content = [
+        `<h2>${article.title}</h2>`,
+        `<p>${article.excerpt}</p>`,
+        '<h3>Why This Topic Matters</h3>',
+        '<p>Understanding legal rights, procedures, and timelines early helps avoid avoidable disputes and compliance risks.</p>',
+        '<h3>Key Considerations</h3>',
+        '<ul><li>Applicable legal framework and forum.</li><li>Required records and supporting evidence.</li><li>Risk assessment and practical strategy.</li></ul>',
+        '<h3>Need Legal Guidance?</h3>',
+        '<p>Our team can help evaluate your facts and suggest the right legal approach.</p>',
+      ].join('');
 
       let post = await BlogPost.findOne({ title: article.title });
       if (!post) {
-        post = await BlogPost.findOne({ externalUrl });
+        post = await BlogPost.findOne({ slug: baseSlug });
       }
 
       if (!post) {
@@ -121,7 +129,7 @@ const main = async () => {
           contentType: 'article',
           excerpt: article.excerpt,
           content,
-          externalUrl,
+          externalUrl: '',
           author: author._id,
           category,
           tags,
@@ -139,7 +147,7 @@ const main = async () => {
         post.excerpt = article.excerpt;
         post.contentType = 'article';
         post.content = content;
-        post.externalUrl = externalUrl;
+        post.externalUrl = '';
         post.category = post.category || category;
         post.tags = Array.isArray(post.tags) && post.tags.length > 0 ? post.tags : tags;
         post.isPublished = true;

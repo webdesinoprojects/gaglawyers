@@ -121,6 +121,9 @@ const withLocationHeading = (heading, city, sectionType = '') => {
   if (!safeHeading) return `Legal Support in ${city}`;
   if (hasCityReference(safeHeading, city)) return safeHeading;
   if (/faq|frequently asked/i.test(safeHeading)) return safeHeading;
+  if (sectionType === 'hero') {
+    return `${safeHeading} in ${city}`;
+  }
   if (sectionType === 'benefits' || sectionType === 'process') {
     return `${safeHeading} in ${city}`;
   }
@@ -297,6 +300,7 @@ const LocationPageDynamic = () => {
       localizeText(pageData?.content?.heading, city) ||
       (templateMode === 'service' ? localizeText(heroSection?.heading, city) : '') ||
       `${serviceName} in ${city}`;
+    const normalizedHeading = ensureCityMention(heading, city);
 
     const intro =
       localizeText(pageData?.content?.intro, city) ||
@@ -311,7 +315,7 @@ const LocationPageDynamic = () => {
     ];
 
     const seo = pageData?.seo || {};
-    return { city, serviceName, heading, intro, sections, serviceStyledSections, images, highlights, seo, templateMode };
+    return { city, serviceName, heading: normalizedHeading, intro, sections, serviceStyledSections, images, highlights, seo, templateMode };
   }, [pageData, serviceData, slug]);
 
   if (loading) {
