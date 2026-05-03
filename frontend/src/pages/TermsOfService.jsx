@@ -89,7 +89,7 @@ const TermsOfService = () => {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-1.5 h-1.5 bg-gold rounded-full mt-2 flex-shrink-0"></span>
-                  <span className="font-sans text-gray-700">Reading our blog and legal resources</span>
+                  <span className="font-sans text-gray-700">Reading our articles and legal resources</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-1.5 h-1.5 bg-gold rounded-full mt-2 flex-shrink-0"></span>

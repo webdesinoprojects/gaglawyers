@@ -201,7 +201,7 @@ const DynamicNavbar = () => {
               >
                 Grover & Grover
               </span>
-              <span className="whitespace-nowrap font-sans text-[9px] font-normal leading-none tracking-widest text-gold md:text-[11px]">
+              <span className="w-full text-center whitespace-nowrap font-sans text-[8px] font-normal leading-none tracking-[0.16em] text-gold md:text-[9px]">
                 Advocates and Solicitors
               </span>
             </div>

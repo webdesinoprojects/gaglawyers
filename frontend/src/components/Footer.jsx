@@ -247,7 +247,7 @@ const Footer = () => {
                   <span className="text-[22px] font-bold text-white leading-none tracking-tight" style={{ fontFamily: '"Baskerville", "Times New Roman", Georgia, serif' }}>
                     Grover & Grover
                   </span>
-                  <span className="font-sans text-[11px] text-gold tracking-wide font-normal leading-none">
+                  <span className="w-full text-center font-sans text-[9px] text-gold tracking-[0.14em] font-normal leading-none">
                     Advocates and Solicitors
                   </span>
                 </div>
@@ -290,7 +290,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link to="/articles" className="text-gray-300 hover:text-gold transition-all duration-200 hover:translate-x-1 inline-block">
-                    Blog
+                    Articles
                   </Link>
                 </li>
                 <li>

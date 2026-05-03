@@ -96,6 +96,14 @@ const hasCityReference = (text, city) =>
   typeof text === 'string' &&
   new RegExp(`\\b${city.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(text);
 
+const ensureCityMention = (text, city, suffix = '') => {
+  if (typeof text !== 'string') return text;
+  const trimmed = text.trim();
+  if (!trimmed) return trimmed;
+  if (hasCityReference(trimmed, city)) return trimmed;
+  return suffix ? `${trimmed}${suffix}` : `${trimmed} in ${city}`;
+};
+
 const withLocationQuestion = (question, city) => {
   if (!question) return `How does this legal process work in ${city}?`;
   return question;
@@ -107,9 +115,15 @@ const withLocationAnswer = (answer, city) => {
   return answer.trim();
 };
 
-const withLocationHeading = (heading, city) => {
+const withLocationHeading = (heading, city, sectionType = '') => {
   const safeHeading = (heading || '').trim();
+  if (sectionType === 'faq') return safeHeading || 'Frequently Asked Questions';
   if (!safeHeading) return `Legal Support in ${city}`;
+  if (hasCityReference(safeHeading, city)) return safeHeading;
+  if (/faq|frequently asked/i.test(safeHeading)) return safeHeading;
+  if (sectionType === 'benefits' || sectionType === 'process') {
+    return `${safeHeading} in ${city}`;
+  }
   return safeHeading;
 };
 
@@ -121,7 +135,7 @@ const withLocationBody = (body, city) => {
 const localizeSectionForCity = (section, city) => {
   const next = {
     ...section,
-    heading: withLocationHeading(section?.heading, city),
+    heading: withLocationHeading(section?.heading, city, section?.type),
     content: { ...(section?.content || {}) },
   };
 
@@ -140,14 +154,14 @@ const localizeSectionForCity = (section, city) => {
   if (next.type === 'benefits' && Array.isArray(next.content.items)) {
     next.content.items = next.content.items.map((item) => ({
       ...item,
-      description: withLocationAnswer(item?.description, city),
+      description: ensureCityMention(withLocationAnswer(item?.description, city), city, ` in ${city}.`),
     }));
   }
 
   if (next.type === 'process' && Array.isArray(next.content.steps)) {
     next.content.steps = next.content.steps.map((step) => ({
       ...step,
-      description: withLocationAnswer(step?.description, city),
+      description: ensureCityMention(withLocationAnswer(step?.description, city), city, ` in ${city}.`),
     }));
   }
 
@@ -622,7 +636,7 @@ const LocationPageDynamic = () => {
             Get Expert {serviceName} Support in {city}
           </h2>
           <p className="font-sans text-lg text-gray-200 mb-10 max-w-2xl mx-auto">
-            Use the same proven service framework with location-specific execution and responsive legal support.
+            Use the same proven service framework with location-specific execution and responsive legal support for clients in {city}.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">

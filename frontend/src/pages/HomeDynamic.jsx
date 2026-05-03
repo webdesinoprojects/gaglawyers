@@ -163,15 +163,15 @@ const HomeDynamic = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
               {teamMembers[0] && (
-                <div className="lg:col-span-3 flex flex-col items-center rounded-2xl border border-navy/10 bg-gradient-to-br from-navy/5 to-gold/5 overflow-hidden md:flex-row md:items-stretch lg:pr-10 lg:pt-10 lg:pb-10 transition-all duration-300 hover:shadow-2xl hover:border-gold hover:scale-[1.01]">
-                  <div className="relative w-full aspect-[4/5] flex-shrink-0 md:aspect-auto md:h-auto md:w-[22rem] md:min-w-[22rem]">
+                <div className="lg:col-span-3 flex flex-col items-center rounded-2xl border border-navy/10 bg-gradient-to-br from-navy/5 to-gold/5 overflow-hidden md:flex-row md:items-stretch md:gap-8 lg:pr-10 lg:pt-10 lg:pb-10 transition-all duration-300 hover:shadow-2xl hover:border-gold hover:scale-[1.01]">
+                  <div className="relative w-full aspect-[4/5] flex-shrink-0 md:aspect-auto md:h-auto md:w-[22rem] md:min-w-[22rem] md:rounded-xl md:overflow-hidden md:border-r md:border-gray-200">
                     <img
                       src={teamMembers[0].imageUrl}
                       alt={teamMembers[0].name}
                       className="absolute inset-0 h-full w-full object-cover object-top"
                     />
                   </div>
-                  <div className="flex-1 p-6 text-center md:p-0 md:text-left">
+                  <div className="flex-1 p-6 text-center md:p-0 md:pr-2 md:text-left">
                     <div className="inline-block px-3 py-1 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-3">
                       Founder
                     </div>
@@ -241,7 +241,7 @@ const HomeDynamic = () => {
         </section>
       )}
 
-      {/* Latest Blog Posts Section */}
+      {/* Latest Articles Section */}
       {blogPosts.length > 0 && (
         <section className="bg-grey-light py-20 lg:py-24">
           <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -251,7 +251,7 @@ const HomeDynamic = () => {
                   Legal Insights
                 </span>
                 <h2 className="font-serif text-3xl lg:text-4xl font-bold text-navy mb-3">
-                  Latest from Our Blog
+                  Latest from Our Article
                 </h2>
                 <p className="font-sans text-lg text-gray-600 max-w-2xl">
                   Stay informed with expert legal insights, case studies, and industry updates

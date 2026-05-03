@@ -57,6 +57,8 @@ const normalizeInlineHtml = (value, fallback = '') => {
   return hasHtml ? raw : raw.replace(/\n/g, '<br />');
 };
 
+const replaceBlogWord = (value = '') => String(value).replace(/\bblog\b/gi, 'article');
+
 const Home = () => {
   const location = useLocation();
   const appointmentCaptchaRef = useRef(null);
@@ -154,7 +156,7 @@ const Home = () => {
         }
       })
       .catch((error) => {
-        console.error('Error fetching blog posts:', error);
+        console.error('Error fetching articles:', error);
       });
 
     const teamPromise = parseJson(`${API_BASE_URL}/api/team?limit=20`)
@@ -802,15 +804,15 @@ const Home = () => {
               </div>
 
               {teamMembers[0] && (
-                <div className="mb-14 flex flex-col items-center rounded-2xl border-l-4 border-gold bg-white shadow-xl overflow-hidden lg:flex-row lg:items-stretch lg:pr-10 lg:pt-10 lg:pb-10 transition-all duration-300 hover:shadow-2xl hover:border-gold hover:scale-[1.01]">
-                  <div className="relative w-full aspect-[4/5] flex-shrink-0 lg:aspect-auto lg:h-auto lg:w-[28rem] lg:min-w-[28rem]">
+                <div className="mb-14 flex flex-col items-center rounded-2xl border-l-4 border-gold bg-white shadow-xl overflow-hidden lg:flex-row lg:items-stretch lg:gap-8 lg:pr-10 lg:pt-10 lg:pb-10 transition-all duration-300 hover:shadow-2xl hover:border-gold hover:scale-[1.01]">
+                  <div className="relative w-full aspect-[4/5] flex-shrink-0 lg:aspect-auto lg:h-auto lg:w-[28rem] lg:min-w-[28rem] lg:rounded-xl lg:overflow-hidden lg:border-r lg:border-gray-200">
                     <img
                       src={teamMembers[0].imageUrl}
                       alt={teamMembers[0].name}
                       className="absolute inset-0 h-full w-full object-cover object-top"
                     />
                   </div>
-                  <div className="flex-1 p-6 text-center lg:p-0 lg:text-left">
+                  <div className="flex-1 p-6 text-center lg:p-0 lg:pr-2 lg:text-left">
                     <div className="inline-block px-3 py-1 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-3">
                       {home.teamSection.founderBadge}
                     </div>
@@ -1012,7 +1014,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Blog */}
+      {/* Articles */}
       {blogPosts.length > 0 && (
         <section id="articles" className="scroll-mt-[var(--site-header-height)] bg-[#F7F9FC] py-16 lg:py-24 border-t border-gold/20">
           <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -1026,16 +1028,16 @@ const Home = () => {
                     <div className="h-px w-12 bg-gold"></div>
                   </div>
                   <span className="inline-block px-4 py-1.5 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-4">
-                    {home.blogSection.eyebrow}
+                    {replaceBlogWord(home.blogSection.eyebrow)}
                   </span>
-                  <h2 className="font-serif text-4xl lg:text-5xl font-bold text-navy mb-4">{home.blogSection.title}</h2>
-                  <p className="font-sans text-base lg:text-lg text-gray-600 max-w-2xl">{home.blogSection.subtitle}</p>
+                  <h2 className="font-serif text-4xl lg:text-5xl font-bold text-navy mb-4">{replaceBlogWord(home.blogSection.title)}</h2>
+                  <p className="font-sans text-base lg:text-lg text-gray-600 max-w-2xl">{replaceBlogWord(home.blogSection.subtitle)}</p>
                 </div>
                 <Link
                   to="/articles"
                   className="hidden sm:inline-flex items-center gap-2 px-6 py-3 bg-gold text-navy font-sans font-semibold rounded-lg hover:brightness-110 transition-all shrink-0 shadow-lg shadow-gold/20"
                 >
-                  {home.blogSection.viewAllText}
+                  {replaceBlogWord(home.blogSection.viewAllText)}
                   <ArrowRight size={18} />
                 </Link>
               </div>
@@ -1120,7 +1122,7 @@ const Home = () => {
                   to="/articles"
                   className="inline-flex items-center gap-2 px-8 py-3 bg-gold text-navy font-sans font-semibold rounded-lg hover:brightness-110 transition-all shadow-lg shadow-gold/20"
                 >
-                  {home.blogSection.viewAllText}
+                  {replaceBlogWord(home.blogSection.viewAllText)}
                   <ArrowRight size={18} />
                 </Link>
               </div>

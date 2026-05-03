@@ -33,7 +33,7 @@ const Blog = () => {
 
       setPosts(allPosts);
     } catch (error) {
-      console.error('Error fetching blog posts:', error);
+      console.error('Error fetching articles:', error);
     } finally {
       setLoading(false);
     }
@@ -88,9 +88,9 @@ const Blog = () => {
   return (
     <div>
       <SEOHead 
-        title="Legal Insights & News | GAG Lawyers Blog"
+        title="Legal Insights & News | GAG Lawyers Articles"
         description="Stay informed with expert legal analysis, case updates, and insights on Indian law. Read articles on corporate law, litigation, real estate, family law, and more from GAG Lawyers."
-        keywords="legal blog, law articles, indian law updates, legal insights, corporate law news, litigation updates"
+        keywords="legal articles, law articles, indian law updates, legal insights, corporate law news, litigation updates"
         canonical="https://www.gaglawyers.com/articles"
       />
       

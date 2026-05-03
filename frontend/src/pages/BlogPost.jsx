@@ -96,7 +96,7 @@ const BlogPost = () => {
         }
       }
     } catch (error) {
-      console.error('Error fetching blog post:', error);
+      console.error('Error fetching article:', error);
     } finally {
       setLoading(false);
     }
@@ -139,7 +139,7 @@ const BlogPost = () => {
 
   const isNewsletterPost = post?.contentType === 'newsletter';
   const backListPath = isNewsletterPost ? '/newsletter' : '/articles';
-  const backListLabel = isNewsletterPost ? 'Back to Newsletter' : 'Back to Blog';
+  const backListLabel = isNewsletterPost ? 'Back to Newsletter' : 'Back to Articles';
   const exploreLabel = isNewsletterPost ? 'Explore More Newsletter Updates' : 'Explore More Articles';
   const canonicalPath = isNewsletterPost ? `/newsletter/${post?.slug || slug}` : `/articles/${post?.slug || slug}`;
 
@@ -177,9 +177,9 @@ const BlogPost = () => {
   return (
     <div className="bg-grey-light">
       <SEOHead 
-        title={`${post.title} | GAG Lawyers Blog`}
+        title={`${post.title} | GAG Lawyers Articles`}
         description={post.excerpt || post.content.substring(0, 160).replace(/<[^>]*>/g, '')}
-        keywords={post.tags?.join(', ') || 'legal blog, law articles'}
+        keywords={post.tags?.join(', ') || 'legal articles, law articles'}
         canonical={`https://www.gaglawyers.com${canonicalPath}`}
       />
 
@@ -492,7 +492,7 @@ const BlogPost = () => {
         </div>
       </article>
 
-      {/* Back to Blog CTA */}
+      {/* Back to Articles CTA */}
       <section className="bg-white py-12 border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <Link
