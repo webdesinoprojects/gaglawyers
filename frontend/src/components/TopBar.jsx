@@ -5,12 +5,63 @@ const TopBar = () => {
   return (
     <div className="bg-navy-dark text-white border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row justify-between items-center py-2.5 gap-3 sm:gap-0">
+        <div className="flex items-center justify-between py-2 gap-3 sm:py-2.5">
           {/* Left - Contact Info */}
-          <div className="flex flex-wrap items-center gap-4 lg:gap-6 text-xs lg:text-sm">
+          <div className="topbar-ticker sm:hidden">
+            <div className="topbar-ticker-track">
+              <div className="topbar-ticker-group">
+                <a
+                  href="tel:+919996263370"
+                  className="flex shrink-0 items-center gap-1.5 text-gray-300 transition-all duration-200 hover:text-gold"
+                >
+                  <Phone size={14} strokeWidth={2} />
+                  <span className="font-sans font-medium">+91-9996263370</span>
+                </a>
+                <a
+                  href="tel:+911161381058"
+                  className="flex shrink-0 items-center gap-1.5 text-gray-300 transition-all duration-200 hover:text-gold"
+                >
+                  <Phone size={14} strokeWidth={2} />
+                  <span className="font-sans font-medium">+91-1161381058</span>
+                </a>
+                <a
+                  href="mailto:contact@gaglawyers.com"
+                  className="flex shrink-0 items-center gap-1.5 text-gray-300 transition-all duration-200 hover:text-gold"
+                >
+                  <Mail size={14} strokeWidth={2} />
+                  <span className="font-sans font-medium">contact@gaglawyers.com</span>
+                </a>
+              </div>
+              <div className="topbar-ticker-group" aria-hidden="true">
+                <a
+                  href="tel:+919996263370"
+                  className="flex shrink-0 items-center gap-1.5 text-gray-300 transition-all duration-200 hover:text-gold"
+                >
+                  <Phone size={14} strokeWidth={2} />
+                  <span className="font-sans font-medium">+91-9996263370</span>
+                </a>
+                <a
+                  href="tel:+911161381058"
+                  className="flex shrink-0 items-center gap-1.5 text-gray-300 transition-all duration-200 hover:text-gold"
+                >
+                  <Phone size={14} strokeWidth={2} />
+                  <span className="font-sans font-medium">+91-1161381058</span>
+                </a>
+                <a
+                  href="mailto:contact@gaglawyers.com"
+                  className="flex shrink-0 items-center gap-1.5 text-gray-300 transition-all duration-200 hover:text-gold"
+                >
+                  <Mail size={14} strokeWidth={2} />
+                  <span className="font-sans font-medium">contact@gaglawyers.com</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="hidden min-w-0 flex-1 items-center gap-3 overflow-x-auto whitespace-nowrap text-[11px] sm:flex sm:w-auto sm:flex-wrap sm:gap-4 sm:text-xs lg:gap-6 lg:text-sm">
             <a 
               href="tel:+919996263370" 
-              className="flex items-center gap-2 text-gray-300 hover:text-gold transition-colors duration-200"
+              className="flex shrink-0 items-center gap-1.5 text-gray-300 transition-all duration-200 hover:-translate-y-0.5 hover:text-gold"
             >
               <Phone size={14} strokeWidth={2} />
               <span className="font-sans font-medium">+91-9996263370</span>
@@ -20,7 +71,7 @@ const TopBar = () => {
             
             <a 
               href="tel:+911161381058" 
-              className="flex items-center gap-2 text-gray-300 hover:text-gold transition-colors duration-200"
+              className="flex shrink-0 items-center gap-1.5 text-gray-300 transition-all duration-200 hover:-translate-y-0.5 hover:text-gold"
             >
               <Phone size={14} strokeWidth={2} />
               <span className="font-sans font-medium">+91-1161381058</span>
@@ -30,7 +81,7 @@ const TopBar = () => {
             
             <a 
               href="mailto:contact@gaglawyers.com" 
-              className="flex items-center gap-2 text-gray-300 hover:text-gold transition-colors duration-200"
+              className="flex shrink-0 items-center gap-1.5 text-gray-300 transition-all duration-200 hover:-translate-y-0.5 hover:text-gold"
             >
               <Mail size={14} strokeWidth={2} />
               <span className="font-sans font-medium">contact@gaglawyers.com</span>
@@ -38,7 +89,7 @@ const TopBar = () => {
           </div>
 
           {/* Right - Social Media */}
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-2.5 sm:gap-3">
             <a
               href="https://facebook.com/gaglawyers"
               target="_blank"
