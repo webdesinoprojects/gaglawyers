@@ -7,7 +7,7 @@ const Service = require('../models/Service');
 const BlogPost = require('../models/BlogPost');
 const LocationPage = require('../models/LocationPage');
 
-const DOMAIN = 'https://www.raagconsultants.co.in';
+const DOMAIN = 'https://www.gaglawyers.com';
 const PUBLIC_DIR = path.resolve(__dirname, '../../frontend/public');
 
 const STATIC_ROUTES = [
