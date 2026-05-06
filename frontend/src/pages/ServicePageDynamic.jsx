@@ -103,6 +103,15 @@ const ServicePageDynamic = () => {
           };
         }
 
+        if (section.type === 'faq' && section.content && typeof section.content === 'object') {
+          const existingItems = Array.isArray(section.content.items) ? section.content.items : [];
+          const fallbackFaqs = Array.isArray(section.content.faqs) ? section.content.faqs : [];
+          nextSection.content = {
+            ...section.content,
+            items: existingItems.length > 0 ? existingItems : fallbackFaqs,
+          };
+        }
+
         return nextSection;
       })
     : [];
