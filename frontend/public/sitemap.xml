@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-    <loc>/pages-sitemap.xml</loc>
-    <lastmod>2026-04-29T00:00:00.000Z</lastmod>
+    <loc>https://www.raagconsultants.co.in/pages-sitemap.xml</loc>
+    <lastmod>2026-05-06T13:21:58.559Z</lastmod>
   </sitemap>
   <sitemap>
-    <loc>/services.xml</loc>
-    <lastmod>2026-04-29T00:00:00.000Z</lastmod>
+    <loc>https://www.raagconsultants.co.in/services-sitemap.xml</loc>
+    <lastmod>2026-05-06T13:21:58.559Z</lastmod>
   </sitemap>
   <sitemap>
-    <loc>/blogs.xml</loc>
-    <lastmod>2026-04-29T00:00:00.000Z</lastmod>
+    <loc>https://www.raagconsultants.co.in/articles-sitemap.xml</loc>
+    <lastmod>2026-05-06T13:21:58.559Z</lastmod>
   </sitemap>
   <sitemap>
-    <loc>/locations.xml</loc>
-    <lastmod>2026-04-29T00:00:00.000Z</lastmod>
+    <loc>https://www.raagconsultants.co.in/newsletters-sitemap.xml</loc>
+    <lastmod>2026-05-06T13:21:58.559Z</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://www.raagconsultants.co.in/locations-sitemap.xml</loc>
+    <lastmod>2026-05-06T13:21:58.559Z</lastmod>
   </sitemap>
 </sitemapindex>
