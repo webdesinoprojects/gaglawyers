@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Phone } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import API_BASE_URL from '../config/api';
@@ -23,6 +23,7 @@ const parseSettingBoolean = (value, fallback = false) => {
 
 const FloatingWidgets = () => {
   const location = useLocation();
+  const stableTitleRef = useRef(typeof document !== 'undefined' ? document.title : '');
   const [settings, setSettings] = useState({
     whatsappEnabled: false,
     whatsappNumber: '',
@@ -302,6 +303,34 @@ const FloatingWidgets = () => {
     resolvedTawkPropertyId,
     resolvedTawkWidgetId,
   ]);
+
+  useEffect(() => {
+    if (!hasTawkConfig || isAdminPanel) return undefined;
+
+    const newMessageTitlePattern = /^\s*(\(?\d+\)?\s*)?new message/i;
+    const titleElement = document.querySelector('title');
+    if (!titleElement) return undefined;
+
+    stableTitleRef.current = document.title;
+
+    const observer = new MutationObserver(() => {
+      const currentTitle = document.title || '';
+
+      if (newMessageTitlePattern.test(currentTitle)) {
+        document.title = stableTitleRef.current;
+        return;
+      }
+
+      // Keep track of the latest valid title set by SEO/route changes.
+      stableTitleRef.current = currentTitle;
+    });
+
+    observer.observe(titleElement, { childList: true, subtree: true, characterData: true });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasTawkConfig, isAdminPanel, location.pathname]);
 
   const handleWhatsAppClick = () => {
     if (settings.whatsappNumber) {
