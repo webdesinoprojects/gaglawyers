@@ -49,7 +49,7 @@ const buildKeywords = (serviceName) => {
 
 const buildTitle = (serviceName) => `${toKeywordBase(serviceName)} - GAG Lawyers`;
 const buildMetaDescription = (serviceName) =>
-  `${toKeywordBase(serviceName)} in Delhi - GAG Lawyers. We offer expert legal guidance and personalized attention to meet your specific legal needs in Delhi. Our dedicated team of experienced attorneys is committed to delivering exceptional and effective legal services to individuals, businesses, and corporations`;
+  `${toKeywordBase(serviceName)} - GAG Lawyers. We offer expert legal guidance and personalized attention to meet your specific legal needs. Our dedicated team of experienced attorneys is committed to delivering exceptional and effective legal services to individuals, businesses, and corporations`;
 
 async function main() {
   if (!process.env.MONGO_URI) {
