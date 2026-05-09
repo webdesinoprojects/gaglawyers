@@ -58,6 +58,32 @@ const localizeObject = (input, city) => {
   return input;
 };
 
+const escapeRegExp = (value = '') => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const stripInLocationFromText = (value, city) => {
+  if (typeof value !== 'string') return value;
+  const safeCity = escapeRegExp(city);
+  // Remove "in <city>" when used in content body text (keep headings handled separately).
+  return value
+    .replace(new RegExp(`\\s+in\\s+${safeCity}(?=[\\s,.!?;:]|$)`, 'gi'), '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+([,.!?;:])/g, '$1')
+    .trim();
+};
+
+const stripInLocationFromContent = (input, city) => {
+  if (typeof input === 'string') return stripInLocationFromText(input, city);
+  if (Array.isArray(input)) return input.map((item) => stripInLocationFromContent(item, city));
+  if (input && typeof input === 'object') {
+    const output = {};
+    Object.entries(input).forEach(([key, value]) => {
+      output[key] = stripInLocationFromContent(value, city);
+    });
+    return output;
+  }
+  return input;
+};
+
 const parseBody = (text) => {
   if (!text || typeof text !== 'string') return { paragraphs: [], bullets: [] };
   const cleaned = text.replace(/\r/g, '').trim();
@@ -110,7 +136,7 @@ const withLocationQuestion = (question, city) => {
 };
 
 const withLocationAnswer = (answer, city) => {
-  if (!answer) return `This depends on your facts, timeline, and court process in ${city}.`;
+  if (!answer) return 'This depends on your facts, timeline, and court process.';
   if (hasCityReference(answer, city)) return answer;
   return answer.trim();
 };
@@ -139,7 +165,7 @@ const localizeSectionForCity = (section, city) => {
   const next = {
     ...section,
     heading: withLocationHeading(section?.heading, city, section?.type),
-    content: { ...(section?.content || {}) },
+    content: stripInLocationFromContent({ ...(section?.content || {}) }, city),
   };
 
   if (next.type === 'overview' && typeof next.content.body === 'string') {
@@ -151,20 +177,6 @@ const localizeSectionForCity = (section, city) => {
       ...item,
       question: withLocationQuestion(item?.question, city),
       answer: withLocationAnswer(item?.answer, city),
-    }));
-  }
-
-  if (next.type === 'benefits' && Array.isArray(next.content.items)) {
-    next.content.items = next.content.items.map((item) => ({
-      ...item,
-      description: ensureCityMention(withLocationAnswer(item?.description, city), city, ` in ${city}.`),
-    }));
-  }
-
-  if (next.type === 'process' && Array.isArray(next.content.steps)) {
-    next.content.steps = next.content.steps.map((step) => ({
-      ...step,
-      description: ensureCityMention(withLocationAnswer(step?.description, city), city, ` in ${city}.`),
     }));
   }
 
