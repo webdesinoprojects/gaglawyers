@@ -73,21 +73,15 @@ const ServicePageDynamic = () => {
 
   const displayServiceName = stripDelhiSuffix(service?.name || '');
   const seoTitle = stripDelhiSuffix(
-    service?.seo?.title || `${displayServiceName || service?.name} | Grover & Grover Advocates`
+    service?.seo?.title || `${displayServiceName || service?.name} - GAG Lawyers`
   );
   const seoDescription =
     service?.seo?.metaDescription ||
     service?.seo?.description ||
-    `Get reliable legal support from Grover & Grover Advocates for ${displayServiceName.toLowerCase() || 'legal matters'}.`;
+    `Get reliable legal support from GAG Lawyers for ${displayServiceName.toLowerCase() || 'legal matters'}.`;
   const seoKeywords =
     service?.seo?.keywords ||
-    `${displayServiceName || service?.name}, ${displayServiceName || service?.name} lawyer, legal services, Grover and Grover Advocates`;
-  const finalSeoTitle = seoTitle;
-  const finalSeoDescription = seoDescription;
-  const finalSeoKeywords = seoKeywords;
-  const finalOgTitle = finalSeoTitle;
-  const finalOgDescription = finalSeoDescription;
-  const finalCanonical = '';
+    `${displayServiceName || service?.name}, ${displayServiceName || service?.name} lawyer, legal services, GAG Lawyers`;
 
   const displaySections = Array.isArray(service?.sections)
     ? service.sections.map((section) => {
@@ -119,12 +113,9 @@ const ServicePageDynamic = () => {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f7f8fb_0%,_#f1f3f7_45%,_#edf0f5_100%)]">
       <SEOHead
-        title={finalSeoTitle}
-        description={finalSeoDescription}
-        keywords={finalSeoKeywords}
-        ogTitle={finalOgTitle}
-        ogDescription={finalOgDescription}
-        canonical={finalCanonical}
+        title={seoTitle}
+        description={seoDescription}
+        keywords={seoKeywords}
       />
 
       {/* Breadcrumb */}

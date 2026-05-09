@@ -422,7 +422,6 @@ const Contact = () => {
                         name="serviceOfInterest"
                         value={formData.serviceOfInterest}
                         onChange={handleChange}
-                        required
                         className={`${inputClass} cursor-pointer pr-11 appearance-none`}
                       >
                         <option value="" className="bg-white text-slate-500">

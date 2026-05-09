@@ -484,13 +484,12 @@ const Home = () => {
           </div>
           <div>
             <label className="block font-sans text-xs font-medium text-gray-700 mb-1">
-              Practice area *
+              Practice area
             </label>
             <select
               name="service"
               value={appointmentForm.service}
               onChange={handleAppointmentChange}
-              required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
             >
               <option value="">{cf.placeholders?.service || 'Select a service'}</option>
