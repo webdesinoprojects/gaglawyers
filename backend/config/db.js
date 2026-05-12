@@ -41,8 +41,14 @@ const connectDB = async () => {
 
   try {
     mongoose.set('strictQuery', false);
-    mongoose.set('bufferCommands', false);
-    mongoose.set('bufferTimeoutMS', 0);
+    // Enable buffer commands in production to handle serverless cold starts
+    if (process.env.NODE_ENV === 'production') {
+      mongoose.set('bufferCommands', true);
+      mongoose.set('bufferTimeoutMS', 30000); // 30 second timeout
+    } else {
+      mongoose.set('bufferCommands', false);
+      mongoose.set('bufferTimeoutMS', 0);
+    }
     bindConnectionListeners();
 
     connectPromise = mongoose.connect(process.env.MONGO_URI, {

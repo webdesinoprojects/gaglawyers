@@ -143,14 +143,8 @@ const getStaticSitemapEntries = async (req) => {
 const generateSitemap = async (req, res) => {
   try {
     // Ensure database connection is ready
-    const mongooseState = require('mongoose').connection.readyState;
-    if (mongooseState !== 1) {
-      return res.status(503).json({
-        success: false,
-        message: 'Database connection not ready',
-        error: 'Database is still connecting. Please try again in a moment.',
-      });
-    }
+    const connectDB = require('../config/db');
+    await connectDB();
 
     const baseUrl = getBaseUrl(req);
     
@@ -204,14 +198,8 @@ const generateSitemap = async (req, res) => {
 const generateNamedSitemap = async (req, res) => {
   try {
     // Ensure database connection is ready
-    const mongooseState = require('mongoose').connection.readyState;
-    if (mongooseState !== 1) {
-      return res.status(503).json({
-        success: false,
-        message: 'Database connection not ready',
-        error: 'Database is still connecting. Please try again in a moment.',
-      });
-    }
+    const connectDB = require('../config/db');
+    await connectDB();
 
     const name = String(req.params.name || '').toLowerCase();
     let entries = [];
