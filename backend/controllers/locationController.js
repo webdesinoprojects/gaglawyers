@@ -1,6 +1,7 @@
 const LocationPage = require('../models/LocationPage');
 const Service = require('../models/Service');
 const { buildLocationPageSlug } = require('../utils/slugify');
+const { scheduleSitemapRegeneration } = require('../utils/sitemapRegen');
 
 const escapeRegExp = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const forceServiceTemplateMode = (payload = {}) => {
@@ -222,6 +223,7 @@ const createLocationPage = async (req, res) => {
       success: true,
       data: page,
     });
+    scheduleSitemapRegeneration('location:create');
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -258,6 +260,7 @@ const updateLocationPage = async (req, res) => {
       success: true,
       data: page,
     });
+    scheduleSitemapRegeneration('location:update');
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -285,6 +288,7 @@ const toggleLocationPage = async (req, res) => {
       success: true,
       data: page,
     });
+    scheduleSitemapRegeneration('location:toggle');
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -309,6 +313,7 @@ const deleteLocationPage = async (req, res) => {
       success: true,
       message: 'Page deleted',
     });
+    scheduleSitemapRegeneration('location:delete');
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -339,6 +344,7 @@ const bulkToggleLocationPages = async (req, res) => {
       message: `${result.modifiedCount} pages updated`,
       modifiedCount: result.modifiedCount,
     });
+    scheduleSitemapRegeneration('location:bulk-toggle');
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -388,6 +394,7 @@ const bulkCreateLocationPages = async (req, res) => {
       count: createdPages.length,
       data: createdPages,
     });
+    scheduleSitemapRegeneration('location:bulk-create');
   } catch (error) {
     if (error.code === 11000) {
       res.status(400).json({

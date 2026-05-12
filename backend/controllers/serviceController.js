@@ -3,6 +3,7 @@ const ServiceSection = require('../models/ServiceSection');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const { generateSlug, generateUniqueSlug } = require('../utils/slugify');
+const { scheduleSitemapRegeneration } = require('../utils/sitemapRegen');
 
 /**
  * @route   GET /api/services
@@ -78,6 +79,7 @@ const createService = async (req, res) => {
       message: 'Service created successfully',
       data: service,
     });
+    scheduleSitemapRegeneration('service:create');
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -221,6 +223,7 @@ const updateService = async (req, res) => {
         sections: updatedSections,
       },
     });
+    scheduleSitemapRegeneration('service:update');
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -357,6 +360,7 @@ const deleteService = async (req, res) => {
         name: service.name,
       },
     });
+    scheduleSitemapRegeneration('service:delete');
   } catch (error) {
     res.status(500).json({
       success: false,

@@ -45,7 +45,9 @@ const connectDB = async () => {
     // This allows Mongoose to queue commands while connecting instead of throwing errors
     const isServerless = process.env.VERCEL || process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME;
     mongoose.set('bufferCommands', true);
-    mongoose.set('bufferTimeoutMS', isServerless ? 30000 : 10000);
+    // Production (especially VPS + remote Mongo) can exceed 10s on cold starts.
+    // Keep this high so the first request doesn't fail while connecting.
+    mongoose.set('bufferTimeoutMS', (process.env.NODE_ENV === 'production' || isServerless) ? 30000 : 10000);
     bindConnectionListeners();
 
     connectPromise = mongoose.connect(process.env.MONGO_URI, {

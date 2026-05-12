@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "generate:sitemap": "node scripts/generateSitemap.js",
     "seed": "node seed.js",
     "seed-25-services": "node seed-25-services.js",
     "sync-website-56-services": "node sync-website-56-services.js",
@@ -60,6 +61,7 @@
     "mongoose": "^9.3.3",
     "multer": "^2.1.1",
     "multer-storage-cloudinary": "^4.0.0",
+    "sitemap": "^8.0.0",
     "nodemailer": "^8.0.4"
   },
   "devDependencies": {

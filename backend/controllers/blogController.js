@@ -1,6 +1,7 @@
 const BlogPost = require('../models/BlogPost');
 const cloudinary = require('../config/cloudinary');
 const { generateSlug, generateUniqueSlug } = require('../utils/slugify');
+const { scheduleSitemapRegeneration } = require('../utils/sitemapRegen');
 
 const escapeRegExp = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -124,6 +125,7 @@ const createPost = async (req, res) => {
       success: true,
       data: post,
     });
+    scheduleSitemapRegeneration('blog:create');
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -195,6 +197,7 @@ const updatePost = async (req, res) => {
       success: true,
       data: post,
     });
+    scheduleSitemapRegeneration('blog:update');
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -229,6 +232,7 @@ const deletePost = async (req, res) => {
       success: true,
       message: 'Post deleted',
     });
+    scheduleSitemapRegeneration('blog:delete');
   } catch (error) {
     res.status(500).json({
       success: false,
