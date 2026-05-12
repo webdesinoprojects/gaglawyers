@@ -142,10 +142,6 @@ const getStaticSitemapEntries = async (req) => {
 
 const generateSitemap = async (req, res) => {
   try {
-    // Ensure database connection is ready
-    const connectDB = require('../config/db');
-    await connectDB();
-
     const baseUrl = getBaseUrl(req);
     
     // Count total location pages to determine how many sitemap files we need
@@ -197,10 +193,6 @@ const generateSitemap = async (req, res) => {
 
 const generateNamedSitemap = async (req, res) => {
   try {
-    // Ensure database connection is ready
-    const connectDB = require('../config/db');
-    await connectDB();
-
     const name = String(req.params.name || '').toLowerCase();
     let entries = [];
 
