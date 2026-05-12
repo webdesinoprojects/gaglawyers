@@ -32,11 +32,8 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const app = express();
 
-// For local development, ensure database connection
-// On Vercel, api/index.js handles the connection
-if (process.env.NODE_ENV !== 'production') {
-  connectDB().catch(console.error);
-}
+// Connect to database at startup (all environments)
+connectDB().catch(console.error);
 
 const allowedOrigins = [
   'http://localhost:5173',
