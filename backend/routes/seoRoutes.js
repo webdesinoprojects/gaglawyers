@@ -16,8 +16,14 @@ router.get('/blogs.xml', (req, res, next) => {
   req.params.name = 'blogs';
   return generateNamedSitemap(req, res, next);
 });
+// Support paginated location sitemaps: locations-1.xml, locations-2.xml, etc.
+router.get('/locations-:page.xml', (req, res, next) => {
+  req.params.name = `locations-${req.params.page}`;
+  return generateNamedSitemap(req, res, next);
+});
+// Legacy support for single locations.xml (redirects to locations-1.xml)
 router.get('/locations.xml', (req, res, next) => {
-  req.params.name = 'locations';
+  req.params.name = 'locations-1';
   return generateNamedSitemap(req, res, next);
 });
 router.get('/robots.txt', generateRobotsTxt);
