@@ -108,7 +108,7 @@ const getBlogsSitemapEntries = async (req) => {
 const getLocationsSitemapEntries = async (req) => {
   const baseUrl = getBaseUrl(req);
   const page = parseInt(req.query.page || '1', 10);
-  const limit = 10000; // 10,000 URLs per sitemap (well under 50,000 limit)
+  const limit = 12000; // ~12,000 URLs per sitemap (creates ~5 files for 58k locations)
   const skip = (page - 1) * limit;
   
   const locationPages = await LocationPage.find({ isActive: true, slug: { $exists: true, $ne: '' } })
@@ -146,7 +146,7 @@ const generateSitemap = async (req, res) => {
     
     // Count total location pages to determine how many sitemap files we need
     const totalLocations = await LocationPage.countDocuments({ isActive: true });
-    const locationsPerSitemap = 10000;
+    const locationsPerSitemap = 12000; // ~12,000 URLs per file for easier crawling
     const numLocationSitemaps = Math.ceil(totalLocations / locationsPerSitemap);
     
     // Get actual last modification dates from database
