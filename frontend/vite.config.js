@@ -15,6 +15,8 @@ export default defineConfig(({ mode }) => {
         '/services.xml': apiTarget,
         '/blogs.xml': apiTarget,
         '/locations.xml': apiTarget,
+        '/locations-sitemap.xml': apiTarget,
+        '/locations-': apiTarget, // Matches /locations-1.xml, /locations-2.xml, etc.
         '/robots.txt': apiTarget,
       },
     },

@@ -1,24 +1,27 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-    <loc>https://www.gaglawyers.com/pages-sitemap.xml</loc>
-    <lastmod>2026-05-06T13:26:45.334Z</lastmod>
+    <loc>https://gaglawyers.com/pages-sitemap.xml</loc>
+    <lastmod>2026-05-12T02:45:26.829Z</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://www.gaglawyers.com/services-sitemap.xml</loc>
-    <lastmod>2026-05-06T13:26:45.334Z</lastmod>
+    <loc>https://gaglawyers.com/services-sitemap.xml</loc>
+    <lastmod>2026-05-12T02:44:26.829Z</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://www.gaglawyers.com/articles-sitemap.xml</loc>
-    <lastmod>2026-05-06T13:26:45.334Z</lastmod>
+    <loc>https://gaglawyers.com/articles-sitemap.xml</loc>
+    <lastmod>2026-05-12T02:43:26.829Z</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://www.gaglawyers.com/newsletters-sitemap.xml</loc>
-    <lastmod>2026-05-06T13:26:45.334Z</lastmod>
+    <loc>https://gaglawyers.com/newsletters-sitemap.xml</loc>
+    <lastmod>2026-05-12T02:42:26.829Z</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://www.gaglawyers.com/locations-sitemap.xml</loc>
-    <lastmod>2026-05-06T13:26:45.334Z</lastmod>
+    <loc>https://gaglawyers.com/locations-1.xml</loc>
+    <lastmod>2026-05-12T02:44:26.829Z</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://gaglawyers.com/locations-2.xml</loc>
+    <lastmod>2026-05-12T02:43:26.829Z</lastmod>
   </sitemap>
 </sitemapindex>
-

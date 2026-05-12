@@ -26,6 +26,11 @@ router.get('/locations.xml', (req, res, next) => {
   req.params.name = 'locations-1';
   return generateNamedSitemap(req, res, next);
 });
+// Support for locations-sitemap.xml (same as locations.xml)
+router.get('/locations-sitemap.xml', (req, res, next) => {
+  req.params.name = 'locations-1';
+  return generateNamedSitemap(req, res, next);
+});
 router.get('/robots.txt', generateRobotsTxt);
 
 module.exports = router;
