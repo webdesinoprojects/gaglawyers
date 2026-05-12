@@ -139,7 +139,8 @@ async function main() {
     priority: 0.7,
   }));
 
-  const locationsPerSitemap = 12000;
+  // Smaller chunks = faster per-file loads for crawlers and nginx (fewer URLs per XML).
+  const locationsPerSitemap = 2000;
   const totalLocations = await LocationPage.countDocuments({
     isActive: true,
     slug: { $exists: true, $ne: '' },
