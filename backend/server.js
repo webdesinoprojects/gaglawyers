@@ -32,9 +32,8 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const app = express();
 
-if (process.env.NODE_ENV !== 'production') {
-  connectDB().catch(console.error);
-}
+// Connect to database (both dev and production)
+connectDB().catch(console.error);
 
 const allowedOrigins = [
   'http://localhost:5173',
