@@ -21,7 +21,8 @@ const SEOHead = ({
   robots = 'index, follow',
   language = 'en',
 }) => {
-  const configuredSiteUrl = (import.meta.env.VITE_SITE_URL || 'https://www.gaglawyers.com').replace(/\/+$/, '');
+  const rawSite = (import.meta.env.VITE_SITE_URL || 'https://gaglawyers.com').replace(/\/+$/, '');
+  const configuredSiteUrl = rawSite.replace(/^https:\/\/www\.(?=gaglawyers\.com)/i, 'https://');
   const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/';
   const currentFullUrl = `${configuredSiteUrl}${currentPath}`;
   const canonicalUrl = (canonical || currentFullUrl).split('#')[0];

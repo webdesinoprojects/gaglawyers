@@ -29,7 +29,7 @@ const env = {
 };
 
 const API_BASE_URL = env.VITE_API_URL || process.env.VITE_API_URL || '';
-const SITE_URL = (env.VITE_SITE_URL || process.env.VITE_SITE_URL || 'https://www.gaglawyers.com').replace(/\/+$/, '');
+const SITE_URL = (env.VITE_SITE_URL || process.env.VITE_SITE_URL || 'https://gaglawyers.com').replace(/\/+$/, '');
 
 const escapeHtml = (value = '') =>
   String(value)

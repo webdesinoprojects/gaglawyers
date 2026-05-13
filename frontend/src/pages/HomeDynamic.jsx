@@ -94,7 +94,7 @@ const HomeDynamic = () => {
         title="GAG Lawyers - Grover & Grover Advocates"
         description="GAG Lawyers - Grover & Grover Advocates: Trusted legal experts for your every need. Your path to legal solutions starts here"
         keywords={pageContent?.seo?.keywords || "lawyers in delhi, advocates in india, corporate law firm, civil litigation, real estate lawyers, family law"}
-        canonical="https://www.gaglawyers.com/"
+        canonical="https://gaglawyers.com/"
       />
 
       {/* Render Dynamic Blocks */}

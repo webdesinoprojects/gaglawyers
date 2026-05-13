@@ -42,7 +42,7 @@ const Newsletter = () => {
         title="Newsletter | GAG Lawyers - Resource Center"
         description="Legal newsletter updates and practical insights from GAG Lawyers Resource Center."
         keywords="legal newsletter, law updates, resource center, gag lawyers"
-        canonical="https://www.gaglawyers.com/newsletter"
+        canonical="https://gaglawyers.com/newsletter"
       />
 
       <section className="bg-gradient-to-br from-navy via-navy/95 to-[#0a1628] text-white py-20 lg:py-28">

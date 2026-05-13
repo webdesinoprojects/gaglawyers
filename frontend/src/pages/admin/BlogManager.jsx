@@ -306,7 +306,7 @@ const BlogManager = ({
                 name="externalUrl"
                 value={formData.externalUrl}
                 onChange={handleChange}
-                placeholder="https://www.gaglawyers.com/blogs/example-slug"
+                placeholder="https://gaglawyers.com/blogs/example-slug"
                 className="w-full px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans"
               />
             </div>

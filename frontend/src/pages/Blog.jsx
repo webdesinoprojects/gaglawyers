@@ -91,7 +91,7 @@ const Blog = () => {
         title="Legal Insights & News | GAG Lawyers Articles"
         description="Stay informed with expert legal analysis, case updates, and insights on Indian law. Read articles on corporate law, litigation, real estate, family law, and more from GAG Lawyers."
         keywords="legal articles, law articles, indian law updates, legal insights, corporate law news, litigation updates"
-        canonical="https://www.gaglawyers.com/articles"
+        canonical="https://gaglawyers.com/articles"
       />
       
       <section className="bg-navy text-white py-16 lg:py-20">

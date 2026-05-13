@@ -141,7 +141,7 @@ const Services = () => {
         title="Legal Services - 25+ Practice Areas | GAG Lawyers"
         description="Expert legal services across 25+ practice areas including corporate law, criminal defense, civil litigation, family law, real estate, and intellectual property. Trusted advocates in Delhi and across India."
         keywords="legal services delhi, advocates, litigation, legal consultation, law firm practice areas, corporate law, criminal defense, family law"
-        canonical="https://www.gaglawyers.com/services"
+        canonical="https://gaglawyers.com/services"
       />
 
       {/* HERO SECTION WITH PARALLAX */}

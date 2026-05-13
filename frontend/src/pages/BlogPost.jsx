@@ -180,7 +180,7 @@ const BlogPost = () => {
         title={`${post.title} | GAG Lawyers Articles`}
         description={post.excerpt || post.content.substring(0, 160).replace(/<[^>]*>/g, '')}
         keywords={post.tags?.join(', ') || 'legal articles, law articles'}
-        canonical={`https://www.gaglawyers.com${canonicalPath}`}
+        canonical={`https://gaglawyers.com${canonicalPath}`}
       />
 
       {/* Hero Section with Featured Image */}
