@@ -49,6 +49,8 @@ The rules of the Bar Council of India prohibit law firms from soliciting work or
         contactPhones: ['+91 99962 63370'],
         officeAddresses: [OFFICE_ADDRESS_LINE],
         otherOffices: DEFAULT_OTHER_OFFICES,
+        footerLocationsLimit: 200,
+        footerLocationSlugs: [],
       };
 
       return res.status(200).json({

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Edit, Trash2, MapPin, Eye, EyeOff, Search, Filter, Download, Upload, RefreshCw, BarChart3 } from 'lucide-react';
+import { Plus, Edit, Trash2, MapPin, Eye, EyeOff, Search, Filter, Download, Upload, RefreshCw, BarChart3, Star } from 'lucide-react';
 import Button from '../../components/Button';
 import API_BASE_URL from '../../config/api';
 import { buildLocationPageSlug } from '../../utils/slugs';
@@ -57,6 +57,7 @@ const LocationManager = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingPageId, setEditingPageId] = useState(null);
   const [togglingPageId, setTogglingPageId] = useState(null);
+  const [togglingFooterPageId, setTogglingFooterPageId] = useState(null);
   const [formData, setFormData] = useState(createInitialFormData);
   
   const [filters, setFilters] = useState({
@@ -223,6 +224,34 @@ const LocationManager = () => {
       }
     } catch (error) {
       console.error('Error bulk toggling:', error);
+    }
+  };
+
+  const handleToggleFooter = async (id) => {
+    const token = localStorage.getItem('adminToken');
+    setTogglingFooterPageId(id);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/locations/${id}/footer-toggle`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        const nextFooter = Boolean(data.data?.showInFooter);
+        setPages((prev) =>
+          prev.map((page) =>
+            page._id === id ? { ...page, showInFooter: nextFooter } : page
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error toggling footer page:', error);
+    } finally {
+      setTogglingFooterPageId(null);
     }
   };
 
@@ -1267,19 +1296,20 @@ const LocationManager = () => {
                 <th className="px-4 py-3 text-left font-sans text-xs font-semibold text-gray-600 uppercase">Slug</th>
                 <th className="px-4 py-3 text-left font-sans text-xs font-semibold text-gray-600 uppercase">Views</th>
                 <th className="px-4 py-3 text-left font-sans text-xs font-semibold text-gray-600 uppercase">Status</th>
+                <th className="px-4 py-3 text-left font-sans text-xs font-semibold text-gray-600 uppercase">Footer</th>
                 <th className="px-4 py-3 text-right font-sans text-xs font-semibold text-gray-600 uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="px-4 py-12 text-center">
+                  <td colSpan="8" className="px-4 py-12 text-center">
                     <div className="animate-spin w-8 h-8 border-4 border-navy border-t-transparent rounded-full mx-auto"></div>
                   </td>
                 </tr>
               ) : pages.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-4 py-12 text-center">
+                  <td colSpan="8" className="px-4 py-12 text-center">
                     <MapPin className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                     <p className="font-sans text-gray-500">No location pages found</p>
                     <Button variant="primary" size="sm" className="mt-4" onClick={() => setShowCreateModal(true)}>
@@ -1328,6 +1358,21 @@ const LocationManager = () => {
                       </button>
                     </td>
                     <td className="px-4 py-3">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleFooter(page._id)}
+                        disabled={togglingFooterPageId === page._id}
+                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-sans font-medium disabled:opacity-60 disabled:cursor-not-allowed ${
+                          page.showInFooter
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
+                        <Star size={12} />
+                        {page.showInFooter ? 'Shown' : 'Hidden'}
+                      </button>
+                    </td>
+                    <td className="px-4 py-3">
                       <div className="flex justify-end space-x-2">
                         <button
                           type="button"
@@ -1341,6 +1386,19 @@ const LocationManager = () => {
                           title={page.isActive ? 'Hide location page' : 'Make location page visible'}
                         >
                           {page.isActive ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleFooter(page._id)}
+                          disabled={togglingFooterPageId === page._id}
+                          className={`p-2 rounded-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+                            page.showInFooter
+                              ? 'text-amber-600 hover:bg-amber-50'
+                              : 'text-gray-500 hover:bg-gray-100'
+                          }`}
+                          title={page.showInFooter ? 'Remove from footer' : 'Show in footer'}
+                        >
+                          <Star size={16} />
                         </button>
                         <button
                           type="button"

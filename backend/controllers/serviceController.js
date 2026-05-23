@@ -5,6 +5,15 @@ const cheerio = require('cheerio');
 const { generateSlug, generateUniqueSlug } = require('../utils/slugify');
 const { scheduleSitemapRegeneration } = require('../utils/sitemapRegen');
 
+const normalizeSectionHeading = (section = {}, index = 0) => {
+  const heading = String(section?.heading || '').trim();
+  if (heading) return heading;
+  const fallbackType = String(section?.type || 'section')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+  return `${fallbackType} ${index + 1}`;
+};
+
 /**
  * @route   GET /api/services
  * @desc    Get all services (id, name, slug only)
@@ -192,23 +201,23 @@ const updateService = async (req, res) => {
 
     // Update sections if provided
     if (sections && Array.isArray(sections)) {
-      // Delete existing sections
-      await ServiceSection.deleteMany({ serviceId: service._id });
-
-      // Create new sections
-      const filteredSections = sections.filter((section) => section.type !== 'cta_banner');
+      const filteredSections = sections.filter((section) => section?.type && section.type !== 'cta_banner');
 
       const newSections = filteredSections.map((section, index) => ({
         serviceId: service._id,
         type: section.type,
         visible: section.visible !== false,
         order: section.order ?? index,
-        heading: section.heading,
+        heading: normalizeSectionHeading(section, index),
         background: section.background || 'light',
-        content: section.content || {},
+        content: section.content && typeof section.content === 'object' ? section.content : {},
       }));
 
-      await ServiceSection.insertMany(newSections);
+      // Replace sections only when we have a valid computed set.
+      await ServiceSection.deleteMany({ serviceId: service._id });
+      if (newSections.length > 0) {
+        await ServiceSection.insertMany(newSections);
+      }
     }
 
     // Return updated service with sections

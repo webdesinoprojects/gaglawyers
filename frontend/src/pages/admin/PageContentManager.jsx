@@ -1210,64 +1210,91 @@ const PageContentManager = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-sm shadow-sm p-6">
-          <h3 className="font-serif text-xl font-semibold text-navy mb-4">Consultation form (in hero)</h3>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-7">
+          <div className="mb-6 border-b border-gray-100 pb-4">
+            <h3 className="font-serif text-2xl font-semibold text-navy">Consultation Form</h3>
+            <p className="mt-1 font-sans text-sm text-gray-500">
+              Manage the hero booking form copy, placeholders, and submission messages.
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block font-sans text-sm font-medium text-gray-700 mb-1">Form title</label>
+              <label className="block font-sans text-sm font-semibold text-gray-700 mb-1.5">Form title</label>
               <input
                 type="text"
                 value={sections.consultationForm?.title || ''}
                 onChange={(e) => handleSectionChange('consultationForm', 'title', e.target.value)}
-                className="w-full px-3 py-2 border rounded-sm font-sans text-sm"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 font-sans text-sm text-gray-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/10"
               />
             </div>
             <div>
-              <label className="block font-sans text-sm font-medium text-gray-700 mb-1">Subtitle</label>
+              <label className="block font-sans text-sm font-semibold text-gray-700 mb-1.5">Subtitle</label>
               <input
                 type="text"
                 value={sections.consultationForm?.subtitle || ''}
                 onChange={(e) => handleSectionChange('consultationForm', 'subtitle', e.target.value)}
-                className="w-full px-3 py-2 border rounded-sm font-sans text-sm"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 font-sans text-sm text-gray-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/10"
               />
             </div>
           </div>
-          <p className="font-sans text-xs text-gray-500 mt-3 mb-2">Placeholders</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {['name', 'email', 'phone', 'service', 'description'].map((k) => (
+
+          <div className="mt-6">
+            <p className="font-sans text-xs font-semibold uppercase tracking-[0.08em] text-gray-500 mb-3">Placeholders</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[
+                ['name', 'Name field'],
+                ['email', 'Email field'],
+                ['phone', 'Phone field'],
+                ['service', 'Service select'],
+                ['description', 'Message field'],
+              ].map(([k, label]) => (
+                <div key={k} className="rounded-lg border border-gray-200 bg-gray-50/60 p-3">
+                  <label className="mb-1.5 block font-sans text-xs font-semibold uppercase tracking-[0.08em] text-gray-600">
+                    {label}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={k}
+                    value={sections.consultationForm?.placeholders?.[k] || ''}
+                    onChange={(e) => patchConsultationPlaceholders(k, e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 font-sans text-sm text-gray-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/10"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+            <div>
+              <label className="block font-sans text-sm font-semibold text-gray-700 mb-1.5">Submit button label</label>
               <input
-                key={k}
                 type="text"
-                placeholder={k}
-                value={sections.consultationForm?.placeholders?.[k] || ''}
-                onChange={(e) => patchConsultationPlaceholders(k, e.target.value)}
-                className="w-full px-3 py-2 border rounded-sm font-sans text-sm"
+                placeholder="Book appointment"
+                value={sections.consultationForm?.submitLabel || ''}
+                onChange={(e) => handleSectionChange('consultationForm', 'submitLabel', e.target.value)}
+                className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 font-sans text-sm text-gray-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/10"
               />
-            ))}
+            </div>
+            <div>
+              <label className="block font-sans text-sm font-semibold text-gray-700 mb-1.5">Submitting label</label>
+              <input
+                type="text"
+                placeholder="Submitting..."
+                value={sections.consultationForm?.submittingLabel || ''}
+                onChange={(e) => handleSectionChange('consultationForm', 'submittingLabel', e.target.value)}
+                className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 font-sans text-sm text-gray-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/10"
+              />
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-            <input
-              type="text"
-              placeholder="Submit button label"
-              value={sections.consultationForm?.submitLabel || ''}
-              onChange={(e) => handleSectionChange('consultationForm', 'submitLabel', e.target.value)}
-              className="w-full px-3 py-2 border rounded-sm font-sans text-sm"
-            />
-            <input
-              type="text"
-              placeholder="Submitting label"
-              value={sections.consultationForm?.submittingLabel || ''}
-              onChange={(e) => handleSectionChange('consultationForm', 'submittingLabel', e.target.value)}
-              className="w-full px-3 py-2 border rounded-sm font-sans text-sm"
-            />
-          </div>
-          <div className="mt-3">
-            <label className="block font-sans text-sm font-medium text-gray-700 mb-1">Success message</label>
+
+          <div className="mt-6">
+            <label className="block font-sans text-sm font-semibold text-gray-700 mb-1.5">Success message</label>
             <textarea
               value={sections.consultationForm?.successMessage || ''}
               onChange={(e) => handleSectionChange('consultationForm', 'successMessage', e.target.value)}
-              rows={2}
-              className="w-full px-3 py-2 border rounded-sm font-sans text-sm"
+              rows={3}
+              className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 font-sans text-sm text-gray-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/10"
             />
           </div>
         </div>

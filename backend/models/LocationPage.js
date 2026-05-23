@@ -52,6 +52,11 @@ const locationPageSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  showInFooter: {
+    type: Boolean,
+    default: false,
+    index: true,
+  },
   views: {
     type: Number,
     default: 0,

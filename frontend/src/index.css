@@ -59,7 +59,7 @@
 
   .testimonial-marquee-track {
     will-change: transform;
-    animation: testimonialMarqueeRight 16s linear infinite;
+    animation: testimonialMarqueeRight 30s linear infinite;
   }
 
   .testimonial-marquee:hover .testimonial-marquee-track {

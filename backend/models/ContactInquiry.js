@@ -3,27 +3,27 @@ const mongoose = require('mongoose');
 const contactInquirySchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
     trim: true,
+    default: '',
   },
   email: {
     type: String,
-    required: true,
     trim: true,
     lowercase: true,
+    default: '',
   },
   phone: {
     type: String,
-    required: true,
     trim: true,
+    default: '',
   },
   serviceOfInterest: {
     type: String,
-    required: true,
+    default: '',
   },
   message: {
     type: String,
-    required: true,
+    default: '',
   },
   resumeUrl: {
     type: String,

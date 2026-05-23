@@ -44,6 +44,8 @@ The rules of the Bar Council of India prohibit law firms from soliciting work or
     contactPhones: ['+91 99962 63370'],
     officeAddresses: [OFFICE_ADDRESS_LINE],
     otherOffices: DEFAULT_OTHER_OFFICES,
+    footerLocationsLimit: 200,
+    footerLocationSlugs: [],
     copyProtectionEnabled: false,
     rightClickDisabled: false,
   });
@@ -132,6 +134,10 @@ The rules of the Bar Council of India prohibit law firms from soliciting work or
         : [],
     }));
   };
+
+  const footerSlugsText = Array.isArray(settings.footerLocationSlugs)
+    ? settings.footerLocationSlugs.join('\n')
+    : '';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -598,6 +604,60 @@ The rules of the Bar Council of India prohibit law firms from soliciting work or
               <label htmlFor="copyProtectionEnabled" className="font-sans text-sm font-medium text-gray-700">
                 Disable Text Selection
               </label>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-sm shadow-sm p-6">
+          <h2 className="font-serif text-xl font-semibold text-navy mb-6">Footer Locations</h2>
+          <div className="space-y-5">
+            <div>
+              <label htmlFor="footerLocationsLimit" className="block font-sans text-sm font-medium text-gray-700 mb-2">
+                Default Footer Locations Count
+              </label>
+              <input
+                type="number"
+                id="footerLocationsLimit"
+                name="footerLocationsLimit"
+                min="1"
+                max="5000"
+                value={settings.footerLocationsLimit ?? 200}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    footerLocationsLimit: Math.max(1, Math.min(5000, parseInt(e.target.value || '200', 10))),
+                  }))
+                }
+                className="w-full max-w-[220px] px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy font-sans"
+              />
+              <p className="mt-2 text-xs text-gray-500 font-sans">
+                Used when no manual location list is provided.
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="footerLocationSlugs" className="block font-sans text-sm font-medium text-gray-700 mb-2">
+                Manual Footer Location Slugs (one per line)
+              </label>
+              <textarea
+                id="footerLocationSlugs"
+                value={footerSlugsText}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    footerLocationSlugs: e.target.value
+                      .split('\n')
+                      .map((line) => line.trim())
+                      .filter(Boolean),
+                  }))
+                }
+                rows={8}
+                className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy font-sans"
+                placeholder="example-slug-in-delhi&#10;another-slug-in-mumbai"
+              />
+              <p className="mt-2 text-xs text-gray-500 font-sans">
+                If provided, footer will show exactly these active locations in this order.
+              </p>
             </div>
           </div>
         </div>

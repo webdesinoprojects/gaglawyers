@@ -1,4 +1,5 @@
 const ContactInquiry = require('../models/ContactInquiry');
+const FormContent = require('../models/FormContent');
 const nodemailer = require('nodemailer');
 const { verifyRecaptcha } = require('../utils/verifyRecaptcha');
 const cloudinary = require('../config/cloudinary');
@@ -28,7 +29,7 @@ const uploadResumeToCloudinary = (fileBuffer, originalName = 'resume') =>
 
 const createContactInquiry = async (req, res) => {
   try {
-    const { name, email, phone, serviceOfInterest, message, captchaToken } = req.body;
+    const { name, email, phone, serviceOfInterest, message, captchaToken, formIdentifier } = req.body;
     let resumeMeta = {
       resumeUrl: '',
       resumePublicId: '',
@@ -36,18 +37,60 @@ const createContactInquiry = async (req, res) => {
       resumeBytes: 0,
     };
 
+    const requestedFormIdentifier = String(formIdentifier || 'contact').trim().toLowerCase();
+    const formConfig = await FormContent.findOne({ formIdentifier: requestedFormIdentifier }).lean();
+    const requiredFieldNames = Array.isArray(formConfig?.fields)
+      ? formConfig.fields
+          .filter((field) => field?.isVisible !== false && field?.isRequired)
+          .map((field) => String(field.fieldName || '').trim())
+          .filter(Boolean)
+      : [];
+
+    const payload = {
+      ...req.body,
+      serviceOfInterest: serviceOfInterest || req.body.service || '',
+      message: message || req.body.description || req.body.legalIssue || '',
+    };
+
+    const fieldAliases = {
+      service: ['serviceOfInterest', 'service'],
+      serviceOfInterest: ['serviceOfInterest', 'service'],
+      message: ['message', 'description', 'legalIssue'],
+      description: ['description', 'message', 'legalIssue'],
+      legalIssue: ['legalIssue', 'description', 'message'],
+      fullName: ['fullName', 'name'],
+      name: ['name', 'fullName'],
+    };
+
+    const missingRequiredFromConfig = requiredFieldNames.filter((fieldName) => {
+      const aliasKeys = fieldAliases[fieldName] || [fieldName];
+      const hasValue = aliasKeys.some((key) => {
+        const value = payload[key];
+        return value !== undefined && value !== null && String(value).trim() !== '';
+      });
+      return !hasValue;
+    });
+
+    if (missingRequiredFromConfig.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide all required fields',
+        missingFields: missingRequiredFromConfig,
+      });
+    }
+
+    if (!formConfig && (!name || !email || !phone || !payload.serviceOfInterest || !payload.message)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide all required fields',
+      });
+    }
+
     const isCaptchaValid = await verifyRecaptcha(captchaToken, req.ip);
     if (!isCaptchaValid) {
       return res.status(400).json({
         success: false,
         message: 'reCAPTCHA verification failed',
-      });
-    }
-
-    if (!name || !email || !phone || !serviceOfInterest || !message) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide all required fields',
       });
     }
 
@@ -73,8 +116,8 @@ const createContactInquiry = async (req, res) => {
       name,
       email,
       phone,
-      serviceOfInterest,
-      message,
+      serviceOfInterest: payload.serviceOfInterest,
+      message: payload.message,
       ...resumeMeta,
     });
 
@@ -98,15 +141,15 @@ const createContactInquiry = async (req, res) => {
         await transporter.sendMail({
           from: process.env.EMAIL_FROM,
           to: enquiryRecipients.join(','),
-          subject: `New Contact Inquiry - ${serviceOfInterest}`,
+          subject: `New Contact Inquiry - ${payload.serviceOfInterest}`,
           html: `
             <h2>New Contact Form Submission</h2>
             <p><strong>Name:</strong> ${name}</p>
             <p><strong>Email:</strong> ${email}</p>
             <p><strong>Phone:</strong> ${phone}</p>
-            <p><strong>Service:</strong> ${serviceOfInterest}</p>
+            <p><strong>Service:</strong> ${payload.serviceOfInterest}</p>
             <p><strong>Message:</strong></p>
-            <p>${message}</p>
+            <p>${payload.message}</p>
             ${resumeMeta.resumeUrl ? `<p><strong>Resume:</strong> <a href="${resumeMeta.resumeUrl}" target="_blank" rel="noopener noreferrer">${resumeMeta.resumeOriginalName || 'View Resume'}</a></p>` : ''}
           `,
         });

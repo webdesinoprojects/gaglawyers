@@ -251,6 +251,7 @@ const AdminLayout = () => {
       title: 'Communication',
       items: [
         { name: 'Contact Forms', path: '/admin/contacts', icon: MessageSquare },
+        { name: 'Form Fields', path: '/admin/forms', icon: FileText },
       ],
     },
     {

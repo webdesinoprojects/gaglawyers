@@ -50,8 +50,6 @@ const CITY_ALIASES = {
 };
 
 const normalizeCity = (value = '') => value.toString().trim().toLowerCase();
-const FOOTER_LOCATION_LIMIT = 200;
-const FOOTER_FETCH_LIMIT = 1000;
 /** Bump when API slug shape changes (e.g. `*-in-*`) so clients refetch. */
 const FOOTER_LOCATIONS_CACHE_KEY = 'gag-footer-locations-v6';
 let footerLocationsCache = null;
@@ -161,7 +159,7 @@ const Footer = () => {
       }
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/locations/footer-links?limit=${FOOTER_FETCH_LIMIT}`);
+        const response = await fetch(`${API_BASE_URL}/api/locations/footer-links`);
         const data = await response.json();
         
         if (data.success && data.data) {
@@ -186,9 +184,7 @@ const Footer = () => {
             });
           });
 
-          const nextLocations = sortFooterLocations(
-            Array.from(dedupedLocationsBySlug.values())
-          ).slice(0, FOOTER_LOCATION_LIMIT);
+          const nextLocations = Array.from(dedupedLocationsBySlug.values());
           footerLocationsCache = nextLocations;
           sessionStorage.setItem(FOOTER_LOCATIONS_CACHE_KEY, JSON.stringify(nextLocations));
           if (isMounted) {

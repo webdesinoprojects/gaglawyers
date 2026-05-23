@@ -6,6 +6,7 @@ const {
   createLocationPage,
   updateLocationPage,
   toggleLocationPage,
+  toggleFooterLocationPage,
   deleteLocationPage,
   bulkToggleLocationPages,
   bulkCreateLocationPages,
@@ -25,6 +26,7 @@ router.post('/bulk/create', protect, adminOnly, bulkCreateLocationPages);
 router.post('/bulk/toggle', protect, adminOnly, bulkToggleLocationPages);
 router.put('/:id', protect, adminOnly, updateLocationPage);
 router.patch('/:id/toggle', protect, adminOnly, toggleLocationPage);
+router.patch('/:id/footer-toggle', protect, adminOnly, toggleFooterLocationPage);
 router.delete('/:id', protect, adminOnly, deleteLocationPage);
 
 module.exports = router;

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ServiceSidebar from '../../components/admin/ServiceSidebar';
 import ServiceEditor from '../../components/admin/ServiceEditor';
 import API_BASE_URL from '../../config/api';
@@ -17,6 +18,14 @@ const ServiceManager = () => {
   const [deletingService, setDeletingService] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  const handleUnauthorized = () => {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
+    alert('Your admin session expired. Please login again.');
+    navigate('/admin/login', { replace: true });
+  };
 
   // Fetch all services on mount
   useEffect(() => {
@@ -116,12 +125,17 @@ const ServiceManager = () => {
 
       const data = await response.json();
 
+      if (response.status === 401) {
+        handleUnauthorized();
+        return;
+      }
+
       if (data.success) {
         setServiceData(data.data);
         setHasUnsavedChanges(false);
         showToast('Changes saved successfully!', 'success');
       } else {
-        showToast('Failed to save changes', 'error');
+        showToast(data.message || 'Failed to save changes', 'error');
       }
     } catch (error) {
       console.error('Error saving service:', error);
@@ -338,10 +352,30 @@ const ServiceManager = () => {
   };
 
   // Filter services by search query
-  const filteredServices = services.filter((service) =>
-    service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    service.slug.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredServices = useMemo(() => {
+    const normalizedQuery = searchQuery.toLowerCase();
+    const matches = services.filter((service) =>
+      service.name.toLowerCase().includes(normalizedQuery) ||
+      service.slug.toLowerCase().includes(normalizedQuery)
+    );
+
+    return [...matches].sort((left, right) => {
+      const leftOrder = Number(left?.servicesPageSettings?.displayOrder);
+      const rightOrder = Number(right?.servicesPageSettings?.displayOrder);
+
+      const leftHasOrder = Number.isFinite(leftOrder);
+      const rightHasOrder = Number.isFinite(rightOrder);
+
+      if (leftHasOrder && rightHasOrder && leftOrder !== rightOrder) {
+        return leftOrder - rightOrder;
+      }
+      if (leftHasOrder !== rightHasOrder) {
+        return leftHasOrder ? -1 : 1;
+      }
+
+      return String(left?.name || '').localeCompare(String(right?.name || ''));
+    });
+  }, [services, searchQuery]);
 
   return (
     <div className="flex h-screen bg-gray-50">

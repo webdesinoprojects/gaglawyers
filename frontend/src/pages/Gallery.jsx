@@ -353,15 +353,6 @@ const Gallery = () => {
           onClick={closeLightbox}
           role="presentation"
         >
-          <button
-            type="button"
-            onClick={closeLightbox}
-            className="absolute top-[calc(var(--site-header-height)+0.75rem)] right-4 sm:right-6 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all hover:scale-110 z-10"
-            aria-label="Close image preview"
-          >
-            <X size={24} />
-          </button>
-
           {filteredImages.length > 1 && (
             <>
               <button
@@ -393,12 +384,22 @@ const Gallery = () => {
             className="w-full max-w-[min(96vw,1400px)] h-[calc(100dvh-var(--site-header-height)-2.5rem)] sm:h-[calc(100dvh-var(--site-header-height)-3rem)] flex flex-col items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-full flex-1 min-h-0 flex items-center justify-center rounded-2xl overflow-hidden">
-              <img
-                src={selectedImage.imageUrl}
-                alt={selectedImage.title}
-                className="max-w-full max-h-full w-auto h-auto object-contain select-none"
-              />
+            <div className="relative w-full flex-1 min-h-0 flex items-center justify-center rounded-2xl overflow-visible">
+              <div className="relative inline-flex max-w-full max-h-full pr-0 md:pr-16">
+                <button
+                  type="button"
+                  onClick={closeLightbox}
+                  className="absolute right-2 top-2 md:right-0 md:top-0 md:-translate-y-[110%] w-11 h-11 sm:w-12 sm:h-12 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/75 transition-all hover:scale-110 z-20"
+                  aria-label="Close image preview"
+                >
+                  <X size={24} />
+                </button>
+                <img
+                  src={selectedImage.imageUrl}
+                  alt={selectedImage.title}
+                  className="max-w-full max-h-full w-auto h-auto object-contain select-none"
+                />
+              </div>
             </div>
             <div className="text-center mt-4 sm:mt-5">
               <p className="text-white font-sans text-xl font-semibold mb-2">

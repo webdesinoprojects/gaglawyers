@@ -58,8 +58,9 @@ const Services = () => {
               service.featured
             ),
             featuredOrder: Number(service.servicesPageSettings?.displayOrder || 0),
+            showOnServicesPage: service.servicesPageSettings?.showOnServicesPage !== false,
           }));
-          setServices(mapped);
+          setServices(mapped.filter((service) => service.showOnServicesPage));
         }
       } catch (error) {
         console.error('Error fetching services:', error);

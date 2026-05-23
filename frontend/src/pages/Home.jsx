@@ -94,6 +94,8 @@ const Home = () => {
   const [isSubmittingCta, setIsSubmittingCta] = useState(false);
   const [ctaStatus, setCtaStatus] = useState(null);
   const [ctaCaptchaToken, setCtaCaptchaToken] = useState(null);
+  const [appointmentFormConfig, setAppointmentFormConfig] = useState(null);
+  const [consultationFormConfig, setConsultationFormConfig] = useState(null);
 
   useEffect(() => {
     fetchDynamicContent();
@@ -122,7 +124,10 @@ const Home = () => {
     const servicesPromise = parseJson(`${API_BASE_URL}/api/services?compact=1&limit=16`)
       .then((servicesData) => {
         if (servicesData.success && servicesData.data.length > 0) {
-          setServices(servicesData.data);
+          const visibleOnHome = servicesData.data.filter(
+            (service) => service?.servicesPageSettings?.showOnHomepage !== false
+          );
+          setServices(visibleOnHome);
         }
       })
       .catch((error) => {
@@ -194,6 +199,18 @@ const Home = () => {
         console.error('Error fetching gallery images:', error);
       });
 
+    const appointmentFormPromise = parseJson(`${API_BASE_URL}/api/cms/forms/appointment`)
+      .then((formData) => {
+        if (formData.success) setAppointmentFormConfig(formData.data);
+      })
+      .catch(() => {});
+
+    const consultationFormPromise = parseJson(`${API_BASE_URL}/api/cms/forms/consultation`)
+      .then((formData) => {
+        if (formData.success) setConsultationFormConfig(formData.data);
+      })
+      .catch(() => {});
+
     await Promise.allSettled([
       servicesPromise,
       reviewsPromise,
@@ -202,6 +219,8 @@ const Home = () => {
       teamPromise,
       awardsPromise,
       galleryPromise,
+      appointmentFormPromise,
+      consultationFormPromise,
     ]);
 
     setLoading(false);
@@ -245,6 +264,7 @@ const Home = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          formIdentifier: 'appointment',
           name: appointmentForm.name,
           email: appointmentForm.email,
           phone: appointmentForm.phone,
@@ -278,6 +298,10 @@ const Home = () => {
         }
         setTimeout(() => setAppointmentStatus(null), 5000);
       } else {
+        if (data?.message === 'reCAPTCHA verification failed') {
+          setAppointmentCaptchaToken(null);
+          if (appointmentCaptchaRef.current) appointmentCaptchaRef.current.reset();
+        }
         setAppointmentStatus({
           type: 'error',
           message: data.message || 'Something went wrong. Please try again.',
@@ -338,6 +362,7 @@ const Home = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          formIdentifier: 'consultation',
           name: ctaForm.name,
           email: ctaForm.email,
           phone: ctaForm.phone,
@@ -367,6 +392,10 @@ const Home = () => {
         }
         setTimeout(() => setCtaStatus(null), 5000);
       } else {
+        if (data?.message === 'reCAPTCHA verification failed') {
+          setCtaCaptchaToken(null);
+          if (ctaCaptchaRef.current) ctaCaptchaRef.current.reset();
+        }
         setCtaStatus({
           type: 'error',
           message: data.message || 'Something went wrong. Please try again.',
@@ -418,6 +447,11 @@ const Home = () => {
   const marqueeReviews = isMarqueeEnabled ? [...reviews, ...reviews] : reviews;
   const cf = home.consultationForm;
   const ctaConsult = home.consultationCta;
+  const isRequiredFromConfig = (config, fieldName, fallback = false) => {
+    const field = config?.fields?.find((row) => row.fieldName === fieldName);
+    if (!field) return fallback;
+    return Boolean(field.isVisible !== false && field.isRequired);
+  };
 
   const bookAppointmentForm = (formId = 'book-appointment') => (
     <div
@@ -453,7 +487,7 @@ const Home = () => {
               name="name"
               value={appointmentForm.name}
               onChange={handleAppointmentChange}
-              required
+              required={isRequiredFromConfig(appointmentFormConfig, 'name', true)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm text-gray-900 focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
               placeholder={cf.placeholders?.name || 'Your name'}
             />
@@ -465,7 +499,7 @@ const Home = () => {
               name="email"
               value={appointmentForm.email}
               onChange={handleAppointmentChange}
-              required
+              required={isRequiredFromConfig(appointmentFormConfig, 'email', true)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
               placeholder={cf.placeholders?.email || 'your@email.com'}
             />
@@ -477,7 +511,7 @@ const Home = () => {
               name="phone"
               value={appointmentForm.phone}
               onChange={handleAppointmentChange}
-              required
+              required={isRequiredFromConfig(appointmentFormConfig, 'phone', true)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
               placeholder={cf.placeholders?.phone || 'Your mobile number (with country code)'}
             />
@@ -1276,7 +1310,7 @@ const Home = () => {
                       name="name"
                       value={ctaForm.name}
                       onChange={handleCtaChange}
-                      required
+                      required={isRequiredFromConfig(consultationFormConfig, 'name', true)}
                       className="w-full px-3 py-2.5 border border-gray-300 rounded-lg font-sans text-sm focus:ring-2 focus:ring-gold/50 focus:border-gold"
                     />
                   </div>
@@ -1288,7 +1322,7 @@ const Home = () => {
                         name="email"
                         value={ctaForm.email}
                         onChange={handleCtaChange}
-                        required
+                        required={isRequiredFromConfig(consultationFormConfig, 'email', true)}
                         className="w-full px-3 py-2.5 border border-gray-300 rounded-lg font-sans text-sm focus:ring-2 focus:ring-gold/50 focus:border-gold"
                       />
                     </div>
@@ -1299,7 +1333,7 @@ const Home = () => {
                         name="phone"
                         value={ctaForm.phone}
                         onChange={handleCtaChange}
-                        required
+                        required={isRequiredFromConfig(consultationFormConfig, 'phone', true)}
                         className="w-full px-3 py-2.5 border border-gray-300 rounded-lg font-sans text-sm focus:ring-2 focus:ring-gold/50 focus:border-gold"
                       />
                     </div>
@@ -1310,7 +1344,7 @@ const Home = () => {
                       name="legalIssue"
                       value={ctaForm.legalIssue}
                       onChange={handleCtaChange}
-                      required
+                      required={isRequiredFromConfig(consultationFormConfig, 'legalIssue', true)}
                       rows={4}
                       className="w-full px-3 py-2.5 border border-gray-300 rounded-lg font-sans text-sm resize-y min-h-[100px] focus:ring-2 focus:ring-gold/50 focus:border-gold"
                       placeholder="Briefly describe your matter"

@@ -266,6 +266,10 @@ const Careers = () => {
           captchaRef.current.reset();
         }
       } else {
+        if (data?.message === 'reCAPTCHA verification failed') {
+          setCaptchaToken(null);
+          if (captchaRef.current) captchaRef.current.reset();
+        }
         setSubmitStatus({
           type: 'error',
           message: data?.message || formConfig.errorMessage || CAREER_FORM_DEFAULT.errorMessage,

@@ -102,10 +102,46 @@ const ServicesPageTab = ({ serviceData, onUpdate }) => {
               />
               <div className="flex-1">
                 <label htmlFor="service-active" className="text-sm font-semibold text-gray-900 cursor-pointer">
-                  Show on Services Page
+                  Service Page Active
                 </label>
                 <p className="text-xs text-gray-500 mt-1">
-                  When enabled, this service will appear in the services grid and be searchable
+                  Controls whether the public service detail URL is active.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <input
+                id="show-on-homepage"
+                type="checkbox"
+                checked={servicesPageSettings.showOnHomepage !== false}
+                onChange={(e) => updateServicesPageSettings('showOnHomepage', e.target.checked)}
+                className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <div className="flex-1">
+                <label htmlFor="show-on-homepage" className="text-sm font-semibold text-gray-900 cursor-pointer">
+                  Show on Homepage Services
+                </label>
+                <p className="text-xs text-gray-500 mt-1">
+                  Controls whether this service appears in homepage service listings.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <input
+                id="show-on-services-page"
+                type="checkbox"
+                checked={servicesPageSettings.showOnServicesPage !== false}
+                onChange={(e) => updateServicesPageSettings('showOnServicesPage', e.target.checked)}
+                className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <div className="flex-1">
+                <label htmlFor="show-on-services-page" className="text-sm font-semibold text-gray-900 cursor-pointer">
+                  Show in Services Listing
+                </label>
+                <p className="text-xs text-gray-500 mt-1">
+                  Controls whether this service appears on `/services` cards and search.
                 </p>
               </div>
             </div>

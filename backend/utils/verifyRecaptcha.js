@@ -30,7 +30,12 @@ const verifyRecaptcha = async (token, remoteIp = '') => {
     }
 
     const result = await response.json();
-    return Boolean(result?.success);
+    const isValid = Boolean(result?.success);
+    if (!isValid) {
+      const errorCodes = Array.isArray(result?.['error-codes']) ? result['error-codes'].join(', ') : 'unknown';
+      console.warn(`reCAPTCHA rejected: ${errorCodes}`);
+    }
+    return isValid;
   } catch (error) {
     console.error('reCAPTCHA verification error:', error);
     return false;
@@ -40,4 +45,3 @@ const verifyRecaptcha = async (token, remoteIp = '') => {
 module.exports = {
   verifyRecaptcha,
 };
-

@@ -57,6 +57,7 @@ const DynamicForm = ({ formIdentifier, onSuccess, services = [] }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          formIdentifier,
           captchaToken
         }),
       });
@@ -82,9 +83,13 @@ const DynamicForm = ({ formIdentifier, onSuccess, services = [] }) => {
 
         if (onSuccess) onSuccess(data);
       } else {
+        if (data?.message === 'reCAPTCHA verification failed') {
+          setCaptchaToken(null);
+          if (captchaRef.current) captchaRef.current.reset();
+        }
         setSubmitStatus({ 
           type: 'error', 
-          message: formConfig?.errorMessage || 'Something went wrong. Please try again.' 
+          message: data?.message || formConfig?.errorMessage || 'Something went wrong. Please try again.' 
         });
       }
     } catch (error) {
@@ -113,9 +118,6 @@ const DynamicForm = ({ formIdentifier, onSuccess, services = [] }) => {
   if (!formConfig) {
     return <div className="text-center py-4">Loading form...</div>;
   }
-
-  const isPracticeAreaField = (fieldName) =>
-    fieldName === 'serviceOfInterest' || fieldName === 'service';
 
   return (
     <div>
@@ -156,7 +158,7 @@ const DynamicForm = ({ formIdentifier, onSuccess, services = [] }) => {
                   className="block font-sans text-sm font-medium text-gray-700 mb-1"
                 >
                   {field.label}
-                  {field.isRequired && !isPracticeAreaField(field.fieldName) && ' *'}
+                  {field.isRequired && ' *'}
                 </label>
               )}
 
@@ -166,7 +168,7 @@ const DynamicForm = ({ formIdentifier, onSuccess, services = [] }) => {
                   name={field.fieldName}
                   value={formData[field.fieldName] || ''}
                   onChange={handleChange}
-                  required={field.isRequired && !isPracticeAreaField(field.fieldName)}
+                  required={field.isRequired}
                   rows={field.rows || 4}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg font-sans text-sm text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-gold/50 focus:border-gold transition-colors resize-none bg-white"
                   placeholder={field.placeholder}
@@ -177,7 +179,7 @@ const DynamicForm = ({ formIdentifier, onSuccess, services = [] }) => {
                   name={field.fieldName}
                   value={formData[field.fieldName] || ''}
                   onChange={handleChange}
-                  required={field.isRequired && !isPracticeAreaField(field.fieldName)}
+                  required={field.isRequired}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg font-sans text-sm text-gray-900 focus:ring-2 focus:ring-gold/50 focus:border-gold transition-colors bg-white"
                 >
                   <option value="">{field.placeholder || 'Select an option'}</option>
@@ -200,7 +202,7 @@ const DynamicForm = ({ formIdentifier, onSuccess, services = [] }) => {
                   name={field.fieldName}
                   value={formData[field.fieldName] || ''}
                   onChange={handleChange}
-                  required={field.isRequired && !isPracticeAreaField(field.fieldName)}
+                  required={field.isRequired}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg font-sans text-sm text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-gold/50 focus:border-gold transition-colors bg-white"
                   placeholder={field.placeholder}
                 />

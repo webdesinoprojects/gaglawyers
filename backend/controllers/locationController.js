@@ -1,5 +1,6 @@
 const LocationPage = require('../models/LocationPage');
 const Service = require('../models/Service');
+const SiteSettings = require('../models/SiteSettings');
 const { buildLocationPageSlug } = require('../utils/slugify');
 const { scheduleSitemapRegeneration } = require('../utils/sitemapRegen');
 
@@ -143,10 +144,80 @@ const getLocationPageBySlug = async (req, res) => {
 
 const getFooterLocationLinks = async (req, res) => {
   try {
+    const [limitSetting, selectedSlugsSetting] = await Promise.all([
+      SiteSettings.findOne({ settingKey: 'footerLocationsLimit' }).lean(),
+      SiteSettings.findOne({ settingKey: 'footerLocationSlugs' }).lean(),
+    ]);
+    const defaultLimitFromSettings = Number(limitSetting?.settingValue);
+    const configuredLimit = Number.isFinite(defaultLimitFromSettings)
+      ? Math.min(Math.max(defaultLimitFromSettings, 1), 5000)
+      : 200;
+    const selectedSlugs = Array.isArray(selectedSlugsSetting?.settingValue)
+      ? selectedSlugsSetting.settingValue.map((slug) => String(slug || '').trim()).filter(Boolean)
+      : [];
+
     const requestedLimit = parseInt(req.query.limit, 10);
     const limit = Number.isFinite(requestedLimit)
-      ? Math.min(Math.max(requestedLimit, 1), 1000)
-      : 300;
+      ? Math.min(Math.max(requestedLimit, 1), 5000)
+      : configuredLimit;
+
+    if (selectedSlugs.length > 0) {
+      const pages = await LocationPage.find({
+        slug: { $in: selectedSlugs },
+        isActive: true,
+      })
+        .populate('service', 'name')
+        .lean();
+
+      const bySlug = new Map();
+      pages.forEach((page) => {
+        const slug = String(page?.slug || '').trim();
+        const city = String(page?.city || '').trim();
+        const serviceName = String(page?.service?.name || '').trim();
+        if (!slug || !city || !serviceName) return;
+        bySlug.set(slug, { city, serviceName, slug });
+      });
+
+      const ordered = selectedSlugs
+        .map((slug) => bySlug.get(slug))
+        .filter(Boolean)
+        .slice(0, limit);
+
+      return res.status(200).json({
+        success: true,
+        count: ordered.length,
+        data: ordered,
+      });
+    }
+
+    const pinnedFooterPages = await LocationPage.find({
+      isActive: true,
+      showInFooter: true,
+      city: { $exists: true, $ne: '' },
+      slug: { $exists: true, $ne: '' },
+      service: { $exists: true, $ne: null },
+    })
+      .populate('service', 'name')
+      .select('city slug service createdAt')
+      .sort({ city: 1, createdAt: -1 })
+      .limit(limit)
+      .lean();
+
+    if (pinnedFooterPages.length > 0) {
+      const mappedPinned = pinnedFooterPages
+        .map((row) => ({
+          city: String(row?.city || '').trim(),
+          serviceName: String(row?.service?.name || '').trim(),
+          slug: String(row?.slug || '').trim(),
+        }))
+        .filter((row) => row.city && row.serviceName && row.slug);
+
+      return res.status(200).json({
+        success: true,
+        count: mappedPinned.length,
+        data: mappedPinned,
+      });
+    }
 
     const links = await LocationPage.aggregate([
       {
@@ -289,6 +360,33 @@ const toggleLocationPage = async (req, res) => {
       data: page,
     });
     scheduleSitemapRegeneration('location:toggle');
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message,
+    });
+  }
+};
+
+const toggleFooterLocationPage = async (req, res) => {
+  try {
+    const page = await LocationPage.findById(req.params.id);
+
+    if (!page) {
+      return res.status(404).json({
+        success: false,
+        message: 'Page not found',
+      });
+    }
+
+    page.showInFooter = !Boolean(page.showInFooter);
+    await page.save();
+
+    res.status(200).json({
+      success: true,
+      data: page,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -476,6 +574,7 @@ module.exports = {
   createLocationPage,
   updateLocationPage,
   toggleLocationPage,
+  toggleFooterLocationPage,
   deleteLocationPage,
   bulkToggleLocationPages,
   bulkCreateLocationPages,

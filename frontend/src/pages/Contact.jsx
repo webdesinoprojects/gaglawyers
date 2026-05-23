@@ -44,12 +44,26 @@ const Contact = () => {
   const [contactEmails, setContactEmails] = useState(['contact@gaglawyers.com']);
   const [contactPhones, setContactPhones] = useState(['+91 99962 63370']);
   const [officeAddresses, setOfficeAddresses] = useState([OFFICE_ADDRESS_LINES.join(', ')]);
+  const [contactFormConfig, setContactFormConfig] = useState(null);
 
   useEffect(() => {
     fetchServices();
     fetchContactInfoSettings();
     fetchOtherOffices();
+    fetchContactFormConfig();
   }, []);
+
+  const fetchContactFormConfig = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/cms/forms/contact`);
+      const data = await response.json();
+      if (data.success) {
+        setContactFormConfig(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching contact form config:', error);
+    }
+  };
 
   const fetchServices = async () => {
     try {
@@ -161,6 +175,7 @@ const Contact = () => {
         },
         body: JSON.stringify({
           ...formData,
+          formIdentifier: 'contact',
           captchaToken
         }),
       });
@@ -181,6 +196,10 @@ const Contact = () => {
           captchaRef.current.reset();
         }
       } else {
+        if (data?.message === 'reCAPTCHA verification failed') {
+          setCaptchaToken(null);
+          if (captchaRef.current) captchaRef.current.reset();
+        }
         setSubmitStatus({ type: 'error', message: data.message || 'Something went wrong. Please try again.' });
       }
     } catch (error) {
@@ -204,6 +223,11 @@ const Contact = () => {
     'w-full rounded-md border border-slate-300 bg-white px-4 py-3 font-sans text-base text-[#0B1526] placeholder:text-slate-400 transition-colors duration-200 focus:border-[#C9A84C] focus:outline-none focus:ring-1 focus:ring-[#C9A84C]/40';
 
   const labelClass = 'mb-2 block font-sans text-xs font-medium uppercase tracking-wider text-slate-600';
+  const isRequiredField = (fieldName, fallback = false) => {
+    const field = contactFormConfig?.fields?.find((row) => row.fieldName === fieldName);
+    if (!field) return fallback;
+    return Boolean(field.isVisible !== false && field.isRequired);
+  };
 
   return (
     <div className="min-h-screen bg-[#0B1526]">
@@ -370,7 +394,7 @@ const Contact = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      required
+                      required={isRequiredField('name', true)}
                       className={inputClass}
                       placeholder="Your full name"
                       autoComplete="name"
@@ -388,7 +412,7 @@ const Contact = () => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        required
+                        required={isRequiredField('email', true)}
                         className={inputClass}
                         placeholder="you@example.com"
                         autoComplete="email"
@@ -404,7 +428,7 @@ const Contact = () => {
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        required
+                        required={isRequiredField('phone', true)}
                         className={inputClass}
                         placeholder="Your mobile number (with country code)"
                         autoComplete="tel"
@@ -456,7 +480,7 @@ const Contact = () => {
                       name="message"
                       value={formData.message}
                       onChange={handleChange}
-                      required
+                      required={isRequiredField('message', true)}
                       rows={5}
                       className={`${inputClass} min-h-[8.75rem] resize-y`}
                       placeholder="Tell us about your legal matter..."
