@@ -487,8 +487,10 @@ const Home = () => {
     config?.fields?.find((row) => row.fieldName === fieldName);
   const getAppointmentFieldMeta = (fieldName, fallbackMeta = {}) => {
     const field = getFieldFromConfig(appointmentFormConfig, fieldName);
+    const rawLabel = field?.label || fallbackMeta.label || fieldName;
+    const normalizedLabel = String(rawLabel).replace(/\s*\*+\s*$/, '').trim();
     return {
-      label: field?.label || fallbackMeta.label || fieldName,
+      label: normalizedLabel,
       placeholder: field?.placeholder || fallbackMeta.placeholder || '',
       required: Boolean(field ? (field.isVisible !== false && field.isRequired) : fallbackMeta.required),
     };
