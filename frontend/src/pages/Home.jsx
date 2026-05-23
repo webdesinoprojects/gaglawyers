@@ -199,15 +199,14 @@ const Home = () => {
         console.error('Error fetching gallery images:', error);
       });
 
-    const appointmentFormPromise = parseJson(`${API_BASE_URL}/api/cms/forms/appointment`)
-      .then((formData) => {
-        if (formData.success) setAppointmentFormConfig(formData.data);
-      })
-      .catch(() => {});
-
-    const consultationFormPromise = parseJson(`${API_BASE_URL}/api/cms/forms/consultation`)
-      .then((formData) => {
-        if (formData.success) setConsultationFormConfig(formData.data);
+    const formsConfigPromise = parseJson(`${API_BASE_URL}/api/cms/forms`)
+      .then((formsData) => {
+        if (formsData.success && Array.isArray(formsData.data)) {
+          const appointmentConfig = formsData.data.find((form) => form.formIdentifier === 'appointment');
+          const consultationConfig = formsData.data.find((form) => form.formIdentifier === 'consultation');
+          if (appointmentConfig) setAppointmentFormConfig(appointmentConfig);
+          if (consultationConfig) setConsultationFormConfig(consultationConfig);
+        }
       })
       .catch(() => {});
 
@@ -219,8 +218,7 @@ const Home = () => {
       teamPromise,
       awardsPromise,
       galleryPromise,
-      appointmentFormPromise,
-      consultationFormPromise,
+      formsConfigPromise,
     ]);
 
     setLoading(false);

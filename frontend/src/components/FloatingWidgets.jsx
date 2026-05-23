@@ -332,6 +332,51 @@ const FloatingWidgets = () => {
     };
   }, [hasTawkConfig, isAdminPanel, location.pathname]);
 
+  useEffect(() => {
+    if (!hasTawkConfig || isAdminPanel) return undefined;
+
+    const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
+
+    const normalizeTinyTawkLauncher = () => {
+      if (!isMobile()) return;
+
+      const iframes = Array.from(document.querySelectorAll('iframe'));
+      iframes.forEach((iframe) => {
+        const title = String(iframe.getAttribute('title') || '').toLowerCase();
+        const src = String(iframe.getAttribute('src') || '').toLowerCase();
+        const style = window.getComputedStyle(iframe);
+        const width = parseFloat(style.width || '0');
+        const height = parseFloat(style.height || '0');
+        const isFixed = style.position === 'fixed';
+        const isLikelyTawk = title.includes('tawk') || title.includes('chat widget') || src.includes('embed.tawk.to');
+        const isLikelyLauncher = isFixed && width > 0 && height > 0 && width <= 52 && height <= 52;
+
+        if (isLikelyTawk && isLikelyLauncher) {
+          iframe.style.width = '64px';
+          iframe.style.height = '64px';
+          iframe.style.minWidth = '64px';
+          iframe.style.minHeight = '64px';
+          iframe.style.maxWidth = '64px';
+          iframe.style.maxHeight = '64px';
+          iframe.style.right = '14px';
+          iframe.style.bottom = '14px';
+          iframe.style.zIndex = '2000000000';
+          iframe.style.borderRadius = '9999px';
+        }
+      });
+    };
+
+    const timer = window.setInterval(normalizeTinyTawkLauncher, 700);
+    const observer = new MutationObserver(() => normalizeTinyTawkLauncher());
+    observer.observe(document.body, { childList: true, subtree: true });
+    normalizeTinyTawkLauncher();
+
+    return () => {
+      window.clearInterval(timer);
+      observer.disconnect();
+    };
+  }, [hasTawkConfig, isAdminPanel]);
+
   const handleWhatsAppClick = () => {
     if (settings.whatsappNumber) {
       const cleanNumber = settings.whatsappNumber.replace(/[^0-9]/g, '');

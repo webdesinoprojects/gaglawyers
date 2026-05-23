@@ -79,11 +79,33 @@ const createContactInquiry = async (req, res) => {
       });
     }
 
-    if (!formConfig && (!name || !email || !phone || !payload.serviceOfInterest || !payload.message)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide all required fields',
+    const fallbackRequiredByForm = {
+      contact: ['name', 'email', 'phone', 'serviceOfInterest', 'message'],
+      appointment: ['name', 'email', 'phone'],
+      consultation: ['name', 'email', 'phone'],
+      newsletter: ['email'],
+      callback: ['name', 'phone'],
+      career: ['name', 'email', 'phone'],
+    };
+
+    if (!formConfig) {
+      const fallbackFields = fallbackRequiredByForm[requestedFormIdentifier] || ['name', 'email', 'phone'];
+      const missingFallbackFields = fallbackFields.filter((fieldName) => {
+        const aliasKeys = fieldAliases[fieldName] || [fieldName];
+        const hasValue = aliasKeys.some((key) => {
+          const value = payload[key];
+          return value !== undefined && value !== null && String(value).trim() !== '';
+        });
+        return !hasValue;
       });
+
+      if (missingFallbackFields.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide all required fields',
+          missingFields: missingFallbackFields,
+        });
+      }
     }
 
     const isCaptchaValid = await verifyRecaptcha(captchaToken, req.ip);
