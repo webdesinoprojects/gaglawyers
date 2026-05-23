@@ -28,7 +28,7 @@ import DisclaimerProvider from './components/disclaimer/DisclaimerProvider';
 import AdminLogin from './pages/admin/Login';
 import AdminDashboard from './pages/admin/Dashboard';
 import ContactForms from './pages/admin/ContactForms';
-import FormContentManager from './pages/admin/FormContentManager';
+import FormRequirementManager from './pages/admin/FormRequirementManager';
 import SiteSettings from './pages/admin/SiteSettings';
 import TeamManager from './pages/admin/TeamManager';
 import ResourceCenterManager from './pages/admin/ResourceCenterManager';
@@ -112,7 +112,7 @@ function App() {
             <Route path="locations" element={<LocationManager />} />
             <Route path="seo" element={<SEOManager />} />
             <Route path="contacts" element={<ContactForms />} />
-            <Route path="forms" element={<FormContentManager />} />
+            <Route path="forms" element={<FormRequirementManager />} />
             <Route path="settings" element={<SiteSettings />} />
             <Route path="*" element={<ComingSoon />} />
           </Route>
