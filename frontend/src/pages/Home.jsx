@@ -244,6 +244,27 @@ const Home = () => {
 
   const handleAppointmentSubmit = async (e) => {
     e.preventDefault();
+
+    const nameMeta = getAppointmentFieldMeta('name', { label: 'Full Name', required: true });
+    const emailMeta = getAppointmentFieldMeta('email', { label: 'Email Address', required: true });
+    const phoneMeta = getAppointmentFieldMeta('phone', { label: 'Phone Number', required: true });
+    const serviceMeta = getAppointmentFieldMeta('service', { label: 'Legal Service', required: false });
+    const descriptionMeta = getAppointmentFieldMeta('description', { label: 'Brief Description', required: false });
+
+    const missingClientFields = [];
+    if (nameMeta.required && !String(appointmentForm.name || '').trim()) missingClientFields.push(nameMeta.label);
+    if (emailMeta.required && !String(appointmentForm.email || '').trim()) missingClientFields.push(emailMeta.label);
+    if (phoneMeta.required && !String(appointmentForm.phone || '').trim()) missingClientFields.push(phoneMeta.label);
+    if (serviceMeta.required && !String(appointmentForm.service || '').trim()) missingClientFields.push(serviceMeta.label);
+    if (descriptionMeta.required && !String(appointmentForm.description || '').trim()) missingClientFields.push(descriptionMeta.label);
+
+    if (missingClientFields.length > 0) {
+      setAppointmentStatus({
+        type: 'error',
+        message: `Please provide all required fields. Missing: ${missingClientFields.join(', ')}.`,
+      });
+      return;
+    }
     
     if (!appointmentCaptchaToken) {
       setAppointmentStatus({
@@ -466,6 +487,14 @@ const Home = () => {
   };
   const getFieldFromConfig = (config, fieldName) =>
     config?.fields?.find((row) => row.fieldName === fieldName);
+  const getAppointmentFieldMeta = (fieldName, fallbackMeta = {}) => {
+    const field = getFieldFromConfig(appointmentFormConfig, fieldName);
+    return {
+      label: field?.label || fallbackMeta.label || fieldName,
+      placeholder: field?.placeholder || fallbackMeta.placeholder || '',
+      required: Boolean(field ? (field.isVisible !== false && field.isRequired) : fallbackMeta.required),
+    };
+  };
 
   const bookAppointmentForm = (formId = 'book-appointment') => (
     <div
@@ -495,54 +524,65 @@ const Home = () => {
 
         <form className="space-y-4" onSubmit={handleAppointmentSubmit}>
           <div>
-            <label className="block font-sans text-xs font-medium text-gray-700 mb-1">Name *</label>
+            <label className="block font-sans text-xs font-medium text-gray-700 mb-1">
+              {getAppointmentFieldMeta('name', { label: 'Full Name', required: true }).label}
+              {getAppointmentFieldMeta('name', { required: true }).required ? ' *' : ''}
+            </label>
             <input
               type="text"
               name="name"
               value={appointmentForm.name}
               onChange={handleAppointmentChange}
-              required={isRequiredFromConfig(appointmentFormConfig, 'name', true)}
+              required={getAppointmentFieldMeta('name', { required: true }).required}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm text-gray-900 focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
-              placeholder={cf.placeholders?.name || 'Your name'}
+              placeholder={getAppointmentFieldMeta('name', { placeholder: cf.placeholders?.name || 'Your name' }).placeholder}
             />
           </div>
           <div>
-            <label className="block font-sans text-xs font-medium text-gray-700 mb-1">Email *</label>
+            <label className="block font-sans text-xs font-medium text-gray-700 mb-1">
+              {getAppointmentFieldMeta('email', { label: 'Email Address', required: true }).label}
+              {getAppointmentFieldMeta('email', { required: true }).required ? ' *' : ''}
+            </label>
             <input
               type="email"
               name="email"
               value={appointmentForm.email}
               onChange={handleAppointmentChange}
-              required={isRequiredFromConfig(appointmentFormConfig, 'email', true)}
+              required={getAppointmentFieldMeta('email', { required: true }).required}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
-              placeholder={cf.placeholders?.email || 'your@email.com'}
+              placeholder={getAppointmentFieldMeta('email', { placeholder: cf.placeholders?.email || 'your@email.com' }).placeholder}
             />
           </div>
           <div>
-            <label className="block font-sans text-xs font-medium text-gray-700 mb-1">Phone *</label>
+            <label className="block font-sans text-xs font-medium text-gray-700 mb-1">
+              {getAppointmentFieldMeta('phone', { label: 'Phone Number', required: true }).label}
+              {getAppointmentFieldMeta('phone', { required: true }).required ? ' *' : ''}
+            </label>
             <input
               type="tel"
               name="phone"
               value={appointmentForm.phone}
               onChange={handleAppointmentChange}
-              required={isRequiredFromConfig(appointmentFormConfig, 'phone', true)}
+              required={getAppointmentFieldMeta('phone', { required: true }).required}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
-              placeholder={cf.placeholders?.phone || 'Your mobile number (with country code)'}
+              placeholder={getAppointmentFieldMeta('phone', { placeholder: cf.placeholders?.phone || 'Your mobile number (with country code)' }).placeholder}
             />
           </div>
           <div>
             <label className="block font-sans text-xs font-medium text-gray-700 mb-1">
-              {getFieldFromConfig(appointmentFormConfig, 'service')?.label || 'Legal Service'}
-              {isRequiredFromConfig(appointmentFormConfig, 'service', false) ? ' *' : ''}
+              {getAppointmentFieldMeta('service', { label: 'Legal Service', required: false }).label}
+              {getAppointmentFieldMeta('service', { required: false }).required ? ' *' : ''}
             </label>
             <select
               name="service"
               value={appointmentForm.service}
               onChange={handleAppointmentChange}
-              required={isRequiredFromConfig(appointmentFormConfig, 'service', false)}
+              required={getAppointmentFieldMeta('service', { required: false }).required}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
             >
-              <option value="">{cf.placeholders?.service || 'Select a service'}</option>
+              <option value="">
+                {getAppointmentFieldMeta('service', { placeholder: cf.placeholders?.service || 'Select a service' }).placeholder}
+              </option>
               {services.map((service) => (
                 <option key={service._id} value={service.name || service.title}>
                   {service.name || service.title}
@@ -564,17 +604,17 @@ const Home = () => {
           </div>
           <div>
             <label className="block font-sans text-xs font-medium text-gray-700 mb-1">
-              {getFieldFromConfig(appointmentFormConfig, 'description')?.label || 'Message'}
-              {isRequiredFromConfig(appointmentFormConfig, 'description', false) ? ' *' : ''}
+              {getAppointmentFieldMeta('description', { label: 'Brief Description', required: false }).label}
+              {getAppointmentFieldMeta('description', { required: false }).required ? ' *' : ''}
             </label>
             <textarea
               name="description"
               value={appointmentForm.description}
               onChange={handleAppointmentChange}
               rows={3}
-              required={isRequiredFromConfig(appointmentFormConfig, 'description', false)}
+              required={getAppointmentFieldMeta('description', { required: false }).required}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm resize-none focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
-              placeholder={cf.placeholders?.description || 'Tell us how we can help'}
+              placeholder={getAppointmentFieldMeta('description', { placeholder: cf.placeholders?.description || 'Tell us how we can help' }).placeholder}
             />
           </div>
           
