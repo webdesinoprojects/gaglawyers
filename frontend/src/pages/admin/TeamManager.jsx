@@ -9,6 +9,8 @@ const TeamManager = () => {
   const [members, setMembers] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
+  const [formError, setFormError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [formData, setFormData] = useState({
     name: '',
     designation: '',
@@ -39,11 +41,43 @@ const TeamManager = () => {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+    if (formError) {
+      setFormError('');
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {};
+    const plainBio = String(formData.bio || '').replace(/<[^>]*>/g, '').trim();
+
+    if (!String(formData.name || '').trim()) {
+      errors.name = 'Name is required.';
+    }
+    if (!String(formData.designation || '').trim()) {
+      errors.designation = 'Designation is required.';
+    }
+    if (!plainBio) {
+      errors.bio = 'Bio is required.';
+    }
+
+    setFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      setFormError('Please fill all required fields before saving.');
+      return false;
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
     const token = localStorage.getItem('adminToken');
 
     try {
@@ -65,9 +99,12 @@ const TeamManager = () => {
       if (response.ok) {
         fetchMembers();
         resetForm();
+      } else {
+        setFormError('Unable to save member. Please check fields and try again.');
       }
     } catch (error) {
       console.error('Error saving member:', error);
+      setFormError('Something went wrong while saving. Please try again.');
     }
   };
 
@@ -80,6 +117,8 @@ const TeamManager = () => {
       imageUrl: member.imageUrl,
       order: member.order,
     });
+    setFormError('');
+    setFieldErrors({});
     setIsEditing(true);
   };
 
@@ -101,6 +140,8 @@ const TeamManager = () => {
 
   const resetForm = () => {
     setFormData({ name: '', designation: '', bio: '', imageUrl: '', order: 0 });
+    setFormError('');
+    setFieldErrors({});
     setEditingMember(null);
     setIsEditing(false);
   };
@@ -132,6 +173,12 @@ const TeamManager = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {formError ? (
+              <div className="rounded-sm border border-red-200 bg-red-50 px-4 py-3">
+                <p className="font-sans text-sm text-red-700">{formError}</p>
+              </div>
+            ) : null}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block font-sans text-sm font-medium text-gray-700 mb-2">
@@ -143,8 +190,13 @@ const TeamManager = () => {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans"
+                  className={`w-full px-4 py-2 border rounded-sm focus:ring-2 focus:ring-navy/20 font-sans ${
+                    fieldErrors.name ? 'border-red-400' : 'border-gray-300'
+                  }`}
                 />
+                {fieldErrors.name ? (
+                  <p className="mt-1 font-sans text-xs text-red-600">{fieldErrors.name}</p>
+                ) : null}
               </div>
 
               <div>
@@ -157,8 +209,13 @@ const TeamManager = () => {
                   value={formData.designation}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-navy/20 font-sans"
+                  className={`w-full px-4 py-2 border rounded-sm focus:ring-2 focus:ring-navy/20 font-sans ${
+                    fieldErrors.designation ? 'border-red-400' : 'border-gray-300'
+                  }`}
                 />
+                {fieldErrors.designation ? (
+                  <p className="mt-1 font-sans text-xs text-red-600">{fieldErrors.designation}</p>
+                ) : null}
               </div>
             </div>
 
@@ -171,11 +228,14 @@ const TeamManager = () => {
               minHeightClass="min-h-[180px]"
               helpText="Use formatting tools to structure biography content."
             />
+            {fieldErrors.bio ? (
+              <p className="-mt-2 font-sans text-xs text-red-600">{fieldErrors.bio}</p>
+            ) : null}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
                 <ImageUploader
-                  label="Team Member Photo"
+                  label="Team Member Photo (Optional)"
                   currentImage={formData.imageUrl}
                   onImageUploaded={(url, publicId) => setFormData({ ...formData, imageUrl: url, cloudinaryPublicId: publicId })}
                 />

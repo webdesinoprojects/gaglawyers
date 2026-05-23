@@ -44,6 +44,7 @@ const Contact = () => {
   const [contactEmails, setContactEmails] = useState(['contact@gaglawyers.com']);
   const [contactPhones, setContactPhones] = useState(['+91 99962 63370']);
   const [officeAddresses, setOfficeAddresses] = useState([OFFICE_ADDRESS_LINES.join(', ')]);
+  const [mainOfficeMapEmbedUrl, setMainOfficeMapEmbedUrl] = useState(MAP_EMBED_SRC);
   const [contactFormConfig, setContactFormConfig] = useState(null);
 
   useEffect(() => {
@@ -113,21 +114,23 @@ const Contact = () => {
     };
 
     try {
-      const [emailsRes, phonesRes, addressesRes, legacyEmailRes, legacyPhoneRes, legacyAddressRes] =
+      const [emailsRes, phonesRes, addressesRes, mainMapRes, legacyEmailRes, legacyPhoneRes, legacyAddressRes] =
         await Promise.all([
           fetch(`${API_BASE_URL}/api/settings/contactEmails`),
           fetch(`${API_BASE_URL}/api/settings/contactPhones`),
           fetch(`${API_BASE_URL}/api/settings/officeAddresses`),
+          fetch(`${API_BASE_URL}/api/settings/mainOfficeMapEmbedUrl`),
           fetch(`${API_BASE_URL}/api/settings/email`),
           fetch(`${API_BASE_URL}/api/settings/phoneNumber`),
           fetch(`${API_BASE_URL}/api/settings/address`),
         ]);
 
-      const [emailsData, phonesData, addressesData, legacyEmailData, legacyPhoneData, legacyAddressData] =
+      const [emailsData, phonesData, addressesData, mainMapData, legacyEmailData, legacyPhoneData, legacyAddressData] =
         await Promise.all([
           emailsRes.json(),
           phonesRes.json(),
           addressesRes.json(),
+          mainMapRes.json(),
           legacyEmailRes.json(),
           legacyPhoneRes.json(),
           legacyAddressRes.json(),
@@ -140,10 +143,13 @@ const Contact = () => {
       const fallbackEmail = String(legacyEmailData?.data?.settingValue || 'contact@gaglawyers.com').trim();
       const fallbackPhone = String(legacyPhoneData?.data?.settingValue || '+91 99962 63370').trim();
       const fallbackAddress = String(legacyAddressData?.data?.settingValue || OFFICE_ADDRESS_LINES.join(', ')).trim();
+      const fallbackMap = MAP_EMBED_SRC;
+      const mapUrl = String(mainMapData?.data?.settingValue || '').trim();
 
       setContactEmails(emailList.length > 0 ? emailList : [fallbackEmail]);
       setContactPhones(phoneList.length > 0 ? phoneList : [fallbackPhone]);
       setOfficeAddresses(addressList.length > 0 ? addressList : [fallbackAddress]);
+      setMainOfficeMapEmbedUrl(mapUrl || fallbackMap);
     } catch (error) {
       console.error('Error fetching contact settings:', error);
     }
@@ -346,7 +352,7 @@ const Contact = () => {
                   <div className="overflow-hidden rounded-[8px] border border-[#C9A84C]/90 ring-1 ring-[#C9A84C]/25 shadow-lg shadow-black/30">
                     <iframe
                       title="GAG Lawyers office on Google Maps"
-                      src={MAP_EMBED_SRC}
+                      src={mainOfficeMapEmbedUrl}
                       className="w-full border-0 block h-[220px] sm:h-[280px] md:h-[360px] lg:h-[450px]"
                       allowFullScreen
                       loading="lazy"

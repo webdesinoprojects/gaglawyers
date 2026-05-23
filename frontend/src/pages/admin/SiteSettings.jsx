@@ -22,6 +22,9 @@ const DEFAULT_OTHER_OFFICES = [
   },
 ];
 
+const DEFAULT_MAIN_OFFICE_MAP_EMBED_URL =
+  'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6998.3752460208125!2d77.13081933769948!3d28.71393836202312!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d010b75f3e47d%3A0x4e92383cc436853f!2sGAG%20Lawyers%20-%20Grover%20%26%20Grover%2C%20Advocates%20%7C%20Best%20Divorce%20Lawyer%20in%20Delhi%2C%20Property%20Lawyer%20in%20Delhi%2C%20Civil%20%26%20Criminal%20Lawyers!5e0!3m2!1sen!2sin!4v1775508641842!5m2!1sen!2sin';
+
 const SiteSettings = () => {
   const [settings, setSettings] = useState({
     disclaimerEnabled: true,
@@ -43,6 +46,7 @@ The rules of the Bar Council of India prohibit law firms from soliciting work or
     contactEmails: ['contact@gaglawyers.com'],
     contactPhones: ['+91 99962 63370'],
     officeAddresses: [OFFICE_ADDRESS_LINE],
+    mainOfficeMapEmbedUrl: DEFAULT_MAIN_OFFICE_MAP_EMBED_URL,
     otherOffices: DEFAULT_OTHER_OFFICES,
     footerLocationsLimit: 200,
     footerLocationSlugs: [],
@@ -290,6 +294,21 @@ The rules of the Bar Council of India prohibit law firms from soliciting work or
                 value={settings.address}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy font-sans"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label htmlFor="mainOfficeMapEmbedUrl" className="block font-sans text-sm font-medium text-gray-700 mb-2">
+                Main Office Google Maps Embed URL
+              </label>
+              <input
+                type="text"
+                id="mainOfficeMapEmbedUrl"
+                name="mainOfficeMapEmbedUrl"
+                value={settings.mainOfficeMapEmbedUrl || ''}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy font-sans"
+                placeholder="https://www.google.com/maps/embed?pb=..."
               />
             </div>
           </div>

@@ -1,22 +1,32 @@
 const TeamMember = require('../models/TeamMember');
 const cloudinary = require('../config/cloudinary');
 
+const getFallbackAvatarUrl = (name = 'Team Member') =>
+  `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0A193C&color=C9A84C&size=600`;
+
 const getAllTeamMembers = async (req, res) => {
   try {
     const teamMembers = await TeamMember.find().sort({ order: 1 });
+    const normalizedMembers = teamMembers.map((member) => {
+      const memberObj = member.toObject();
+      if (!memberObj.imageUrl) {
+        memberObj.imageUrl = getFallbackAvatarUrl(memberObj.name);
+      }
+      return memberObj;
+    });
     
     // Calculate team members added this month
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const thisMonthMembers = teamMembers.filter(member => 
+    const thisMonthMembers = normalizedMembers.filter(member => 
       new Date(member.createdAt) >= startOfMonth
     ).length;
     
     res.status(200).json({
       success: true,
-      count: teamMembers.length,
+      count: normalizedMembers.length,
       addedThisMonth: thisMonthMembers,
-      data: teamMembers,
+      data: normalizedMembers,
     });
   } catch (error) {
     res.status(500).json({
