@@ -302,9 +302,21 @@ const Home = () => {
           setAppointmentCaptchaToken(null);
           if (appointmentCaptchaRef.current) appointmentCaptchaRef.current.reset();
         }
+        const fieldLabelMap = {
+          name: getFieldFromConfig(appointmentFormConfig, 'name')?.label || 'Name',
+          email: getFieldFromConfig(appointmentFormConfig, 'email')?.label || 'Email',
+          phone: getFieldFromConfig(appointmentFormConfig, 'phone')?.label || 'Phone',
+          service: getFieldFromConfig(appointmentFormConfig, 'service')?.label || 'Legal Service',
+          serviceOfInterest: getFieldFromConfig(appointmentFormConfig, 'service')?.label || 'Legal Service',
+          description: getFieldFromConfig(appointmentFormConfig, 'description')?.label || 'Message',
+          message: getFieldFromConfig(appointmentFormConfig, 'description')?.label || 'Message',
+        };
+        const missingFieldsText = Array.isArray(data?.missingFields) && data.missingFields.length > 0
+          ? ` Missing: ${data.missingFields.map((key) => fieldLabelMap[key] || key).join(', ')}.`
+          : '';
         setAppointmentStatus({
           type: 'error',
-          message: data.message || 'Something went wrong. Please try again.',
+          message: (data.message || 'Something went wrong. Please try again.') + missingFieldsText,
         });
       }
     } catch {
@@ -452,6 +464,8 @@ const Home = () => {
     if (!field) return fallback;
     return Boolean(field.isVisible !== false && field.isRequired);
   };
+  const getFieldFromConfig = (config, fieldName) =>
+    config?.fields?.find((row) => row.fieldName === fieldName);
 
   const bookAppointmentForm = (formId = 'book-appointment') => (
     <div
@@ -518,12 +532,14 @@ const Home = () => {
           </div>
           <div>
             <label className="block font-sans text-xs font-medium text-gray-700 mb-1">
-              Practice area
+              {getFieldFromConfig(appointmentFormConfig, 'service')?.label || 'Legal Service'}
+              {isRequiredFromConfig(appointmentFormConfig, 'service', false) ? ' *' : ''}
             </label>
             <select
               name="service"
               value={appointmentForm.service}
               onChange={handleAppointmentChange}
+              required={isRequiredFromConfig(appointmentFormConfig, 'service', false)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
             >
               <option value="">{cf.placeholders?.service || 'Select a service'}</option>
@@ -547,12 +563,16 @@ const Home = () => {
             />
           </div>
           <div>
-            <label className="block font-sans text-xs font-medium text-gray-700 mb-1">Message</label>
+            <label className="block font-sans text-xs font-medium text-gray-700 mb-1">
+              {getFieldFromConfig(appointmentFormConfig, 'description')?.label || 'Message'}
+              {isRequiredFromConfig(appointmentFormConfig, 'description', false) ? ' *' : ''}
+            </label>
             <textarea
               name="description"
               value={appointmentForm.description}
               onChange={handleAppointmentChange}
               rows={3}
+              required={isRequiredFromConfig(appointmentFormConfig, 'description', false)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm resize-none focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white"
               placeholder={cf.placeholders?.description || 'Tell us how we can help'}
             />
