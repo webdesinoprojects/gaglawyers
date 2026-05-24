@@ -296,6 +296,20 @@ const createLocationPage = async (req, res) => {
     });
     scheduleSitemapRegeneration('location:create');
   } catch (error) {
+    if (error?.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: 'A location page with this slug already exists',
+        error: error.message,
+      });
+    }
+    if (error?.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid location page data',
+        error: error.message,
+      });
+    }
     res.status(500).json({
       success: false,
       message: 'Server Error',
@@ -333,6 +347,20 @@ const updateLocationPage = async (req, res) => {
     });
     scheduleSitemapRegeneration('location:update');
   } catch (error) {
+    if (error?.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: 'A location page with this slug already exists',
+        error: error.message,
+      });
+    }
+    if (error?.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid location page data',
+        error: error.message,
+      });
+    }
     res.status(500).json({
       success: false,
       message: 'Server Error',

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Edit, Trash2, MapPin, Eye, EyeOff, Search, Filter, Download, Upload, RefreshCw, BarChart3, Star } from 'lucide-react';
+import { Plus, Edit, Trash2, MapPin, Eye, EyeOff, Search, Filter, Upload, RefreshCw, BarChart3, Star } from 'lucide-react';
 import Button from '../../components/Button';
 import API_BASE_URL from '../../config/api';
 import { buildLocationPageSlug } from '../../utils/slugs';
@@ -36,7 +36,6 @@ const createInitialFormData = () => ({
   service: '',
   city: '',
   slug: '',
-  templateMode: 'service',
   heading: '',
   intro: '',
   sections: DEFAULT_SECTIONS.map((section) => ({ ...section })),
@@ -47,6 +46,45 @@ const createInitialFormData = () => ({
   isActive: true,
 });
 
+const toTitleCase = (value) =>
+  String(value || '')
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+
+const buildStandardSeo = (serviceNameRaw, cityRaw) => {
+  const serviceName = String(serviceNameRaw || '').trim();
+  const city = String(cityRaw || '').trim();
+  const serviceLower = serviceName.toLowerCase();
+  const cityLower = city.toLowerCase();
+  const serviceTitle = serviceName;
+  const cityTitle = toTitleCase(city);
+  const titleService = serviceLower.includes('lawyer') ? serviceTitle : `${serviceTitle} Lawyer`;
+
+  return {
+    title: `${titleService} in ${cityTitle} | GAG Lawyers`,
+    description: `${serviceTitle} in ${cityTitle} - GAG Lawyers. We offer expert legal guidance and personalized attention to meet your specific legal needs in ${cityTitle}. Our dedicated team of experienced attorneys is committed to delivering exceptional and effective legal services to individuals, businesses, and corporations`,
+    keywords: [
+      `${serviceLower} in ${cityLower}`,
+      `advocate for ${serviceLower} matters in ${cityLower}`,
+      `best ${serviceLower} lawyers near me`,
+      `${serviceLower} lawyer fees in ${cityLower}`,
+      `${serviceTitle} lawyer near me`,
+      `best ${serviceTitle} lawyers in ${cityTitle}`,
+      `best ${serviceTitle} lawyers near me`,
+      `top ${serviceTitle} lawyer in india`,
+      `best advocates for ${serviceTitle} cases in ${cityTitle}`,
+      `best lawyers for ${serviceTitle} cases in ${cityTitle}`,
+      `lawyer for ${serviceTitle} cases in ${cityTitle}`,
+      `lawyer for ${serviceTitle} matters in ${cityTitle}`,
+      `lawyer for ${serviceTitle} disputes in ${cityTitle}`,
+      `${serviceTitle} lawyer in high court`,
+      `top ${serviceTitle} lawyer in supreme court`,
+    ].join(', '),
+  };
+};
+
 const LocationManager = () => {
   const [pages, setPages] = useState([]);
   const [services, setServices] = useState([]);
@@ -56,6 +94,7 @@ const LocationManager = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingPageId, setEditingPageId] = useState(null);
+  const [creatingPage, setCreatingPage] = useState(false);
   const [togglingPageId, setTogglingPageId] = useState(null);
   const [togglingFooterPageId, setTogglingFooterPageId] = useState(null);
   const [formData, setFormData] = useState(createInitialFormData);
@@ -269,30 +308,39 @@ const LocationManager = () => {
       return;
     }
 
+    if (!selectedService.slug) {
+      alert('Selected service has no slug. Please update service slug first.');
+      return;
+    }
+
     const slug = formData.slug || buildLocationPageSlug(selectedService.slug, formData.city);
+    const standardSeo = buildStandardSeo(selectedService.name || selectedService.title, formData.city);
+    if (!slug) {
+      alert('Could not generate a valid slug. Please check service/city values.');
+      return;
+    }
     
     const pageData = {
       service: selectedService._id,
       serviceName: selectedService.name || selectedService.title,
-      city: formData.city,
+      city: String(formData.city || '').trim(),
       slug,
       content: {
         templateMode: 'service',
-        heading: formData.heading || `${selectedService.name || selectedService.title} in ${formData.city}`,
-        intro: formData.intro || `Expert ${(selectedService.name || selectedService.title).toLowerCase()} services in ${formData.city}.`,
-        sections: formData.sections.filter(s => s.title && s.content),
+        heading: `${selectedService.name || selectedService.title} in ${String(formData.city || '').trim()}`,
+        intro: `GAG Lawyers provides expert ${(selectedService.name || selectedService.title).toLowerCase()} services in ${String(formData.city || '').trim()}.`,
       },
-      images: formData.images,
       seo: {
-        title: formData.seoTitle || `${selectedService.name || selectedService.title} in ${formData.city} | GAG Lawyers`,
-        description: formData.seoDescription || `Expert ${(selectedService.name || selectedService.title).toLowerCase()} services in ${formData.city}. Contact GAG Lawyers for professional legal assistance.`,
-        keywords: formData.seoKeywords || `${(selectedService.name || selectedService.title).toLowerCase()}, lawyers in ${formData.city.toLowerCase()}, legal services ${formData.city.toLowerCase()}`,
+        title: formData.seoTitle || standardSeo.title,
+        description: formData.seoDescription || standardSeo.description,
+        keywords: formData.seoKeywords || standardSeo.keywords,
         h1: `${selectedService.name || selectedService.title} in ${formData.city}`,
       },
       isActive: formData.isActive,
     };
 
     try {
+      setCreatingPage(true);
       const response = await fetch(`${API_BASE_URL}/api/locations`, {
         method: 'POST',
         headers: {
@@ -304,7 +352,7 @@ const LocationManager = () => {
 
       const data = await response.json();
       
-      if (data.success) {
+      if (response.ok && data.success) {
         alert('Page created successfully');
         setShowCreateModal(false);
         setFormData(createInitialFormData());
@@ -316,6 +364,8 @@ const LocationManager = () => {
     } catch (error) {
       console.error('Error creating page:', error);
       alert('Error creating page');
+    } finally {
+      setCreatingPage(false);
     }
   };
 
@@ -460,6 +510,12 @@ const LocationManager = () => {
   const handleServiceCityChange = (field, value) => {
     setFormData(prev => {
       const updated = { ...prev, [field]: value };
+
+      if (field === 'service' || field === 'city') {
+        updated.seoTitle = '';
+        updated.seoDescription = '';
+        updated.seoKeywords = '';
+      }
       
       // Auto-populate content when both service and city are selected
       if (updated.service && updated.city) {
@@ -467,6 +523,7 @@ const LocationManager = () => {
         if (selectedService) {
           const serviceName = selectedService.name || selectedService.title;
           const city = updated.city;
+          const standardSeo = buildStandardSeo(serviceName, city);
           
           updated.slug = buildLocationPageSlug(selectedService.slug, city);
           
@@ -479,35 +536,11 @@ const LocationManager = () => {
           if (!prev.intro || prev.intro === '') {
             updated.intro = `GAG Lawyers - Grover & Grover Advocates provides expert ${serviceName.toLowerCase()} services in ${city}. Our experienced team of advocates delivers comprehensive legal solutions tailored to your specific needs.`;
           }
+
+          updated.seoTitle = standardSeo.title;
+          updated.seoDescription = standardSeo.description;
+          updated.seoKeywords = standardSeo.keywords;
           
-          // Auto-populate sections with service and city context
-          updated.sections = [
-            { 
-              title: `Why Choose Our ${serviceName} Services in ${city}`, 
-              content: `When it comes to ${serviceName.toLowerCase()} in ${city}, GAG Lawyers stands out for our commitment to excellence, client-focused approach, and proven track record. Our legal team has extensive experience handling complex cases and providing strategic counsel.` 
-            },
-            { 
-              title: 'Our Approach', 
-              content: `We understand that every legal matter is unique. Our approach combines deep legal expertise with practical insight, ensuring you receive advice that is not only legally sound but also commercially viable and personally relevant. We work in close partnership with our clients throughout the entire process.` 
-            },
-            { 
-              title: `Contact Our ${city} Legal Team`, 
-              content: `If you need ${serviceName.toLowerCase()} assistance in ${city}, our team is ready to help. We offer initial consultations to understand your situation and provide clear guidance on the best path forward. Contact us today to discuss your legal needs.` 
-            }
-          ];
-          
-          // Auto-populate SEO fields
-          if (!prev.seoTitle || prev.seoTitle === '') {
-            updated.seoTitle = `${serviceName} in ${city} | GAG Lawyers - Expert Legal Services`;
-          }
-          
-          if (!prev.seoDescription || prev.seoDescription === '') {
-            updated.seoDescription = `Looking for ${serviceName.toLowerCase()} in ${city}? GAG Lawyers offers professional legal services with 25+ years of experience. Contact us for expert consultation.`;
-          }
-          
-          if (!prev.seoKeywords || prev.seoKeywords === '') {
-            updated.seoKeywords = `${serviceName.toLowerCase()}, ${city}, lawyers, advocates, legal services, ${serviceName.toLowerCase()} ${city}`;
-          }
         }
       }
       
@@ -664,7 +697,7 @@ const LocationManager = () => {
         </div>
       </div>
 
-      {/* Bulk Create Modal */}
+      {/* Create Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
@@ -746,131 +779,8 @@ const LocationManager = () => {
                   </p>
                 </div>
 
-                {/* Content Section */}
-                <div className="border-t pt-6">
-                  <h3 className="font-serif text-lg font-bold text-gray-800 mb-4">Page Content</h3>
-                  
-                  <div className="space-y-4">
-                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
-                      This page uses <strong>Centralized Service Template</strong>. Any content change in Service Manager
-                      automatically updates all location pages for this service.
-                    </div>
-
-                    <div>
-                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-2">
-                        Main Heading
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.heading}
-                        onChange={(e) => setFormData(prev => ({ ...prev, heading: e.target.value }))}
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-navy/30 focus:border-navy transition-all font-sans text-gray-700"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-sans text-sm font-semibold text-gray-800 mb-2">
-                        Introduction
-                      </label>
-                      <textarea
-                        value={formData.intro}
-                        onChange={(e) => setFormData(prev => ({ ...prev, intro: e.target.value }))}
-                        rows="3"
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-navy/30 focus:border-navy transition-all font-sans text-gray-700 resize-none"
-                      />
-                    </div>
-
-                    {/* Image Upload */}
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <label className="block font-sans text-sm font-semibold text-gray-800">
-                          Images (Upload to Cloudinary)
-                        </label>
-                        <button
-                          type="button"
-                          onClick={addImageSlot}
-                          className="text-sm text-navy hover:text-navy/80 font-sans font-medium"
-                        >
-                          + Add Image Slot
-                        </button>
-                      </div>
-                      <div className="space-y-3">
-                        {formData.images.map((image, index) => (
-                          <div key={index} className="p-4 bg-gray-50 rounded-lg border-2 border-gray-300">
-                            <div className="flex items-center justify-between mb-3">
-                              <div className="flex items-center">
-                                <svg className="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <span className="text-sm font-semibold text-gray-600">Image {index + 1}</span>
-                              </div>
-                              {image.url && (
-                                <button
-                                  onClick={() => handleRemoveImage(index)}
-                                  className="text-xs text-red-500 hover:text-red-700 font-medium"
-                                >
-                                  Remove
-                                </button>
-                              )}
-                            </div>
-                            
-                            {image.url ? (
-                              <div className="space-y-3">
-                                <div className="relative rounded-lg overflow-hidden bg-gray-200">
-                                  <img 
-                                    src={image.url} 
-                                    alt={image.alt || `Image ${index + 1}`}
-                                    className="w-full h-48 object-cover"
-                                  />
-                                </div>
-                                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                                  <input
-                                    type="text"
-                                    value={image.alt}
-                                    onChange={(e) => updateImage(index, 'alt', e.target.value)}
-                                    placeholder="Alt text"
-                                    className="px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm"
-                                  />
-                                  <input
-                                    type="text"
-                                    value={image.caption}
-                                    onChange={(e) => updateImage(index, 'caption', e.target.value)}
-                                    placeholder="Caption"
-                                    className="px-3 py-2 border border-gray-300 rounded-lg font-sans text-sm"
-                                  />
-                                </div>
-                              </div>
-                            ) : (
-                              <div>
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={(e) => {
-                                    const file = e.target.files[0];
-                                    if (file) handleImageUpload(index, file);
-                                  }}
-                                  className="hidden"
-                                  id={`image-upload-${index}`}
-                                />
-                                <label
-                                  htmlFor={`image-upload-${index}`}
-                                  className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-navy hover:bg-gray-100 transition-colors"
-                                >
-                                  <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                                  <span className="text-sm text-gray-600 font-medium">Click to upload image</span>
-                                  <span className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP up to 10MB</span>
-                                </label>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-                      Section layout/content is controlled centrally from Service Manager for this service.
-                    </div>
-                  </div>
+                <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+                  This page uses <strong>Centralized Service Template</strong>. Content and sections are managed from Service Manager.
                 </div>
 
                 {/* SEO Section */}
@@ -946,10 +856,10 @@ const LocationManager = () => {
                 <Button 
                   variant="primary" 
                   onClick={handleCreatePage}
-                  disabled={!formData.service || !formData.city}
+                  disabled={!formData.service || !formData.city || creatingPage}
                 >
                   <Plus className="inline mr-2" size={18} />
-                  Create Page
+                  {creatingPage ? 'Creating...' : 'Create Page'}
                 </Button>
               </div>
             </div>
@@ -1484,7 +1394,7 @@ const LocationManager = () => {
       <div className="bg-blue-50 border border-blue-200 rounded-sm p-4 mt-6">
         <h3 className="font-sans text-sm font-semibold text-blue-900 mb-2">How to use:</h3>
         <ul className="font-sans text-sm text-blue-800 space-y-1 list-disc list-inside">
-          <li>Use "Bulk Create" to generate pages for multiple cities at once</li>
+          <li>Create one page by selecting service + city and saving</li>
           <li>Toggle individual pages on/off, or use checkboxes for bulk operations</li>
           <li>Inactive pages won't appear in sitemap or public site</li>
           <li>Use filters to find specific pages quickly</li>

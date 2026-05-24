@@ -42,6 +42,7 @@
     "locations:enforce-service-template:dry": "node scripts/enforce-location-service-template.js",
     "locations:enforce-service-template:apply": "node scripts/enforce-location-service-template.js --apply",
     "services:content-audit": "node scripts/check-duplicate-service-content.js",
+    "check:locations-per-service": "node check-locations-per-service.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
