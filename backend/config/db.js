@@ -4,6 +4,8 @@ let isConnected = false;
 let connectPromise = null;
 let listenersBound = false;
 
+const getMongoUri = () => process.env.MONGO_URI || process.env.MONGODB_URI || process.env.DATABASE_URL;
+
 const bindConnectionListeners = () => {
   if (listenersBound) return;
 
@@ -26,6 +28,15 @@ const bindConnectionListeners = () => {
 };
 
 const connectDB = async () => {
+  const mongoUri = getMongoUri();
+  if (!mongoUri) {
+    throw new Error('MONGO_URI is missing (checked: MONGO_URI, MONGODB_URI, DATABASE_URL)');
+  }
+
+  if (!process.env.MONGO_URI && (process.env.MONGODB_URI || process.env.DATABASE_URL)) {
+    console.warn('MONGO_URI not set. Falling back to legacy Mongo env variable. Please standardize to MONGO_URI.');
+  }
+
   const readyState = mongoose.connection.readyState;
 
   if (isConnected || readyState === 1) {
@@ -50,7 +61,7 @@ const connectDB = async () => {
     mongoose.set('bufferTimeoutMS', (process.env.NODE_ENV === 'production' || isServerless) ? 30000 : 10000);
     bindConnectionListeners();
 
-    connectPromise = mongoose.connect(process.env.MONGO_URI, {
+    connectPromise = mongoose.connect(mongoUri, {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
       maxPoolSize: 20,
