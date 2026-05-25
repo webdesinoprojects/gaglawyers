@@ -21,9 +21,19 @@ function runGenerator() {
   pending = false;
 
   const scriptPath = path.resolve(__dirname, '../scripts/generateSitemap.js');
+  
+  // ===== CRITICAL FIX #2: Set explicit cwd for child process =====
+  const backendDir = path.resolve(__dirname, '../');
+  
+  console.log('[sitemap-regen] Spawning sitemap generator');
+  console.log('[sitemap-regen] Parent cwd:', process.cwd());
+  console.log('[sitemap-regen] Setting child cwd:', backendDir);
+  console.log('[sitemap-regen] Script path:', scriptPath);
+  
   const child = spawn(process.execPath, [scriptPath], {
-    stdio: 'ignore',
+    stdio: ['ignore', 'inherit', 'inherit'],  // Changed to 'inherit' to see child output
     detached: true,
+    cwd: backendDir,  // ✅ Set working directory to backend/
     env: process.env,
   });
 
@@ -36,8 +46,15 @@ function runGenerator() {
       scheduleSitemapRegeneration('pending');
     }
     if (code !== 0) {
-      console.error(`[sitemap] generator exited with code ${code}`);
+      console.error(`[sitemap-regen] generator exited with code ${code}`);
+    } else {
+      console.log('[sitemap-regen] generator completed successfully');
     }
+  });
+
+  child.on('error', (err) => {
+    running = false;
+    console.error('[sitemap-regen] generator error:', err);
   });
 }
 
@@ -47,7 +64,7 @@ function scheduleSitemapRegeneration(reason = 'content-change', debounceMs = 500
   if (timer) clearTimeout(timer);
   timer = setTimeout(() => {
     timer = null;
-    console.log(`[sitemap] regenerating (${reason})`);
+    console.log(`[sitemap-regen] regenerating (${reason})`);
     runGenerator();
   }, debounceMs);
 }

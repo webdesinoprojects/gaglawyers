@@ -143,6 +143,12 @@ const getStaticSitemapEntries = async (req) => {
 
 const generateSitemap = async (req, res) => {
   try {
+    // ===== DEBUG: Runtime route execution =====
+    console.log('[sitemap-route] GET /sitemap.xml');
+    console.log('[sitemap-route] process.cwd():', process.cwd());
+    console.log('[sitemap-route] process.pid:', process.pid);
+    console.log('[sitemap-route] MONGO_URI available:', !!process.env.MONGO_URI);
+    
     await connectDB();
     const baseUrl = getBaseUrl(req);
     
@@ -195,6 +201,12 @@ const generateSitemap = async (req, res) => {
 
 const generateNamedSitemap = async (req, res) => {
   try {
+    // ===== DEBUG: Runtime route execution =====
+    console.log('[sitemap-route] GET /:name.xml', { name: req.params.name });
+    console.log('[sitemap-route] process.cwd():', process.cwd());
+    console.log('[sitemap-route] process.pid:', process.pid);
+    console.log('[sitemap-route] MONGO_URI available:', !!process.env.MONGO_URI);
+    
     await connectDB();
     const name = String(req.params.name || '').toLowerCase();
     let entries = [];

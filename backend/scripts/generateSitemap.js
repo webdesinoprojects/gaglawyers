@@ -1,8 +1,21 @@
 /* eslint-disable no-console */
-require('dotenv').config();
+const path = require('path');
+
+// ===== CRITICAL FIX #1: Explicit .env path for child process =====
+require('dotenv').config({ 
+  path: path.resolve(__dirname, '../.env') 
+});
+
+// ===== DEBUG LOGS =====
+console.log('[sitemap-gen] Child process startup');
+console.log('[sitemap-gen] cwd:', process.cwd());
+console.log('[sitemap-gen] __dirname:', __dirname);
+console.log('[sitemap-gen] .env path:', path.resolve(__dirname, '../.env'));
+console.log('[sitemap-gen] .env exists:', require('fs').existsSync(path.resolve(__dirname, '../.env')));
+console.log('[sitemap-gen] NODE_ENV:', process.env.NODE_ENV);
+console.log('[sitemap-gen] MONGO_URI loaded:', !!process.env.MONGO_URI);
 
 const fs = require('fs');
-const path = require('path');
 const zlib = require('zlib');
 const { SitemapStream, streamToPromise } = require('sitemap');
 

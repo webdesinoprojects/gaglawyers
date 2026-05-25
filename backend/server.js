@@ -1,5 +1,14 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
+
+// ===== DEBUG: Server startup =====
+console.log('[server] Startup');
+console.log('[server] cwd:', process.cwd());
+console.log('[server] __dirname:', __dirname);
+console.log('[server] .env path:', path.join(__dirname, '.env'));
+console.log('[server] NODE_ENV:', process.env.NODE_ENV);
+console.log('[server] MONGO_URI available:', !!process.env.MONGO_URI);
+
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');

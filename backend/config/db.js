@@ -60,6 +60,11 @@ const connectDB = async () => {
   }
 
   if (!process.env.MONGO_URI) {
+    console.error('[db] ❌ MONGO_URI not found!');
+    console.error('[db] cwd:', process.cwd());
+    console.error('[db] __dirname:', __dirname);
+    console.error('[db] process.pid:', process.pid);
+    console.error('[db] Available env keys:', Object.keys(process.env).filter(k => k.includes('MONGO') || k.includes('DB')));
     throw new Error('MONGO_URI environment variable is not set. Check your .env file on the server.');
   }
 
