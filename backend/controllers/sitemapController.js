@@ -1,7 +1,6 @@
 const Service = require('../models/Service');
 const BlogPost = require('../models/BlogPost');
 const LocationPage = require('../models/LocationPage');
-const connectDB = require('../config/db');
 
 const getBaseUrl = (req) => {
   // Priority 1: Use environment variable (production)
@@ -143,7 +142,6 @@ const getStaticSitemapEntries = async (req) => {
 
 const generateSitemap = async (req, res) => {
   try {
-    await connectDB();
     const baseUrl = getBaseUrl(req);
     
     // Count total location pages to determine how many sitemap files we need
@@ -195,7 +193,6 @@ const generateSitemap = async (req, res) => {
 
 const generateNamedSitemap = async (req, res) => {
   try {
-    await connectDB();
     const name = String(req.params.name || '').toLowerCase();
     let entries = [];
 

@@ -40,6 +40,9 @@ const connectDB = async () => {
   }
 
   try {
+    if (!process.env.MONGO_URI) {
+      throw new Error('MONGO_URI environment variable is not set. Check your .env file.');
+    }
     mongoose.set('strictQuery', false);
     // Always enable bufferCommands to handle serverless cold starts and delayed connections
     // This allows Mongoose to queue commands while connecting instead of throwing errors
