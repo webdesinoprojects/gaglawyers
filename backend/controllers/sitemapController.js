@@ -1,7 +1,6 @@
 const Service = require('../models/Service');
 const BlogPost = require('../models/BlogPost');
 const LocationPage = require('../models/LocationPage');
-const connectDB = require('../config/db');
 
 const getBaseUrl = (req) => {
   // Priority 1: Use environment variable (production)
@@ -149,7 +148,7 @@ const generateSitemap = async (req, res) => {
     console.log('[sitemap-route] process.pid:', process.pid);
     console.log('[sitemap-route] MONGO_URI available:', !!process.env.MONGO_URI);
     
-    await connectDB();
+    // Connection established globally at server startup - use existing connection
     const baseUrl = getBaseUrl(req);
     
     // Count total location pages to determine how many sitemap files we need
@@ -207,7 +206,7 @@ const generateNamedSitemap = async (req, res) => {
     console.log('[sitemap-route] process.pid:', process.pid);
     console.log('[sitemap-route] MONGO_URI available:', !!process.env.MONGO_URI);
     
-    await connectDB();
+    // Connection established globally at server startup - use existing connection
     const name = String(req.params.name || '').toLowerCase();
     let entries = [];
 
