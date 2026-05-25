@@ -143,8 +143,6 @@ const getStaticSitemapEntries = async (req) => {
 
 const generateSitemap = async (req, res) => {
   try {
-    console.log('SITEMAP MONGO_URI exists:', !!process.env.MONGO_URI);
-    console.log('SITEMAP MONGODB_URI exists:', !!process.env.MONGODB_URI);
     await connectDB();
     const baseUrl = getBaseUrl(req);
     
@@ -197,8 +195,6 @@ const generateSitemap = async (req, res) => {
 
 const generateNamedSitemap = async (req, res) => {
   try {
-    console.log('SITEMAP MONGO_URI exists:', !!process.env.MONGO_URI);
-    console.log('SITEMAP MONGODB_URI exists:', !!process.env.MONGODB_URI);
     await connectDB();
     const name = String(req.params.name || '').toLowerCase();
     let entries = [];
