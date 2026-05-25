@@ -25,36 +25,53 @@ const bindConnectionListeners = () => {
   listenersBound = true;
 };
 
+const waitForConnection = () =>
+  new Promise((resolve, reject) => {
+    const onConnected = () => {
+      mongoose.connection.removeListener('error', onError);
+      resolve();
+    };
+    const onError = (err) => {
+      mongoose.connection.removeListener('connected', onConnected);
+      reject(err);
+    };
+    mongoose.connection.once('connected', onConnected);
+    mongoose.connection.once('error', onError);
+  });
+
 const connectDB = async () => {
   const readyState = mongoose.connection.readyState;
 
   if (isConnected || readyState === 1) {
     isConnected = true;
-    console.log('Using existing MongoDB connection');
     return;
   }
 
-  if (readyState === 2 && connectPromise) {
-    await connectPromise;
+  if (readyState === 2) {
+    // Mongoose is connecting — either via our connectPromise or via internal auto-reconnect.
+    // In both cases just wait for the 'connected' event rather than calling mongoose.connect() again.
+    if (connectPromise) {
+      await connectPromise;
+    } else {
+      await waitForConnection();
+    }
+    isConnected = true;
     return;
+  }
+
+  if (!process.env.MONGO_URI) {
+    throw new Error('MONGO_URI environment variable is not set. Check your .env file on the server.');
   }
 
   try {
-    if (!process.env.MONGO_URI) {
-      throw new Error('MONGO_URI environment variable is not set. Check your .env file.');
-    }
     mongoose.set('strictQuery', false);
-    // Always enable bufferCommands to handle serverless cold starts and delayed connections
-    // This allows Mongoose to queue commands while connecting instead of throwing errors
-    const isServerless = process.env.VERCEL || process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME;
     mongoose.set('bufferCommands', true);
-    // Production (especially VPS + remote Mongo) can exceed 10s on cold starts.
-    // Keep this high so the first request doesn't fail while connecting.
-    mongoose.set('bufferTimeoutMS', (process.env.NODE_ENV === 'production' || isServerless) ? 30000 : 10000);
+    // Always 30 s — NODE_ENV may be undefined on VPS and 10 s is too short for reconnects.
+    mongoose.set('bufferTimeoutMS', 30000);
     bindConnectionListeners();
 
     connectPromise = mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
       maxPoolSize: 20,
     });
