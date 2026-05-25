@@ -8,7 +8,7 @@ let isConnected = false;
 let connectPromise = null;
 let listenersBound = false;
 
-const getMongoUri = () => process.env.MONGO_URI;
+const getMongoUri = () => process.env.MONGO_URI || process.env.MONGODB_URI;
 
 const bindConnectionListeners = () => {
   if (listenersBound) return;
@@ -34,7 +34,7 @@ const bindConnectionListeners = () => {
 const connectDB = async () => {
   const mongoUri = getMongoUri();
   if (!mongoUri) {
-    throw new Error('MONGO_URI is missing');
+    throw new Error('No Mongo URI found. Expected MONGO_URI or MONGODB_URI');
   }
 
   const readyState = mongoose.connection.readyState;
@@ -60,6 +60,13 @@ const connectDB = async () => {
     // Keep this high so the first request doesn't fail while connecting.
     mongoose.set('bufferTimeoutMS', (process.env.NODE_ENV === 'production' || isServerless) ? 30000 : 10000);
     bindConnectionListeners();
+
+    console.log('DB URI CHECK', {
+      MONGO_URI: !!process.env.MONGO_URI,
+      MONGODB_URI: !!process.env.MONGODB_URI,
+      NODE_ENV: process.env.NODE_ENV,
+      cwd: process.cwd(),
+    });
 
     connectPromise = mongoose.connect(mongoUri, {
       serverSelectionTimeoutMS: 5000,
