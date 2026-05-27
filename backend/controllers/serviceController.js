@@ -211,6 +211,7 @@ const updateService = async (req, res) => {
         heading: normalizeSectionHeading(section, index),
         background: section.background || 'light',
         content: section.content && typeof section.content === 'object' ? section.content : {},
+        appendLocationToHeading: typeof section.appendLocationToHeading === 'boolean' ? section.appendLocationToHeading : null,
       }));
 
       // Replace sections only when we have a valid computed set.

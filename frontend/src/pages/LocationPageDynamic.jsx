@@ -141,19 +141,21 @@ const withLocationAnswer = (answer, city) => {
   return answer.trim();
 };
 
-const withLocationHeading = (heading, city, sectionType = '') => {
+const LOCATION_APPEND_DEFAULTS = ['hero', 'benefits', 'process'];
+
+const withLocationHeading = (heading, city, sectionType = '', appendLocationToHeading = null) => {
   const safeHeading = (heading || '').trim();
   if (sectionType === 'faq') return safeHeading || 'Frequently Asked Questions';
   if (!safeHeading) return `Legal Support in ${city}`;
   if (hasCityReference(safeHeading, city)) return safeHeading;
   if (/faq|frequently asked/i.test(safeHeading)) return safeHeading;
-  if (sectionType === 'hero') {
-    return `${safeHeading} in ${city}`;
-  }
-  if (sectionType === 'benefits' || sectionType === 'process') {
-    return `${safeHeading} in ${city}`;
-  }
-  return safeHeading;
+
+  // Use admin-set override if present, otherwise fall back to type-based default
+  const shouldAppend = typeof appendLocationToHeading === 'boolean'
+    ? appendLocationToHeading
+    : LOCATION_APPEND_DEFAULTS.includes(sectionType);
+
+  return shouldAppend ? `${safeHeading} in ${city}` : safeHeading;
 };
 
 const withLocationBody = (body, city) => {
@@ -164,7 +166,7 @@ const withLocationBody = (body, city) => {
 const localizeSectionForCity = (section, city) => {
   const next = {
     ...section,
-    heading: withLocationHeading(section?.heading, city, section?.type),
+    heading: withLocationHeading(section?.heading, city, section?.type, section?.appendLocationToHeading ?? null),
     content: stripInLocationFromContent({ ...(section?.content || {}) }, city),
   };
 

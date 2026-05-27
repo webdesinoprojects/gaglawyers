@@ -51,6 +51,12 @@ const serviceSectionSchema = new mongoose.Schema({
     required: true,
     default: {},
   },
+  // null = use type-based default (hero/benefits/process → true, others → false)
+  // true/false = admin-controlled explicit override
+  appendLocationToHeading: {
+    type: Boolean,
+    default: null,
+  },
 }, {
   timestamps: true,
 });

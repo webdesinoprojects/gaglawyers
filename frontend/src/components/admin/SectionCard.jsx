@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { GripVertical, Eye, EyeOff, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
+import { GripVertical, Eye, EyeOff, ChevronDown, ChevronUp, Trash2, MapPin } from 'lucide-react';
 import SectionContentFields from './SectionContentFields';
+
+const LOCATION_APPEND_DEFAULTS = ['hero', 'benefits', 'process'];
 
 /**
  * Section Card - Individual draggable section
@@ -37,6 +39,15 @@ const SectionCard = ({
 
   const handleContentChange = (newContent) => {
     onUpdate({ ...section, content: newContent });
+  };
+
+  const locationAppendDefault = LOCATION_APPEND_DEFAULTS.includes(section.type);
+  const locationAppendEffective = section.appendLocationToHeading !== null && section.appendLocationToHeading !== undefined
+    ? section.appendLocationToHeading
+    : locationAppendDefault;
+
+  const handleLocationAppendToggle = () => {
+    onUpdate({ ...section, appendLocationToHeading: !locationAppendEffective });
   };
 
   return (
@@ -138,6 +149,39 @@ const SectionCard = ({
               <option value="dark">Dark</option>
               <option value="accent">Accent</option>
             </select>
+          </div>
+
+          {/* Location Page Title Control */}
+          <div className="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-blue-500" />
+                <span className="text-sm font-medium text-gray-700">
+                  Append &ldquo;in City&rdquo; to heading on location pages
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleLocationAppendToggle}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                  locationAppendEffective ? 'bg-blue-600' : 'bg-gray-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                    locationAppendEffective ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+            <p className="mt-1 text-xs text-gray-500">
+              {locationAppendEffective
+                ? `Location pages will show: "${section.heading} in Delhi"`
+                : `Location pages will show: "${section.heading}" (no city appended)`}
+              {section.appendLocationToHeading === null || section.appendLocationToHeading === undefined
+                ? ' (using default for this section type)'
+                : ' (custom override)'}
+            </p>
           </div>
 
           {/* Content Fields */}
