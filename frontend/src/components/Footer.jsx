@@ -51,7 +51,7 @@ const CITY_ALIASES = {
 
 const normalizeCity = (value = '') => value.toString().trim().toLowerCase();
 /** Bump when API slug shape changes (e.g. `*-in-*`) so clients refetch. */
-const FOOTER_LOCATIONS_CACHE_KEY = 'gag-footer-locations-v6';
+const FOOTER_LOCATIONS_CACHE_KEY = 'gag-footer-locations-v7';
 let footerLocationsCache = null;
 
 const isStaleFooterSlug = (slug) =>
@@ -130,7 +130,6 @@ const Footer = () => {
         if (isMounted) {
           setLocations(footerLocationsCache);
         }
-        return;
       }
       if (footerLocationsCache?.some((row) => isStaleFooterSlug(row?.slug))) {
         footerLocationsCache = null;
@@ -149,10 +148,10 @@ const Footer = () => {
             if (isMounted) {
               setLocations(parsedLocations);
             }
-            return;
+          } else {
+            sessionStorage.removeItem(FOOTER_LOCATIONS_CACHE_KEY);
+            footerLocationsCache = null;
           }
-          sessionStorage.removeItem(FOOTER_LOCATIONS_CACHE_KEY);
-          footerLocationsCache = null;
         }
       } catch (error) {
         sessionStorage.removeItem(FOOTER_LOCATIONS_CACHE_KEY);

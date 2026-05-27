@@ -162,31 +162,67 @@ const getFooterLocationLinks = async (req, res) => {
       : configuredLimit;
 
     if (selectedSlugs.length > 0) {
-      const pages = await LocationPage.find({
-        slug: { $in: selectedSlugs },
-        isActive: true,
-      })
-        .populate('service', 'name')
-        .lean();
+      const [manualPages, pinnedFooterPages] = await Promise.all([
+        LocationPage.find({
+          slug: { $in: selectedSlugs },
+          isActive: true,
+          showInFooter: true,
+        })
+          .populate('service', 'name')
+          .lean(),
+        LocationPage.find({
+          isActive: true,
+          showInFooter: true,
+          city: { $exists: true, $ne: '' },
+          slug: { $exists: true, $ne: '' },
+          service: { $exists: true, $ne: null },
+        })
+          .populate('service', 'name')
+          .sort({ updatedAt: -1, createdAt: -1 })
+          .lean(),
+      ]);
 
-      const bySlug = new Map();
-      pages.forEach((page) => {
+      const manualBySlug = new Map();
+      manualPages.forEach((page) => {
         const slug = String(page?.slug || '').trim();
         const city = String(page?.city || '').trim();
         const serviceName = String(page?.service?.name || '').trim();
         if (!slug || !city || !serviceName) return;
-        bySlug.set(slug, { city, serviceName, slug });
+        manualBySlug.set(slug, { city, serviceName, slug });
       });
 
-      const ordered = selectedSlugs
-        .map((slug) => bySlug.get(slug))
-        .filter(Boolean)
-        .slice(0, limit);
+      const pinnedOrdered = pinnedFooterPages
+        .map((page) => ({
+          slug: String(page?.slug || '').trim(),
+          city: String(page?.city || '').trim(),
+          serviceName: String(page?.service?.name || '').trim(),
+        }))
+        .filter((row) => row.slug && row.city && row.serviceName);
+
+      const merged = [];
+      const seen = new Set();
+
+      // Always prioritize explicitly toggled footer pages.
+      pinnedOrdered.forEach((row) => {
+        if (seen.has(row.slug)) return;
+        seen.add(row.slug);
+        merged.push(row);
+      });
+
+      // Fill remaining slots with the manual ordered list.
+      selectedSlugs.forEach((slug) => {
+        const row = manualBySlug.get(slug);
+        if (!row || seen.has(row.slug)) return;
+        seen.add(row.slug);
+        merged.push(row);
+      });
+
+      const data = merged.slice(0, limit);
 
       return res.status(200).json({
         success: true,
-        count: ordered.length,
-        data: ordered,
+        count: data.length,
+        data,
       });
     }
 
@@ -397,6 +433,32 @@ const toggleLocationPage = async (req, res) => {
   }
 };
 
+const getLocationPageById = async (req, res) => {
+  try {
+    const page = await LocationPage.findById(req.params.id)
+      .populate('service', 'name slug')
+      .lean();
+
+    if (!page) {
+      return res.status(404).json({
+        success: false,
+        message: 'Page not found',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: page,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message,
+    });
+  }
+};
+
 const toggleFooterLocationPage = async (req, res) => {
   try {
     const page = await LocationPage.findById(req.params.id);
@@ -598,6 +660,7 @@ const getLocationStats = async (req, res) => {
 module.exports = {
   getAllLocationPages,
   getLocationPageBySlug,
+  getLocationPageById,
   getFooterLocationLinks,
   createLocationPage,
   updateLocationPage,

@@ -53,6 +53,13 @@ const toTitleCase = (value) =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
 
+const normalizeId = (value) => {
+  if (!value) return '';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'object' && value._id) return String(value._id);
+  return String(value);
+};
+
 const buildStandardSeo = (serviceNameRaw, cityRaw) => {
   const serviceName = String(serviceNameRaw || '').trim();
   const city = String(cityRaw || '').trim();
@@ -94,6 +101,7 @@ const LocationManager = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingPageId, setEditingPageId] = useState(null);
+  const [loadingEditPageId, setLoadingEditPageId] = useState(null);
   const [creatingPage, setCreatingPage] = useState(false);
   const [togglingPageId, setTogglingPageId] = useState(null);
   const [togglingFooterPageId, setTogglingFooterPageId] = useState(null);
@@ -301,7 +309,7 @@ const LocationManager = () => {
     }
 
     const token = localStorage.getItem('adminToken');
-    const selectedService = services.find(s => s._id === formData.service);
+    const selectedService = services.find((s) => normalizeId(s._id) === normalizeId(formData.service));
 
     if (!selectedService) {
       alert('Service not found');
@@ -369,23 +377,48 @@ const LocationManager = () => {
     }
   };
 
-  const handleEditPage = (page) => {
+  const hydrateEditForm = (page) => {
     setEditingPageId(page._id);
     setFormData({
-      service: page.service?._id || page.service,
-      city: page.city,
+      service: normalizeId(page.service?._id || page.service),
+      city: page.city || '',
       slug: page.slug || '',
       templateMode: 'service',
       heading: page.content?.heading || '',
       intro: page.content?.intro || '',
-      sections: page.content?.sections || DEFAULT_SECTIONS.map((section) => ({ ...section, content: '' })),
+      sections: Array.isArray(page.content?.sections) && page.content.sections.length > 0
+        ? page.content.sections
+        : DEFAULT_SECTIONS.map((section) => ({ ...section, content: '' })),
       images: normalizeImages(page.images),
       seoTitle: page.seo?.title || '',
       seoDescription: page.seo?.description || '',
       seoKeywords: page.seo?.keywords || '',
-      isActive: page.isActive,
+      isActive: Boolean(page.isActive),
     });
     setShowEditModal(true);
+  };
+
+  const handleEditPage = async (page) => {
+    const token = localStorage.getItem('adminToken');
+    setLoadingEditPageId(page._id);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/locations/${page._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+
+      if (response.ok && data.success && data.data) {
+        hydrateEditForm(data.data);
+      } else {
+        hydrateEditForm(page);
+      }
+    } catch (error) {
+      console.error('Error loading page details for edit:', error);
+      hydrateEditForm(page);
+    } finally {
+      setLoadingEditPageId(null);
+    }
   };
 
   const handleUpdatePage = async () => {
@@ -395,7 +428,7 @@ const LocationManager = () => {
     }
 
     const token = localStorage.getItem('adminToken');
-    const selectedService = services.find(s => s._id === formData.service);
+    const selectedService = services.find((s) => normalizeId(s._id) === normalizeId(formData.service));
 
     if (!selectedService) {
       alert('Service not found');
@@ -1321,7 +1354,8 @@ const LocationManager = () => {
                         <button
                           type="button"
                           onClick={() => handleEditPage(page)}
-                          className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-sm transition-colors"
+                          disabled={loadingEditPageId === page._id}
+                          className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                           title="Edit page"
                         >
                           <Edit size={16} />
