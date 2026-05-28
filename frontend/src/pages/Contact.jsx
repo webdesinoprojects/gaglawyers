@@ -241,7 +241,6 @@ const Contact = () => {
         title="Contact Us - GAG Lawyers | Legal Consultation"
         description="Get in touch with our legal experts. Schedule a consultation for corporate law, litigation, real estate, and family law matters."
         keywords="contact lawyers, legal consultation, lawyers in delhi, law firm contact"
-        canonical="https://gaglawyers.com/contact"
       />
 
       <section className="bg-[#0B1526] text-white">

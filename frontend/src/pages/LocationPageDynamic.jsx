@@ -5,6 +5,8 @@ import SEOHead from '../components/SEOHead';
 import SectionRenderer from '../components/sections/SectionRenderer';
 import API_BASE_URL from '../config/api';
 
+const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://gaglawyers.com').replace(/\/+$/, '');
+
 const parseServiceAndCityFromSlug = (slug = '') => {
   const marker = '-in-';
   const idx = slug.lastIndexOf(marker);
@@ -333,33 +335,53 @@ const LocationPageDynamic = () => {
   }, [pageData, serviceData, slug]);
 
   if (loading) {
+    const { citySlug, serviceSlugPart } = parseServiceAndCityFromSlug(slug || '');
+    const loadingCity = toTitleCaseFromSlug(citySlug);
+    const loadingService = toTitleCaseFromSlug(serviceSlugPart);
+    const loadingTitle = buildLocationSeoTitle(loadingService || 'Legal Service', loadingCity || 'Your City');
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5]">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 text-[#c9a84c] animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 font-sans">Loading service...</p>
+      <>
+        <SEOHead
+          title={loadingTitle}
+          description={`Expert ${(loadingService || 'legal').toLowerCase()} services in ${loadingCity || 'your city'}. Contact GAG Lawyers for trusted legal representation.`}
+          keywords={`${loadingService}, ${loadingCity}, lawyers, GAG Lawyers`}
+          canonical={`${SITE_URL}/${slug || ''}`}
+        />
+        <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5]">
+          <div className="text-center">
+            <Loader2 className="w-12 h-12 text-[#c9a84c] animate-spin mx-auto mb-4" />
+            <p className="text-gray-600 font-sans">Loading service...</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (error || !template) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5]">
-        <div className="text-center">
-          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h1 className="mb-4 max-w-[90vw] font-serif text-2xl font-bold leading-snug text-[#1a2744] md:text-4xl md:leading-tight">
-            Service Not Found
-          </h1>
-          <p className="font-sans text-gray-600 mb-8">{error || 'The page you are looking for does not exist.'}</p>
-          <Link
-            to="/services"
-            className="inline-block px-6 py-3 bg-[#c9a84c] text-[#1a2744] font-sans font-bold rounded-lg hover:bg-[#b89840] transition-colors"
-          >
-            View All Services
-          </Link>
+      <>
+        <SEOHead
+          title="Service Not Found | GAG Lawyers"
+          description="The legal service page you are looking for could not be found. Browse our services or contact GAG Lawyers for assistance."
+          canonical={`${SITE_URL}/${slug || ''}`}
+          robots="noindex, follow"
+        />
+        <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5]">
+          <div className="text-center">
+            <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            <h1 className="mb-4 max-w-[90vw] font-serif text-2xl font-bold leading-snug text-[#1a2744] md:text-4xl md:leading-tight">
+              Service Not Found
+            </h1>
+            <p className="font-sans text-gray-600 mb-8">{error || 'The page you are looking for does not exist.'}</p>
+            <Link
+              to="/services"
+              className="inline-block px-6 py-3 bg-[#c9a84c] text-[#1a2744] font-sans font-bold rounded-lg hover:bg-[#b89840] transition-colors"
+            >
+              View All Services
+            </Link>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -539,6 +561,7 @@ const LocationPageDynamic = () => {
         title={normalizedSeoTitle}
         description={seo?.description || `Expert ${serviceName.toLowerCase()} services in ${city}.`}
         keywords={seo?.keywords || `${serviceName}, ${city}, lawyers`}
+        canonical={`${SITE_URL}/${slug || ''}`}
       />
 
       <section className="bg-navy text-white py-16 lg:py-20">

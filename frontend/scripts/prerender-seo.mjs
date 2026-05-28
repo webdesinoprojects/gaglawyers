@@ -52,7 +52,11 @@ const injectSeo = (html, seo) => {
     `<meta name="twitter:description" content="${escapeHtml(seo.description)}" />`,
   ].join('\n    ');
 
-  return html.replace('</head>', `    ${tags}\n  </head>`);
+  // Replace the generic fallback title/description with page-specific ones
+  return html
+    .replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(seo.title)}</title>`)
+    .replace(/<meta name="description"[^>]*\/>/, `<meta name="description" content="${escapeHtml(seo.description)}" />`)
+    .replace('</head>', `    <link rel="canonical" href="${escapeHtml(seo.canonical)}" />\n    <meta property="og:title" content="${escapeHtml(seo.title)}" />\n    <meta property="og:description" content="${escapeHtml(seo.description)}" />\n    <meta property="og:url" content="${escapeHtml(seo.canonical)}" />\n    <meta name="twitter:title" content="${escapeHtml(seo.title)}" />\n    <meta name="twitter:description" content="${escapeHtml(seo.description)}" />\n  </head>`);
 };
 
 const ensureDir = (dirPath) => {
@@ -89,12 +93,80 @@ const buildServiceSeo = (service) => {
   };
 };
 
+const buildLocationSeo = (page) => {
+  const slug = String(page?.slug || '').trim();
+  const city = String(page?.city || '').trim();
+  const serviceName = String(page?.serviceName || '').trim();
+  const title = String(page?.seo?.title || `${serviceName} Lawyer in ${city} | GAG Lawyers`).trim();
+  const description = String(
+    page?.seo?.description ||
+      `Expert ${serviceName.toLowerCase()} legal services in ${city}. Contact GAG Lawyers for trusted legal representation and case guidance.`
+  ).trim();
+  const keywords = String(
+    page?.seo?.keywords || `${serviceName}, ${city}, lawyer, advocate, GAG Lawyers`
+  ).trim();
+  return {
+    route: `/${slug}`,
+    seo: { title, description, keywords, canonical: `${SITE_URL}/${slug}` },
+  };
+};
+
+const fetchJson = async (url) => {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
+  return res.json();
+};
+
 const getServices = async () => {
   if (!API_BASE_URL) return [];
-  const response = await fetch(`${API_BASE_URL}/api/services`);
-  const data = await response.json();
+  const data = await fetchJson(`${API_BASE_URL}/api/services`);
   if (!data?.success || !Array.isArray(data?.data)) return [];
   return data.data.filter((s) => s?.slug);
+};
+
+// Max location pages to prerender at build time.
+// For very large sites (61k+), set PRERENDER_LOCATION_LIMIT=0 to skip prerendering
+// and rely on the backend SSR injection middleware instead.
+const PRERENDER_LIMIT = process.env.PRERENDER_LOCATION_LIMIT !== undefined
+  ? parseInt(process.env.PRERENDER_LOCATION_LIMIT, 10)
+  : 5000;
+
+// Process location pages in streaming batches — never loads all pages into memory at once.
+// Calls onBatch(pages[]) for each fetched batch so callers can write files immediately.
+const streamLocationPages = async (onBatch) => {
+  if (!API_BASE_URL) return 0;
+  if (PRERENDER_LIMIT === 0) {
+    console.log('Location prerendering skipped (PRERENDER_LOCATION_LIMIT=0). Backend SSR handles these.');
+    return 0;
+  }
+
+  const BATCH = 500;
+  let fetched = 0;
+  let currentPage = 1;
+
+  while (true) {
+    if (PRERENDER_LIMIT > 0 && fetched >= PRERENDER_LIMIT) break;
+    const remaining = PRERENDER_LIMIT > 0 ? PRERENDER_LIMIT - fetched : BATCH;
+    const batchSize = Math.min(BATCH, remaining);
+
+    const data = await fetchJson(
+      `${API_BASE_URL}/api/locations?page=${currentPage}&limit=${batchSize}`
+    );
+    if (!data?.success || !Array.isArray(data?.data) || data.data.length === 0) break;
+
+    const valid = data.data.filter((p) => p?.slug && p?.isActive !== false);
+    await onBatch(valid);
+    fetched += valid.length;
+
+    process.stdout.write(`\r  Location pages written: ${fetched}...`);
+
+    const totalPages = data?.total ? Math.ceil(data.total / batchSize) : 1;
+    if (currentPage >= totalPages) break;
+    currentPage++;
+  }
+
+  process.stdout.write('\n');
+  return fetched;
 };
 
 const main = async () => {
@@ -117,6 +189,15 @@ const main = async () => {
       },
     },
     {
+      route: '/about',
+      seo: {
+        title: 'About GAG Lawyers - Grover & Grover Advocates',
+        description: 'Learn about GAG Lawyers – our history, values, and commitment to providing trusted legal services across India.',
+        keywords: 'about GAG Lawyers, Grover and Grover Advocates, law firm history, legal experts India',
+        canonical: `${SITE_URL}/about`,
+      },
+    },
+    {
       route: '/services',
       seo: {
         title: 'Legal Services - 25+ Practice Areas | GAG Lawyers',
@@ -125,6 +206,24 @@ const main = async () => {
         keywords:
           'legal services, advocates, litigation, legal consultation, law firm practice areas',
         canonical: `${SITE_URL}/services`,
+      },
+    },
+    {
+      route: '/team',
+      seo: {
+        title: 'Our Team | GAG Lawyers - Grover & Grover Advocates',
+        description: 'Meet our team led by Advocate Rahul Grover. Skilled lawyers and professionals combining legal excellence with personal commitment to client success.',
+        keywords: 'legal team, advocate rahul grover, law firm team, lawyers in india, legal specialists',
+        canonical: `${SITE_URL}/team`,
+      },
+    },
+    {
+      route: '/contact',
+      seo: {
+        title: 'Contact GAG Lawyers | Schedule a Legal Consultation',
+        description: 'Get in touch with GAG Lawyers – Grover & Grover Advocates for expert legal advice and representation across India.',
+        keywords: 'contact GAG Lawyers, legal consultation, schedule appointment, law firm contact',
+        canonical: `${SITE_URL}/contact`,
       },
     },
     {
@@ -138,22 +237,63 @@ const main = async () => {
         canonical: `${SITE_URL}/articles`,
       },
     },
+    {
+      route: '/careers',
+      seo: {
+        title: 'Careers at GAG Lawyers | Join Our Legal Team',
+        description: 'Explore career opportunities at GAG Lawyers – Grover & Grover Advocates. Join a dynamic legal team committed to excellence.',
+        keywords: 'legal careers, law firm jobs, advocate positions, GAG Lawyers careers',
+        canonical: `${SITE_URL}/careers`,
+      },
+    },
+    {
+      route: '/gallery',
+      seo: {
+        title: 'Image Gallery | GAG Lawyers - Grover & Grover Advocates',
+        description: 'Visual journey into the life of GAG Lawyers - courtroom advocacy, client engagements, events, milestones, and community outreach.',
+        keywords: 'law firm gallery, courtroom photos, legal events, firm milestones',
+        canonical: `${SITE_URL}/gallery`,
+      },
+    },
   ];
 
-  const services = await getServices();
-  const servicePages = services.map(buildServiceSeo);
-  const pages = [...staticPages, ...servicePages];
+  let services = [];
 
-  for (const page of pages) {
+  try {
+    services = await getServices();
+    console.log(`Fetched ${services.length} service pages.`);
+  } catch (err) {
+    console.warn('Warning: Could not fetch services:', err.message);
+  }
+
+  // Write static and service pages
+  const allPages = [...staticPages, ...services.map(buildServiceSeo)];
+  for (const page of allPages) {
     const html = injectSeo(baseTemplate, page.seo);
     writeRouteFile(page.route, html);
   }
+  console.log(`Written ${allPages.length} static + service pages.`);
 
-  console.log(`Prerendered SEO HTML for ${pages.length} routes.`);
+  // Stream location pages in batches — memory efficient for 61k+ pages
+  let locationCount = 0;
+  try {
+    locationCount = await streamLocationPages(async (batch) => {
+      for (const page of batch) {
+        const entry = buildLocationSeo(page);
+        const html = injectSeo(baseTemplate, entry.seo);
+        writeRouteFile(entry.route, html);
+      }
+    });
+  } catch (err) {
+    console.warn('Warning: Could not prerender location pages:', err.message);
+    console.warn('Tip: Set PRERENDER_LOCATION_LIMIT=0 and use the backend SSR middleware for location pages.');
+  }
+
+  const total = allPages.length + locationCount;
+  console.log(`Prerendered SEO HTML for ${total} routes (${staticPages.length} static + ${services.length} services + ${locationCount} locations).`);
 };
 
 main().catch((error) => {
   console.error('prerender-seo failed:', error.message);
   process.exit(1);
 });
-

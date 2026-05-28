@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useLocation } from 'react-router-dom';
 import { OFFICE_ADDRESS_LINE } from '../constants/officeAddress';
 
 const SEOHead = ({ 
@@ -23,8 +24,11 @@ const SEOHead = ({
 }) => {
   const rawSite = (import.meta.env.VITE_SITE_URL || 'https://gaglawyers.com').replace(/\/+$/, '');
   const configuredSiteUrl = rawSite.replace(/^https:\/\/www\.(?=gaglawyers\.com)/i, 'https://');
-  const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/';
-  const currentFullUrl = `${configuredSiteUrl}${currentPath}`;
+  const { pathname } = useLocation();
+  // Remove trailing slash for non-root paths to prevent duplicate-URL indexing
+  const normalizedPath = pathname.length > 1 ? pathname.replace(/\/+$/, '') : '/';
+  const currentFullUrl = `${configuredSiteUrl}${normalizedPath}`;
+  // Use explicit canonical if provided, else derive from current router location
   const canonicalUrl = (canonical || currentFullUrl).split('#')[0];
   const origin = configuredSiteUrl;
   const defaultOgImage = `${origin}/logo.png`;

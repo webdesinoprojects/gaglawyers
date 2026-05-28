@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 // ===== DEBUG: Server startup =====
@@ -28,6 +29,7 @@ const settingsRoutes = require('./routes/settingsRoutes');
 const seoRoutes = require('./routes/seoRoutes');
 const seoManagementRoutes = require('./routes/seoManagementRoutes');
 const cloudinaryRoutes = require('./routes/cloudinaryRoutes');
+const { seoInjectionMiddleware, FRONTEND_DIST } = require('./middleware/seoInjection');
 
 // CMS Routes
 const globalSettingsRoutes = require('./routes/globalSettingsRoutes');
@@ -98,9 +100,22 @@ app.use('/api/admin/dashboard', dashboardRoutes);
 
 app.use('/', seoRoutes);
 
-app.get('/', (req, res) => {
-  res.json({ message: 'GAG Lawyers API is running' });
-});
+// ─── Serve built React frontend with server-side SEO injection ────────────────
+// When the frontend dist is co-deployed with the backend, this serves the SPA
+// with correct per-page title / description / canonical in the raw HTML source
+// (no prerendering needed — scales to any number of pages).
+const frontendDistExists = fs.existsSync(path.join(FRONTEND_DIST, 'index.html'));
+if (frontendDistExists) {
+  // Serve static assets (JS, CSS, images) directly — no SEO injection needed
+  app.use(express.static(FRONTEND_DIST, { index: false }));
+  // All remaining HTML requests go through SEO injection then serve index.html
+  app.use(seoInjectionMiddleware);
+} else {
+  // Frontend not co-deployed — keep the old health-check response
+  app.get('/', (req, res) => {
+    res.json({ message: 'GAG Lawyers API is running' });
+  });
+}
 
 app.use((err, req, res, next) => {
   console.error('Error:', err);
