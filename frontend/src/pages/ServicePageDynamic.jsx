@@ -73,7 +73,6 @@ const ServicePageDynamic = () => {
           title="Service Not Found | GAG Lawyers"
           description="The legal service you are looking for could not be found. Browse our services or contact GAG Lawyers for assistance."
           canonical={`${SITE_URL}/${slug || ''}`}
-          robots="noindex, follow"
         />
         <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5]">
           <div className="text-center">

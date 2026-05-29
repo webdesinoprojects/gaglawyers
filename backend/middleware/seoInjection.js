@@ -29,17 +29,20 @@ const escHtml = (v = '') =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
-const injectIntoHtml = (template, { title, description, keywords, canonical }) => {
+const injectIntoHtml = (template, { title, description, keywords, canonical, robots = 'index, follow' }) => {
   let html = template;
 
-  // Replace existing title and description tags rather than duplicating them
+  // Replace existing title and description tags
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${escHtml(title)}</title>`);
   html = html.replace(
     /<meta\s+name="description"[^>]*>/,
     `<meta name="description" content="${escHtml(description)}" />`
   );
+  // Remove any existing robots meta (we inject a fresh authoritative one below)
+  html = html.replace(/<meta\s+name="robots"[^>]*>/g, '');
 
   const extraTags = [
+    `<meta name="robots" content="${robots}" />`,
     `<link rel="canonical" href="${escHtml(canonical)}" />`,
     `<meta name="keywords" content="${escHtml(keywords)}" />`,
     `<meta property="og:title" content="${escHtml(title)}" />`,
@@ -94,6 +97,26 @@ const STATIC_SEO = {
     description: 'Expert legal analysis, case updates, and insights on Indian law from GAG Lawyers.',
     keywords: 'legal articles, law updates, legal insights, Indian law news',
   },
+  '/newsletter': {
+    title: 'Newsletter | GAG Lawyers - Resource Center',
+    description: 'Legal newsletter updates and practical insights from GAG Lawyers Resource Center.',
+    keywords: 'legal newsletter, law updates, resource center, GAG Lawyers',
+  },
+  '/firm': {
+    title: 'The Firm | GAG Lawyers - Grover & Grover Advocates',
+    description: 'Learn about GAG Lawyers as a firm – our structure, values, and commitment to legal excellence across India.',
+    keywords: 'GAG Lawyers firm, law firm India, Grover Advocates, legal practice',
+  },
+  '/awards': {
+    title: 'Awards & Recognition | GAG Lawyers',
+    description: 'Recognitions and awards received by GAG Lawyers – Grover & Grover Advocates for excellence in legal services.',
+    keywords: 'GAG Lawyers awards, law firm recognition, legal excellence, Grover Advocates',
+  },
+  '/affiliation': {
+    title: 'Affiliations | GAG Lawyers - Grover & Grover Advocates',
+    description: 'Professional affiliations and bar associations of GAG Lawyers – Grover & Grover Advocates.',
+    keywords: 'GAG Lawyers affiliations, bar association, legal memberships',
+  },
   '/privacy': {
     title: 'Privacy Policy | GAG Lawyers',
     description: 'Read the privacy policy of GAG Lawyers – Grover & Grover Advocates. Learn how we handle your data.',
@@ -129,42 +152,57 @@ const seoInjectionMiddleware = async (req, res, next) => {
   const canonical = `${SITE_URL}${urlPath}`;
 
   let seoData = STATIC_SEO[urlPath] || null;
+  // robots defaults to index,follow. Only set noindex when DB confirms page doesn't exist.
+  let robots = 'index, follow';
 
   if (!seoData) {
     const slug = urlPath.replace(/^\//, '');
-    try {
-      if (slug.includes('-in-')) {
-        // Location page — direct DB lookup, no API overhead
-        const page = await LocationPage.findOne({ slug, isActive: true })
-          .select('seo city serviceName')
-          .lean();
-        if (page?.seo?.title) {
-          seoData = {
-            title: page.seo.title,
-            description: page.seo.description || `Expert legal services in ${page.city} from GAG Lawyers.`,
-            keywords: page.seo.keywords || `${page.serviceName}, ${page.city}, lawyers, GAG Lawyers`,
-          };
+
+    // Multi-segment paths (articles/:slug, newsletter/:slug, services/:slug) — skip DB lookup.
+    // React client handles SEO for these; serve generic fallback indexable HTML.
+    if (slug.includes('/')) {
+      seoData = null; // falls to generic fallback below
+    } else {
+      try {
+        if (slug.includes('-in-')) {
+          // Location page — direct DB lookup, no API overhead
+          const page = await LocationPage.findOne({ slug, isActive: true })
+            .select('seo city serviceName')
+            .lean();
+          if (page?.seo?.title) {
+            seoData = {
+              title: page.seo.title,
+              description: page.seo.description || `Expert legal services in ${page.city} from GAG Lawyers.`,
+              keywords: page.seo.keywords || `${page.serviceName}, ${page.city}, lawyers, GAG Lawyers`,
+            };
+          } else {
+            // DB confirms this location page does not exist or is inactive
+            robots = 'noindex, follow';
+          }
+        } else {
+          // Service page — direct DB lookup
+          const service = await Service.findOne({ slug, isActive: true })
+            .select('name seo')
+            .lean();
+          if (service) {
+            seoData = {
+              title: service.seo?.title || `${service.name} - GAG Lawyers`,
+              description: service.seo?.metaDescription || service.seo?.description || `Professional ${service.name.toLowerCase()} legal assistance from GAG Lawyers.`,
+              keywords: service.seo?.keywords || `${service.name}, ${service.name} lawyer, legal services, GAG Lawyers`,
+            };
+          } else {
+            // DB confirms this service slug does not exist or is inactive
+            robots = 'noindex, follow';
+          }
         }
-      } else {
-        // Service page — direct DB lookup
-        const service = await Service.findOne({ slug, isActive: true })
-          .select('name seo')
-          .lean();
-        if (service) {
-          seoData = {
-            title: service.seo?.title || `${service.name} - GAG Lawyers`,
-            description: service.seo?.metaDescription || service.seo?.description || `Professional ${service.name.toLowerCase()} legal assistance from GAG Lawyers.`,
-            keywords: service.seo?.keywords || `${service.name}, ${service.name} lawyer, legal services, GAG Lawyers`,
-          };
-        }
+      } catch (err) {
+        // DB lookup failed — do NOT set noindex, could be a transient error
+        console.error('[seoInjection] DB lookup error for', slug, err.message);
       }
-    } catch (err) {
-      // DB lookup failed — fall through to generic fallback
-      console.error('[seoInjection] DB lookup error for', slug, err.message);
     }
   }
 
-  // Generic fallback for unknown routes
+  // Generic fallback for unknown/not-found routes
   if (!seoData) {
     seoData = {
       title: 'GAG Lawyers - Grover & Grover Advocates',
@@ -173,7 +211,7 @@ const seoInjectionMiddleware = async (req, res, next) => {
     };
   }
 
-  const html = injectIntoHtml(template, { ...seoData, canonical });
+  const html = injectIntoHtml(template, { ...seoData, canonical, robots });
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   // Cache in CDN/browser for 1 hour; re-validate on next visit
   res.setHeader('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
