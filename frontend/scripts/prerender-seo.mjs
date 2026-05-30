@@ -40,11 +40,22 @@ const escapeHtml = (value = '') =>
     .replace(/'/g, '&#39;');
 
 const injectSeo = (html, seo) => {
-  const tags = [
-    `<title>${escapeHtml(seo.title)}</title>`,
-    `<meta name="description" content="${escapeHtml(seo.description)}" />`,
-    `<meta name="keywords" content="${escapeHtml(seo.keywords)}" />`,
+  let result = html;
+
+  // Replace title and description in-place
+  result = result.replace(/<title>[^<]*<\/title>/i, `<title>${escapeHtml(seo.title)}</title>`);
+  result = result.replace(/<meta\s+name="description"[^>]*\/?>/gi, `<meta name="description" content="${escapeHtml(seo.description)}" />`);
+
+  // Strip ALL existing SEO tags that we will re-inject — prevents duplicate/conflicting tags
+  // when dist/index.html already has homepage SEO from a previous prerender run
+  result = result.replace(/<link\s+rel="canonical"[^>]*\/?>/gi, '');
+  result = result.replace(/<meta\s+name="keywords"[^>]*\/?>/gi, '');
+  result = result.replace(/<meta\s+property="og:[^"]*"[^>]*\/?>/gi, '');
+  result = result.replace(/<meta\s+name="twitter:[^"]*"[^>]*\/?>/gi, '');
+
+  const newTags = [
     `<link rel="canonical" href="${escapeHtml(seo.canonical)}" />`,
+    `<meta name="keywords" content="${escapeHtml(seo.keywords)}" />`,
     `<meta property="og:title" content="${escapeHtml(seo.title)}" />`,
     `<meta property="og:description" content="${escapeHtml(seo.description)}" />`,
     `<meta property="og:url" content="${escapeHtml(seo.canonical)}" />`,
@@ -52,11 +63,7 @@ const injectSeo = (html, seo) => {
     `<meta name="twitter:description" content="${escapeHtml(seo.description)}" />`,
   ].join('\n    ');
 
-  // Replace the generic fallback title/description with page-specific ones
-  return html
-    .replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(seo.title)}</title>`)
-    .replace(/<meta name="description"[^>]*\/>/, `<meta name="description" content="${escapeHtml(seo.description)}" />`)
-    .replace('</head>', `    <link rel="canonical" href="${escapeHtml(seo.canonical)}" />\n    <meta property="og:title" content="${escapeHtml(seo.title)}" />\n    <meta property="og:description" content="${escapeHtml(seo.description)}" />\n    <meta property="og:url" content="${escapeHtml(seo.canonical)}" />\n    <meta name="twitter:title" content="${escapeHtml(seo.title)}" />\n    <meta name="twitter:description" content="${escapeHtml(seo.description)}" />\n  </head>`);
+  return result.replace('</head>', `    ${newTags}\n  </head>`);
 };
 
 const ensureDir = (dirPath) => {

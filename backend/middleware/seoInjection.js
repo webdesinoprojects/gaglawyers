@@ -32,14 +32,19 @@ const escHtml = (v = '') =>
 const injectIntoHtml = (template, { title, description, keywords, canonical, robots = 'index, follow' }) => {
   let html = template;
 
-  // Replace existing title and description tags
-  html = html.replace(/<title>[^<]*<\/title>/, `<title>${escHtml(title)}</title>`);
-  html = html.replace(
-    /<meta\s+name="description"[^>]*>/,
-    `<meta name="description" content="${escHtml(description)}" />`
-  );
-  // Remove any existing robots meta (we inject a fresh authoritative one below)
-  html = html.replace(/<meta\s+name="robots"[^>]*>/g, '');
+  // Replace title and description in-place
+  html = html.replace(/<title>[^<]*<\/title>/i, `<title>${escHtml(title)}</title>`);
+  html = html.replace(/<meta\s+name="description"[^>]*\/?>/gi, `<meta name="description" content="${escHtml(description)}" />`);
+
+  // Strip ALL existing SEO tags we will re-inject — critical when dist/index.html
+  // was overwritten by the prerender script with homepage-specific canonical/OG tags.
+  // Without stripping, every page would inherit the homepage canonical as the first tag,
+  // which Google picks over any later injected page-specific canonical.
+  html = html.replace(/<link\s+rel="canonical"[^>]*\/?>/gi, '');
+  html = html.replace(/<meta\s+name="keywords"[^>]*\/?>/gi, '');
+  html = html.replace(/<meta\s+name="robots"[^>]*\/?>/gi, '');
+  html = html.replace(/<meta\s+property="og:[^"]*"[^>]*\/?>/gi, '');
+  html = html.replace(/<meta\s+name="twitter:[^"]*"[^>]*\/?>/gi, '');
 
   const extraTags = [
     `<meta name="robots" content="${robots}" />`,
