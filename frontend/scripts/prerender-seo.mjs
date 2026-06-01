@@ -298,6 +298,20 @@ const main = async () => {
 
   const total = allPages.length + locationCount;
   console.log(`Prerendered SEO HTML for ${total} routes (${staticPages.length} static + ${services.length} services + ${locationCount} locations).`);
+
+  // CRITICAL: Restore dist/index.html to the original clean vite template.
+  //
+  // The homepage prerender writes homepage-specific HTML (including
+  // <link rel="canonical" href="https://gaglawyers.com/" />) to dist/index.html,
+  // overwriting the clean vite output. On Vercel static hosting, dist/index.html
+  // is served as the fallback for ALL non-prerendered routes. Without this restore,
+  // every non-prerendered location page would inherit the homepage canonical —
+  // causing Google to mark them as "Alternate page with proper canonical tag".
+  //
+  // After restore, non-prerendered pages get clean generic HTML with no canonical
+  // tag. Google self-selects the page URL as canonical, which is correct.
+  fs.writeFileSync(TEMPLATE_PATH, baseTemplate, 'utf8');
+  console.log('Restored dist/index.html to clean fallback template (no page-specific canonical).');
 };
 
 main().catch((error) => {
