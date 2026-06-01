@@ -5,9 +5,29 @@ import react from '@vitejs/plugin-react'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const apiTarget = env.VITE_API_URL || 'http://localhost:5000';
+  const isSSR = process.env.SSR === 'true';
 
   return {
     plugins: [react()],
+    build: {
+      // SSR-compatible build output
+      ssr: isSSR ? 'src/entry-server.jsx' : undefined,
+      outDir: 'dist',
+      rollupOptions: {
+        output: isSSR
+          ? {
+              // SSR bundle: single server file
+              entryFileNames: 'server.js',
+              format: 'esm',
+            }
+          : {
+              // Client bundle
+              entryFileNames: 'assets/[name]-[hash].js',
+              chunkFileNames: 'assets/[name]-[hash].js',
+              assetFileNames: 'assets/[name]-[hash][extname]',
+            },
+      },
+    },
     server: {
       proxy: {
         '/sitemap.xml': apiTarget,
