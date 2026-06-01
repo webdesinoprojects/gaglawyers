@@ -29,7 +29,7 @@ const settingsRoutes = require('./routes/settingsRoutes');
 const seoRoutes = require('./routes/seoRoutes');
 const seoManagementRoutes = require('./routes/seoManagementRoutes');
 const cloudinaryRoutes = require('./routes/cloudinaryRoutes');
-const { createSSRMiddleware } = require('./ssr-middleware');
+const { seoInjectionMiddleware, FRONTEND_DIST } = require('./middleware/seoInjection');
 
 // CMS Routes
 const globalSettingsRoutes = require('./routes/globalSettingsRoutes');
@@ -100,23 +100,16 @@ app.use('/api/admin/dashboard', dashboardRoutes);
 
 app.use('/', seoRoutes);
 
-// ─── Serve built React frontend with Server-Side Rendering (SSR) ────────────────
-// Serves the frontend with per-page SEO tags injected server-side.
-// Each request fetches page data and injects correct title, meta, canonical, schema.
-// React hydrates on client for full interactivity.
-const FRONTEND_DIST = path.join(__dirname, '../frontend/dist');
+// ─── Serve built React frontend with server-side SEO injection ────────────────
+// When the frontend dist is co-deployed with the backend, this serves the SPA
+// with correct per-page title / description / canonical in the raw HTML source
+// (no prerendering needed — scales to any number of pages).
 const frontendDistExists = fs.existsSync(path.join(FRONTEND_DIST, 'index.html'));
-
 if (frontendDistExists) {
-  // Serve static assets (JS, CSS, images) directly — no SSR processing needed
+  // Serve static assets (JS, CSS, images) directly — no SEO injection needed
   app.use(express.static(FRONTEND_DIST, { index: false }));
-  
-  // SSR middleware: fetch page data, inject SEO tags, render with content
-  const ssrMiddleware = createSSRMiddleware(
-    process.env.SITE_URL || 'https://gaglawyers.com',
-    FRONTEND_DIST
-  );
-  app.use(ssrMiddleware);
+  // All remaining HTML requests go through SEO injection then serve index.html
+  app.use(seoInjectionMiddleware);
 } else {
   // Frontend not co-deployed — keep the old health-check response
   app.get('/', (req, res) => {

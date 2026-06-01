@@ -218,8 +218,20 @@ const seoInjectionMiddleware = async (req, res, next) => {
 
   const html = injectIntoHtml(template, { ...seoData, canonical, robots });
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  // Cache in CDN/browser for 1 hour; re-validate on next visit
-  res.setHeader('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+  
+  // Determine if this is a 404 (robots = noindex indicates non-existent page)
+  const is404 = robots.includes('noindex');
+  
+  // Set proper HTTP status code (CRITICAL: avoids soft 404s)
+  if (is404) {
+    res.status(404);
+    // 404 pages: shorter cache to allow quick updates
+    res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
+  } else {
+    // Regular pages: longer cache
+    res.setHeader('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+  }
+  
   return res.send(html);
 };
 

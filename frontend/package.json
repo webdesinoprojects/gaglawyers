@@ -5,10 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build:ssr": "SSR=true vite build",
-    "preview": "vite preview",
-    "lint": "eslint ."
+    "build": "vite build && node scripts/prerender-seo.mjs",
+    "lint": "eslint .",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
