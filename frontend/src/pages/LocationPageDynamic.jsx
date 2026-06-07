@@ -6,6 +6,8 @@ import SectionRenderer from '../components/sections/SectionRenderer';
 import API_BASE_URL from '../config/api';
 
 const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://gaglawyers.com').replace(/\/+$/, '');
+const locationPageCache = new Map();
+const locationServiceCache = new Map();
 
 const parseServiceAndCityFromSlug = (slug = '') => {
   const marker = '-in-';
@@ -37,6 +39,21 @@ const deriveServiceSlug = (locationSlug = '', pageData = null) => {
   const { serviceSlugPart } = parseServiceAndCityFromSlug(locationSlug);
   if (!serviceSlugPart) return '';
   return serviceSlugPart;
+};
+
+const fetchLocationService = async (serviceSlug, signal) => {
+  if (!serviceSlug) return null;
+  if (locationServiceCache.has(serviceSlug)) {
+    return locationServiceCache.get(serviceSlug);
+  }
+
+  const serviceRes = await fetch(`${API_BASE_URL}/api/services/${serviceSlug}`, { signal });
+  const serviceJson = await serviceRes.json();
+  const service = serviceJson.success && serviceJson.data ? serviceJson.data : null;
+  if (service) {
+    locationServiceCache.set(serviceSlug, service);
+  }
+  return service;
 };
 
 const localizeText = (value, city) => {
@@ -146,7 +163,7 @@ const withLocationAnswer = (answer, city) => {
 const LOCATION_APPEND_DEFAULTS = ['hero', 'benefits', 'process'];
 
 const withLocationHeading = (heading, city, sectionType = '', appendLocationToHeading = null) => {
-  const safeHeading = (heading || '').trim();
+  const safeHeading = (heading || '').replace(/\{city\}/gi, city).trim();
   if (sectionType === 'faq') return safeHeading || 'Frequently Asked Questions';
   if (!safeHeading) return `Legal Support in ${city}`;
   if (hasCityReference(safeHeading, city)) return safeHeading;
@@ -204,6 +221,20 @@ const LocationPageDynamic = () => {
         setLoading(true);
         setError(null);
 
+        const cachedPage = locationPageCache.get(slug);
+        if (cachedPage) {
+          if (mounted) {
+            setPageData(cachedPage.pageData);
+            setServiceData(cachedPage.serviceData);
+          }
+          return;
+        }
+
+        const serviceSlugFromUrl = deriveServiceSlug(slug);
+        const servicePromise = serviceSlugFromUrl
+          ? fetchLocationService(serviceSlugFromUrl, controller.signal).catch(() => null)
+          : Promise.resolve(null);
+
         const pageRes = await fetch(`${API_BASE_URL}/api/locations/slug/${slug}`, {
           signal: controller.signal,
         });
@@ -226,16 +257,10 @@ const LocationPageDynamic = () => {
         const nextPage = pageJson.data;
         const templateMode = nextPage?.content?.templateMode === 'custom' ? 'custom' : 'service';
         const serviceSlug = deriveServiceSlug(slug, nextPage);
-        let nextService = null;
+        let nextService = await servicePromise;
 
-        if (serviceSlug) {
-          const serviceRes = await fetch(`${API_BASE_URL}/api/services/${serviceSlug}`, {
-            signal: controller.signal,
-          });
-          const serviceJson = await serviceRes.json();
-          if (serviceJson.success && serviceJson.data) {
-            nextService = serviceJson.data;
-          }
+        if (!nextService && serviceSlug) {
+          nextService = await fetchLocationService(serviceSlug, controller.signal);
         }
 
         if (templateMode === 'service' && !nextService) {
@@ -248,6 +273,7 @@ const LocationPageDynamic = () => {
         }
 
         if (mounted) {
+          locationPageCache.set(slug, { pageData: nextPage, serviceData: nextService });
           setPageData(nextPage);
           setServiceData(nextService);
         }
@@ -306,10 +332,6 @@ const LocationPageDynamic = () => {
       templateMode === 'custom'
         ? (fallbackSections.length > 0 ? fallbackSections : contentSections)
         : (contentSections.length > 0 ? contentSections : fallbackSections);
-    const serviceStyledSections =
-      templateMode === 'service'
-        ? (serviceSections.length > 0 ? serviceSections : fallbackSections)
-        : [];
     const images = getLocationImages(pageData);
 
     const heading =
@@ -322,6 +344,23 @@ const LocationPageDynamic = () => {
       localizeText(pageData?.content?.intro, city) ||
       (templateMode === 'service' ? localizeText(heroSection?.content?.description, city) : '') ||
       `Get dedicated ${serviceName.toLowerCase()} support in ${city} with clear strategy and professional legal execution.`;
+
+    const serviceStyledSections =
+      templateMode === 'service'
+        ? (serviceSections.length > 0
+            ? serviceSections.map((section) => {
+                if (section.type !== 'hero') return section;
+                return {
+                  ...section,
+                  heading: normalizedHeading,
+                  content: {
+                    ...(section.content || {}),
+                    description: intro,
+                  },
+                };
+              })
+            : fallbackSections)
+        : [];
 
     const highlights = [
       `${serviceName} support tailored to your case needs`,
@@ -389,14 +428,22 @@ const LocationPageDynamic = () => {
   const galleryImages = images.filter((img) => img.url);
   const pageTag = `${serviceName} in ${city}`;
   const normalizedSeoTitle = buildLocationSeoTitle(serviceName, city);
+  const pageSeoTitle = (typeof seo?.title === 'string' && seo.title.trim()) || normalizedSeoTitle;
+  const pageSeoDescription =
+    seo?.description ||
+    seo?.metaDescription ||
+    `Expert ${serviceName.toLowerCase()} services in ${city}.`;
+  const pageSeoKeywords = seo?.keywords || `${serviceName}, ${city}, lawyers`;
+  const pageCanonical = `${SITE_URL}/${slug || ''}`;
 
   if (templateMode === 'service') {
     return (
       <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f7f8fb_0%,_#f1f3f7_45%,_#edf0f5_100%)]">
         <SEOHead
-          title={normalizedSeoTitle}
-          description={seo?.description || `Expert ${serviceName.toLowerCase()} services in ${city}.`}
-          keywords={seo?.keywords || `${serviceName}, ${city}, lawyers`}
+          title={pageSeoTitle}
+          description={pageSeoDescription}
+          keywords={pageSeoKeywords}
+          canonical={pageCanonical}
         />
 
         <div className="sticky top-0 z-30 border-b border-white/60 bg-white/85 backdrop-blur">
@@ -557,10 +604,10 @@ const LocationPageDynamic = () => {
   return (
     <div>
       <SEOHead
-        title={normalizedSeoTitle}
-        description={seo?.description || `Expert ${serviceName.toLowerCase()} services in ${city}.`}
-        keywords={seo?.keywords || `${serviceName}, ${city}, lawyers`}
-        canonical={`${SITE_URL}/${slug || ''}`}
+        title={pageSeoTitle}
+        description={pageSeoDescription}
+        keywords={pageSeoKeywords}
+        canonical={pageCanonical}
       />
 
       <section className="bg-navy text-white py-16 lg:py-20">

@@ -21,11 +21,50 @@ import API_BASE_URL from '../config/api';
 const FALLBACK_CARD_IMAGE =
   'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1200&q=80';
 
+let servicesListCache = null;
+
+const cleanDisplayText = (value = '', fallback = '') => {
+  const text = String(value || fallback || '')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, ' ')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[`*_~>#|]/g, ' ')
+    .replace(/^[-+]\s+/gm, '')
+    .replace(/\\n/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return text || fallback;
+};
+
+const mapServicesForDisplay = (items = []) =>
+  items
+    .map((service) => ({
+      id: service._id,
+      title: cleanDisplayText(service.name || service.title, 'Service'),
+      slug: service.slug,
+      summary: cleanDisplayText(
+        service.shortDescription || service.seo?.metaDescription || service.seo?.description,
+        'Strategic legal representation tailored to your specific matter.'
+      ),
+      cardImageUrl: service.cardImageUrl || '',
+      cardImageAlt: cleanDisplayText(service.cardImageAlt || service.name, 'Legal service'),
+      isFeatured: Boolean(
+        service.servicesPageSettings?.isFeatured ||
+        service.isFeatured ||
+        service.featured
+      ),
+      featuredOrder: Number(service.servicesPageSettings?.displayOrder || 0),
+      showOnServicesPage: service.servicesPageSettings?.showOnServicesPage !== false,
+    }))
+    .filter((service) => service.showOnServicesPage);
+
 const Services = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [hoveredCard, setHoveredCard] = useState(null);
   const [isFeaturedCarouselPaused, setIsFeaturedCarouselPaused] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const featuredTrackRef = useRef(null);
@@ -37,38 +76,36 @@ const Services = () => {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchServices = async () => {
+      if (servicesListCache) {
+        setServices(servicesListCache);
+        setLoading(false);
+      }
+
       try {
-        const response = await fetch(`${API_BASE_URL}/api/services`);
+        const response = await fetch(`${API_BASE_URL}/api/services`, {
+          cache: 'no-store',
+        });
         const data = await response.json();
-        if (data.success && Array.isArray(data.data)) {
-          const mapped = data.data.map((service) => ({
-            id: service._id,
-            title: service.name || 'Service',
-            slug: service.slug,
-            summary:
-              service.shortDescription ||
-              service.seo?.metaDescription ||
-              'Strategic legal representation tailored to your specific matter.',
-            cardImageUrl: service.cardImageUrl || '',
-            cardImageAlt: service.cardImageAlt || service.name || 'Legal service',
-            isFeatured: Boolean(
-              service.servicesPageSettings?.isFeatured ||
-              service.isFeatured ||
-              service.featured
-            ),
-            featuredOrder: Number(service.servicesPageSettings?.displayOrder || 0),
-            showOnServicesPage: service.servicesPageSettings?.showOnServicesPage !== false,
-          }));
-          setServices(mapped.filter((service) => service.showOnServicesPage));
+        if (data.success && Array.isArray(data.data) && !cancelled) {
+          const mapped = mapServicesForDisplay(data.data);
+          servicesListCache = mapped;
+          setServices(mapped);
         }
       } catch (error) {
         console.error('Error fetching services:', error);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
+
     fetchServices();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const filteredServices = useMemo(() => {
@@ -288,8 +325,6 @@ const Services = () => {
               <div
                 key={service.id}
                 className="group relative"
-                onMouseEnter={() => setHoveredCard(service.id)}
-                onMouseLeave={() => setHoveredCard(null)}
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="relative h-full bg-white rounded-3xl overflow-hidden border-2 border-slate-200 hover:border-amber-400 transition-all duration-500 hover:shadow-2xl hover:shadow-amber-500/20 hover:-translate-y-2">

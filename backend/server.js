@@ -44,9 +44,6 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const app = express();
 
-// Connect to database at startup (all environments)
-connectDB().catch(console.error);
-
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
@@ -128,8 +125,16 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-});
+if (require.main === module) {
+  // Connect at startup only for the long-running Node server. Serverless entrypoints
+  // handle connection lifecycle before forwarding requests to this app.
+  connectDB()
+    .then(() => {
+      app.listen(PORT, () => {
+        console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+      });
+    })
+    .catch(console.error);
+}
 
 module.exports = app;

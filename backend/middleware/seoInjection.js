@@ -5,6 +5,9 @@ const Service = require('../models/Service');
 const LocationPage = require('../models/LocationPage');
 
 const SITE_URL = (process.env.SITE_URL || 'https://gaglawyers.com').replace(/\/+$/, '');
+const SITE_URL_INFO = new URL(SITE_URL);
+const CANONICAL_HOST = SITE_URL_INFO.host;
+const CANONICAL_ORIGIN = SITE_URL_INFO.origin;
 
 // Resolve the built frontend index.html — configurable via env for flexible deployments
 const FRONTEND_DIST = process.env.FRONTEND_DIST_PATH
@@ -28,6 +31,54 @@ const escHtml = (v = '') =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+
+const isHtmlPageRequest = (p = '') =>
+  !p.startsWith('/api/') &&
+  !p.startsWith('/admin') &&
+  !p.match(/\.(js|mjs|css|png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot|json|xml|txt|gz|map)$/);
+
+const buildRedirectTarget = (req, normalizedPath) => {
+  const requestHost = String(req.get('host') || '').toLowerCase();
+  const canonicalHost = String(CANONICAL_HOST || '').toLowerCase();
+  const hostIsProductionDomain = /(^|\.)gaglawyers\.com(?::\d+)?$/i.test(requestHost);
+  const shouldRedirectHost =
+    process.env.NODE_ENV === 'production' &&
+    hostIsProductionDomain &&
+    requestHost &&
+    canonicalHost &&
+    requestHost !== canonicalHost;
+  const shouldRedirectSlash = req.path.length > 1 && req.path.endsWith('/');
+
+  if (!shouldRedirectHost && !shouldRedirectSlash) return '';
+
+  const query = req.originalUrl.includes('?') ? req.originalUrl.slice(req.originalUrl.indexOf('?')) : '';
+  const origin =
+    process.env.NODE_ENV === 'production' && hostIsProductionDomain
+      ? CANONICAL_ORIGIN
+      : `${req.protocol}://${req.get('host')}`;
+  return `${origin}${normalizedPath}${query}`;
+};
+
+const stripSiteSuffix = (value = '') =>
+  String(value)
+    .replace(/\s*\|\s*GAG Lawyers\s*$/i, '')
+    .replace(/\s*-\s*GAG Lawyers\s*$/i, '')
+    .trim();
+
+const buildFallbackContent = ({ title, description, canonical, robots }) => {
+  if (String(robots || '').toLowerCase().includes('noindex')) {
+    return '';
+  }
+
+  const heading = stripSiteSuffix(title) || 'GAG Lawyers';
+  return [
+    '<main class="seo-fallback-content" data-seo-fallback="true">',
+    `<h1>${escHtml(heading)}</h1>`,
+    `<p>${escHtml(description)}</p>`,
+    `<a href="${escHtml(canonical)}">View page</a>`,
+    '</main>',
+  ].join('');
+};
 
 const injectIntoHtml = (template, { title, description, keywords, canonical, robots = 'index, follow' }) => {
   let html = template;
@@ -56,6 +107,9 @@ const injectIntoHtml = (template, { title, description, keywords, canonical, rob
     `<meta name="twitter:title" content="${escHtml(title)}" />`,
     `<meta name="twitter:description" content="${escHtml(description)}" />`,
   ].join('\n  ');
+
+  const fallbackContent = buildFallbackContent({ title, description, canonical, robots });
+  html = html.replace(/<div\s+id="root"\s*><\/div>/i, `<div id="root">${fallbackContent}</div>`);
 
   return html.replace('</head>', `  ${extraTags}\n</head>`);
 };
@@ -138,12 +192,15 @@ const STATIC_SEO = {
 const seoInjectionMiddleware = async (req, res, next) => {
   // Skip API, assets, sitemaps, and anything not an HTML page request
   const p = req.path;
-  if (
-    p.startsWith('/api/') ||
-    p.startsWith('/admin') ||
-    p.match(/\.(js|mjs|css|png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot|json|xml|txt|gz|map)$/)
-  ) {
+  if (!isHtmlPageRequest(p)) {
     return next();
+  }
+
+  // Normalize path: strip trailing slash unless it's the root
+  const urlPath = (p.length > 1 ? p.replace(/\/+$/, '') : '/');
+  const redirectTarget = buildRedirectTarget(req, urlPath);
+  if (redirectTarget) {
+    return res.redirect(301, redirectTarget);
   }
 
   const template = getTemplate();
@@ -152,8 +209,6 @@ const seoInjectionMiddleware = async (req, res, next) => {
     return next();
   }
 
-  // Normalize path: strip trailing slash unless it's the root
-  const urlPath = (p.length > 1 ? p.replace(/\/+$/, '') : '/');
   const canonical = `${SITE_URL}${urlPath}`;
 
   let seoData = STATIC_SEO[urlPath] || null;

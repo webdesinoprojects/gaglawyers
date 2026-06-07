@@ -6,6 +6,7 @@ import SectionRenderer from '../components/sections/SectionRenderer';
 import API_BASE_URL from '../config/api';
 
 const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://gaglawyers.com').replace(/\/+$/, '');
+const servicePageCache = new Map();
 
 const ServicePageDynamic = () => {
   const { slug } = useParams();
@@ -19,27 +20,49 @@ const ServicePageDynamic = () => {
       .trim();
 
   useEffect(() => {
+    let mounted = true;
+    const controller = new AbortController();
+
     const fetchService = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/api/services/${slug}`);
+        setError(null);
+
+        if (servicePageCache.has(slug)) {
+          if (mounted) {
+            setService(servicePageCache.get(slug));
+          }
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/services/${slug}`, {
+          signal: controller.signal,
+        });
         const data = await response.json();
 
         if (data.success) {
-          setService(data.data);
-        } else {
+          servicePageCache.set(slug, data.data);
+          if (mounted) setService(data.data);
+        } else if (mounted) {
           setError('Service not found');
         }
       } catch (err) {
-        console.error('Error fetching service:', err);
-        setError('Failed to load service');
+        if (err.name !== 'AbortError' && mounted) {
+          console.error('Error fetching service:', err);
+          setError('Failed to load service');
+        }
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
 
     fetchService();
     window.scrollTo(0, 0);
+
+    return () => {
+      mounted = false;
+      controller.abort();
+    };
   }, [slug]);
 
   if (loading) {

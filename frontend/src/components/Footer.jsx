@@ -51,7 +51,7 @@ const CITY_ALIASES = {
 
 const normalizeCity = (value = '') => value.toString().trim().toLowerCase();
 /** Bump when API slug shape changes (e.g. `*-in-*`) so clients refetch. */
-const FOOTER_LOCATIONS_CACHE_KEY = 'gag-footer-locations-v7';
+const FOOTER_LOCATIONS_CACHE_KEY = 'gag-footer-locations-v8';
 let footerLocationsCache = null;
 
 const isStaleFooterSlug = (slug) =>
@@ -158,7 +158,9 @@ const Footer = () => {
       }
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/locations/footer-links`);
+        const response = await fetch(`${API_BASE_URL}/api/locations/footer-links`, {
+          cache: 'no-store',
+        });
         const data = await response.json();
         
         if (data.success && data.data) {

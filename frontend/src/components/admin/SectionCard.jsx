@@ -182,6 +182,10 @@ const SectionCard = ({
                 ? ' (using default for this section type)'
                 : ' (custom override)'}
             </p>
+            <p className="mt-1 text-xs text-gray-500">
+              Use {'{city}'} in the heading for exact placement, for example:
+              {' '}Best Lawyers in {'{city}'}.
+            </p>
           </div>
 
           {/* Content Fields */}

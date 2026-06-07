@@ -144,6 +144,7 @@ const getLocationPageBySlug = async (req, res) => {
 
 const getFooterLocationLinks = async (req, res) => {
   try {
+    res.setHeader('Cache-Control', 'no-store');
     const [limitSetting, selectedSlugsSetting] = await Promise.all([
       SiteSettings.findOne({ settingKey: 'footerLocationsLimit' }).lean(),
       SiteSettings.findOne({ settingKey: 'footerLocationSlugs' }).lean(),
@@ -162,25 +163,14 @@ const getFooterLocationLinks = async (req, res) => {
       : configuredLimit;
 
     if (selectedSlugs.length > 0) {
-      const [manualPages, pinnedFooterPages] = await Promise.all([
-        LocationPage.find({
-          slug: { $in: selectedSlugs },
-          isActive: true,
-          showInFooter: true,
-        })
-          .populate('service', 'name')
-          .lean(),
-        LocationPage.find({
-          isActive: true,
-          showInFooter: true,
-          city: { $exists: true, $ne: '' },
-          slug: { $exists: true, $ne: '' },
-          service: { $exists: true, $ne: null },
-        })
-          .populate('service', 'name')
-          .sort({ updatedAt: -1, createdAt: -1 })
-          .lean(),
-      ]);
+      const manualPages = await LocationPage.find({
+        slug: { $in: selectedSlugs },
+        isActive: true,
+        city: { $exists: true, $ne: '' },
+        service: { $exists: true, $ne: null },
+      })
+        .populate('service', 'name')
+        .lean();
 
       const manualBySlug = new Map();
       manualPages.forEach((page) => {
@@ -191,33 +181,10 @@ const getFooterLocationLinks = async (req, res) => {
         manualBySlug.set(slug, { city, serviceName, slug });
       });
 
-      const pinnedOrdered = pinnedFooterPages
-        .map((page) => ({
-          slug: String(page?.slug || '').trim(),
-          city: String(page?.city || '').trim(),
-          serviceName: String(page?.service?.name || '').trim(),
-        }))
-        .filter((row) => row.slug && row.city && row.serviceName);
-
-      const merged = [];
-      const seen = new Set();
-
-      // Always prioritize explicitly toggled footer pages.
-      pinnedOrdered.forEach((row) => {
-        if (seen.has(row.slug)) return;
-        seen.add(row.slug);
-        merged.push(row);
-      });
-
-      // Fill remaining slots with the manual ordered list.
-      selectedSlugs.forEach((slug) => {
-        const row = manualBySlug.get(slug);
-        if (!row || seen.has(row.slug)) return;
-        seen.add(row.slug);
-        merged.push(row);
-      });
-
-      const data = merged.slice(0, limit);
+      const data = selectedSlugs
+        .map((slug) => manualBySlug.get(slug))
+        .filter(Boolean)
+        .slice(0, limit);
 
       return res.status(200).json({
         success: true,

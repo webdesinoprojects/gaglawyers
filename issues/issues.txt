@@ -1,0 +1,17 @@
+1) SEO Related Issues for All services location pages not showing while doing inspect (Ctrl+U): 
+- Meta Title
+- Meta Decription
+- Meta Keywords
+- Canonical Tag must be same as url of that particular page
+- Index Tag - must not have no Index tag on the website
+
+2) Not able to change the placement of location in the heading of the location pages. Krishna suggested Benefits option to place the location in the heading but its working properly 
+
+3) Facing multi time lag issues while loading services and its location pages because of which Soft 404 error is coming for many pages in console.
+https://docs.google.com/spreadsheets/d/1nwZFupeDrcry8p5QBeE0IywjvtvAOK6q2D9OBVbACt0/edit?gid=1804823193#gid=1804823193
+
+https://docs.google.com/spreadsheets/d/1Kyqp7WUFMRPbNE0Qd56bv38Z9D6qfJFuDNTB-2MJUBU/edit?gid=1807027997#gid=1807027997
+
+https://docs.google.com/spreadsheets/d/1eLQ8TU-lfqPM8RsINbETguKTmwOHo7TS8msJuz1pFLI/edit?gid=979535672#gid=979535672
+
+4) Need to fix the management of the location pages placed in the footer. Not able to change the same, it is fixed
