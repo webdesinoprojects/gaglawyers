@@ -104,7 +104,7 @@ app.use('/', seoRoutes);
 const frontendDistExists = fs.existsSync(path.join(FRONTEND_DIST, 'index.html'));
 if (frontendDistExists) {
   // Serve static assets (JS, CSS, images) directly — no SEO injection needed
-  app.use(express.static(FRONTEND_DIST, { index: false }));
+  app.use(express.static(FRONTEND_DIST, { index: false, redirect: false }));
   // All remaining HTML requests go through SEO injection then serve index.html
   app.use(seoInjectionMiddleware);
 } else {
