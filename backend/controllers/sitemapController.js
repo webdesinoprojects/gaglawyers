@@ -105,9 +105,9 @@ const getBlogsSitemapEntries = async (req) => {
   }));
 };
 
-const getLocationsSitemapEntries = async (req) => {
+const getLocationsSitemapEntries = async (req, pageNumber = 1) => {
   const baseUrl = getBaseUrl(req);
-  const page = parseInt(req.query.page || '1', 10);
+  const page = Number.isInteger(pageNumber) && pageNumber > 0 ? pageNumber : 1;
   const limit = 2000; // URLs per sitemap chunk (smaller files load faster)
   const skip = (page - 1) * limit;
   
@@ -218,11 +218,17 @@ const generateNamedSitemap = async (req, res) => {
       entries = await getBlogsSitemapEntries(req);
     } else if (name.startsWith('locations')) {
       // Extract page number from name like "locations-1", "locations-2", etc.
+      const routePage = Number.parseInt(req.params.page, 10);
       const match = name.match(/locations-(\d+)/);
-      if (match) {
-        req.query.page = match[1];
+      const pageNumber = match ? Number.parseInt(match[1], 10) : 1;
+      const locationPageNumber = Number.isInteger(routePage) && routePage > 0 ? routePage : pageNumber;
+      if (!Number.isInteger(locationPageNumber) || locationPageNumber < 1) {
+        return res.status(404).json({
+          success: false,
+          message: 'Unknown location sitemap',
+        });
       }
-      entries = await getLocationsSitemapEntries(req);
+      entries = await getLocationsSitemapEntries(req, locationPageNumber);
     } else {
       return res.status(404).json({
         success: false,
