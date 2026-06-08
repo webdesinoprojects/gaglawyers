@@ -34,7 +34,6 @@ const escHtml = (v = '') =>
 
 const isHtmlPageRequest = (p = '') =>
   !p.startsWith('/api/') &&
-  !p.startsWith('/admin') &&
   !p.match(/\.(js|mjs|css|png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot|json|xml|txt|gz|map)$/);
 
 const buildRedirectTarget = (req, normalizedPath) => {
@@ -224,6 +223,19 @@ const seoInjectionMiddleware = async (req, res, next) => {
   }
 
   const canonical = `${SITE_URL}${urlPath}`;
+
+  if (urlPath === '/admin' || urlPath.startsWith('/admin/')) {
+    const html = injectIntoHtml(template, {
+      title: 'Admin | GAG Lawyers',
+      description: 'GAG Lawyers admin portal.',
+      keywords: 'GAG Lawyers admin',
+      canonical,
+      robots: 'noindex, nofollow',
+    });
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-store');
+    return res.send(html);
+  }
 
   let seoData = STATIC_SEO[urlPath] || null;
   // robots defaults to index,follow. Only set noindex when DB confirms page doesn't exist.
