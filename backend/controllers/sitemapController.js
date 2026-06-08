@@ -113,7 +113,9 @@ const getLocationsSitemapEntries = async (req, pageNumber = 1) => {
   
   const locationPages = await LocationPage.find({ isActive: true, slug: { $exists: true, $ne: '' } })
     .select('slug updatedAt')
-    .sort({ updatedAt: -1 })
+    // Sitemap order does not matter. Use indexed _id ordering so large location
+    // collections do not hit MongoDB's in-memory sort limit on later chunks.
+    .sort({ _id: 1 })
     .skip(skip)
     .limit(limit)
     .lean();
