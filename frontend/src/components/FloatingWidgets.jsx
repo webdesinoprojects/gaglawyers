@@ -259,7 +259,6 @@ const FloatingWidgets = () => {
       if (window.Tawk_API && typeof window.Tawk_API.hideWidget === 'function') {
         window.Tawk_API.hideWidget();
       }
-      setIsTawkLoaded(false);
       return undefined;
     }
 
@@ -272,7 +271,6 @@ const FloatingWidgets = () => {
       existingScripts.forEach((script) => script.remove());
       window.Tawk_API = {};
       window.Tawk_LoadStart = null;
-      setIsTawkLoaded(false);
     }
 
     if (window.Tawk_API && typeof window.Tawk_API.maximize === 'function' && hasExactScript) {

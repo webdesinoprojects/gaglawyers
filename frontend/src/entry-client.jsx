@@ -1,5 +1,5 @@
 import React from 'react';
-import { hydrateRoot } from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
 import App from './App.jsx';
@@ -16,11 +16,24 @@ import App from './App.jsx';
  * rather than replacing it (which would cause duplicate content).
  */
 
-hydrateRoot(
-  document.getElementById('root'),
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+  throw new Error('Root element not found');
+}
+
+const app = (
   <React.StrictMode>
     <HelmetProvider>
       <App />
     </HelmetProvider>
   </React.StrictMode>
 );
+
+const hasSeoFallback = rootElement.querySelector('[data-seo-fallback="true"]');
+
+if (hasSeoFallback || !rootElement.hasChildNodes()) {
+  createRoot(rootElement).render(app);
+} else {
+  hydrateRoot(rootElement, app);
+}

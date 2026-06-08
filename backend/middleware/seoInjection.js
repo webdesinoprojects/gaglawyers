@@ -111,7 +111,21 @@ const injectIntoHtml = (template, { title, description, keywords, canonical, rob
   const fallbackContent = buildFallbackContent({ title, description, canonical, robots });
   html = html.replace(/<div\s+id="root"\s*><\/div>/i, `<div id="root">${fallbackContent}</div>`);
 
-  return html.replace('</head>', `  ${extraTags}\n</head>`);
+  const fallbackVisibilityGuard = fallbackContent
+    ? [
+        '<script>',
+        'document.documentElement.classList.add("js-enabled");',
+        'window.setTimeout(function(){',
+        '  if (document.querySelector("[data-seo-fallback=true]")) {',
+        '    document.documentElement.classList.remove("js-enabled");',
+        '  }',
+        '}, 3000);',
+        '</script>',
+        '<style>.js-enabled .seo-fallback-content{display:none!important;}</style>',
+      ].join('\n  ')
+    : '';
+
+  return html.replace('</head>', `  ${fallbackVisibilityGuard}\n  ${extraTags}\n</head>`);
 };
 
 // ─── Static page SEO (no DB lookup needed) ────────────────────────────────────
