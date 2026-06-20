@@ -133,7 +133,7 @@
 
   .disclaimer-scroll {
     scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 #f8fafc;
+    scrollbar-color: #a68a4a transparent;
   }
 
   .disclaimer-scroll::-webkit-scrollbar {
@@ -141,17 +141,17 @@
   }
 
   .disclaimer-scroll::-webkit-scrollbar-track {
-    background: #f8fafc;
+    background: transparent;
     border-radius: 9999px;
   }
 
   .disclaimer-scroll::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: #a68a4a;
     border-radius: 9999px;
   }
 
   .disclaimer-scroll::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: #8a713b;
   }
 
   .section-split {

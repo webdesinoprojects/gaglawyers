@@ -36,16 +36,16 @@ export default function DisclaimerModal({ onAgree, onDecline }) {
   }, []);
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div className="fixed inset-0 z-[9999] flex items-end justify-center bg-transparent">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="disclaimer-title"
-        className={`max-w-2xl w-[95vw] bg-white rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ease-out ${
-          animateIn ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+        className={`flex h-[76dvh] max-h-[760px] w-full flex-col overflow-hidden border-t-4 border-amber-500 bg-[#f8f5e9] shadow-[0_-18px_45px_rgba(15,23,42,0.22)] transition-transform duration-300 ease-out sm:h-auto sm:max-h-[68vh] ${
+          animateIn ? 'translate-y-0' : 'translate-y-full'
         }`}
       >
-        <div className="bg-navy py-4 px-8 flex items-center justify-between">
+        <div className="flex flex-none items-center justify-between bg-navy px-5 py-3 sm:px-10 lg:px-16">
           <span className="brand-logo-shell">
             <img src="/logo.png" alt="GAG Lawyers" className="h-7 w-auto" />
           </span>
@@ -61,17 +61,17 @@ export default function DisclaimerModal({ onAgree, onDecline }) {
             </button>
           </div>
         </div>
-        <div className="h-[2px] bg-amber-500" />
+        <div className="h-[2px] flex-none bg-amber-500" />
 
-        <div className="px-8 py-6">
+        <div className="flex min-h-0 flex-1 flex-col px-5 py-4 sm:px-10 sm:py-5 lg:px-16">
           <h2 id="disclaimer-title" className="text-xl font-bold text-slate-900 mb-1">
             Important Notice
           </h2>
-          <p className="text-xs uppercase tracking-widest text-slate-400 mb-6">
+          <p className="mb-4 text-xs uppercase tracking-widest text-slate-400 sm:mb-5">
             Bar Council of India - Mandatory Disclosure
           </p>
 
-          <div className="max-h-[45vh] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 pr-1 disclaimer-scroll">
+          <div className="disclaimer-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain pr-3 sm:pr-5">
             <p className="text-sm font-semibold text-slate-700 leading-relaxed mb-4">{DISCLAIMER_TEXT.title}</p>
             <p className="text-sm text-slate-600 leading-relaxed mb-4">{DISCLAIMER_TEXT.intro}</p>
             <p className="text-sm text-slate-600 leading-relaxed mb-4">{DISCLAIMER_TEXT.lead}</p>
@@ -112,26 +112,28 @@ export default function DisclaimerModal({ onAgree, onDecline }) {
           </div>
         </div>
 
-        <div className="border-t border-slate-100 px-8 py-5">
-          <div className="flex justify-end gap-3">
+        <div className="flex-none border-t border-slate-300/70 bg-[#f8f5e9] px-5 py-4 sm:px-10 lg:px-16">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex w-full gap-3 sm:w-auto">
             <button
               type="button"
               onClick={onDecline}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-8 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 w-full sm:w-auto"
+              className="w-full min-w-32 bg-slate-100 px-8 py-2.5 text-sm font-semibold text-slate-700 transition-colors duration-200 hover:bg-slate-200 sm:w-auto"
             >
               I Decline
             </button>
             <button
               type="button"
               onClick={onAgree}
-              className="bg-navy hover:bg-navy-dark text-white px-8 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 w-full sm:w-auto shadow-md hover:shadow-lg"
+              className="w-full min-w-32 bg-navy px-8 py-2.5 text-sm font-semibold text-white shadow-md transition-colors duration-200 hover:bg-navy-dark sm:w-auto"
             >
               I Agree
             </button>
+            </div>
+            <p className="text-center text-xs text-slate-400 sm:text-right">
+              This disclaimer is mandatory under Bar Council of India Rules, 1962
+            </p>
           </div>
-          <p className="text-xs text-slate-400 text-center sm:text-right mt-2">
-            This disclaimer is mandatory under Bar Council of India Rules, 1962
-          </p>
         </div>
       </div>
     </div>,
