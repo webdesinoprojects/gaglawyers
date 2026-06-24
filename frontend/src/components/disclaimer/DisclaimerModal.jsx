@@ -41,9 +41,9 @@ export default function DisclaimerModal({ onAgree, onDecline }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="disclaimer-title"
-        className={`flex h-[76dvh] max-h-[760px] w-full flex-col overflow-hidden border-t-4 border-amber-500 bg-[#f8f5e9] shadow-[0_-18px_45px_rgba(15,23,42,0.22)] transition-transform duration-300 ease-out sm:h-auto sm:max-h-[68vh] ${
-          animateIn ? 'translate-y-0' : 'translate-y-full'
-        }`}
+ className={`flex h-[36dvh] min-h-[260px] max-h-[340px] w-full flex-col overflow-hidden border-t-4 border-amber-500 bg-[#f8f5e9] shadow-[0_-18px_45px_rgba(15,23,42,0.22)] transition-transform duration-300 ease-out sm:h-[32dvh] sm:min-h-[280px] sm:max-h-[360px] ${
+  animateIn ? 'translate-y-0' : 'translate-y-full'
+}`}
       >
         <div className="flex flex-none items-center justify-between bg-navy px-5 py-3 sm:px-10 lg:px-16">
           <span className="brand-logo-shell">
