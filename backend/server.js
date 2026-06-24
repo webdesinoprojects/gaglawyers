@@ -12,6 +12,7 @@ console.log('[server] MONGO_URI available:', !!process.env.MONGO_URI);
 
 const express = require('express');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/db');
 
 const authRoutes = require('./routes/authRoutes');
@@ -44,6 +45,22 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const app = express();
 
+// Behind the Hostinger VPS reverse proxy, the real client IP is in
+// X-Forwarded-For. Trust the first proxy hop so the rate limiter keys on the
+// actual visitor IP (not the proxy's single IP). One hop only — do not trust
+// the whole chain.
+app.set('trust proxy', 1);
+
+// Brute-force protection for login ONLY. Scoped to the auth route so normal
+// site/API browsing and the sitemap routes (mounted at '/') are never affected.
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // max login attempts per IP per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many login attempts, please try again later.' },
+});
+
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
@@ -69,6 +86,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use('/api/auth/login', loginLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/team', teamRoutes);
 app.use('/api/services', serviceRoutes);

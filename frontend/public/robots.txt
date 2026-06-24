@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /admin/
-Disallow: /api
-Disallow: /api/
+Disallow: /api/auth
+Disallow: /api/admin
 
 Sitemap: https://gaglawyers.com/sitemap.xml

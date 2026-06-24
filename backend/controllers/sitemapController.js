@@ -257,9 +257,11 @@ const generateRobotsTxt = (req, res) => {
   txt += 'User-agent: *\n';
   txt += 'Allow: /\n';
   txt += 'Disallow: /admin/\n';
-  txt += 'Disallow: /api/\n';
   txt += 'Disallow: /admin\n';
-  txt += 'Disallow: /api\n\n';
+  // Block only sensitive/auth APIs. Content APIs stay crawlable so Googlebot
+  // can fetch the data it needs to render pages (client-side React).
+  txt += 'Disallow: /api/auth\n';
+  txt += 'Disallow: /api/admin\n\n';
   txt += '# Crawl-delay for polite crawling\n';
   txt += 'Crawl-delay: 1\n\n';
   txt += `Sitemap: ${baseUrl}/sitemap.xml\n`;
