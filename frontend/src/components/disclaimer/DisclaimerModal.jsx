@@ -41,11 +41,11 @@ export default function DisclaimerModal({ onAgree, onDecline }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="disclaimer-title"
- className={`flex h-[36dvh] min-h-[260px] max-h-[340px] w-full flex-col overflow-hidden border-t-4 border-amber-500 bg-[#f8f5e9] shadow-[0_-18px_45px_rgba(15,23,42,0.22)] transition-transform duration-300 ease-out sm:h-[32dvh] sm:min-h-[280px] sm:max-h-[360px] ${
+ className={`flex h-[46dvh] min-h-[340px] max-h-[440px] w-full flex-col overflow-hidden border-t-4 border-amber-500 bg-[#f8f5e9] shadow-[0_-18px_45px_rgba(15,23,42,0.22)] transition-transform duration-300 ease-out sm:h-[40dvh] sm:min-h-[340px] sm:max-h-[430px] ${
   animateIn ? 'translate-y-0' : 'translate-y-full'
 }`}
       >
-        <div className="flex flex-none items-center justify-between bg-navy px-5 py-3 sm:px-10 lg:px-16">
+        <div className="flex flex-none items-center justify-between bg-navy px-5 py-2 sm:px-10 lg:px-16">
           <span className="brand-logo-shell">
             <img src="/logo.png" alt="GAG Lawyers" className="h-7 w-auto" />
           </span>
@@ -63,18 +63,18 @@ export default function DisclaimerModal({ onAgree, onDecline }) {
         </div>
         <div className="h-[2px] flex-none bg-amber-500" />
 
-        <div className="flex min-h-0 flex-1 flex-col px-5 py-4 sm:px-10 sm:py-5 lg:px-16">
-          <h2 id="disclaimer-title" className="text-xl font-bold text-slate-900 mb-1">
+        <div className="flex min-h-0 flex-1 flex-col px-5 py-2 sm:px-10 sm:py-3 lg:px-16">
+          <h2 id="disclaimer-title" className="mb-0 text-lg font-bold text-slate-900 sm:text-xl">
             Important Notice
           </h2>
-          <p className="mb-4 text-xs uppercase tracking-widest text-slate-400 sm:mb-5">
+          <p className="mb-2 text-xs uppercase tracking-widest text-slate-400 sm:mb-3">
             Bar Council of India - Mandatory Disclosure
           </p>
 
           <div className="disclaimer-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain pr-3 sm:pr-5">
-            <p className="text-sm font-semibold text-slate-700 leading-relaxed mb-4">{DISCLAIMER_TEXT.title}</p>
-            <p className="text-sm text-slate-600 leading-relaxed mb-4">{DISCLAIMER_TEXT.intro}</p>
-            <p className="text-sm text-slate-600 leading-relaxed mb-4">{DISCLAIMER_TEXT.lead}</p>
+            <p className="mb-2 text-sm font-semibold leading-relaxed text-slate-700">{DISCLAIMER_TEXT.title}</p>
+            <p className="mb-3 text-sm leading-relaxed text-slate-600">{DISCLAIMER_TEXT.intro}</p>
+            <p className="mb-3 text-sm leading-relaxed text-slate-600">{DISCLAIMER_TEXT.lead}</p>
 
             <div>
               {DISCLAIMER_TEXT.bullets.map((item, idx) => (
@@ -112,20 +112,20 @@ export default function DisclaimerModal({ onAgree, onDecline }) {
           </div>
         </div>
 
-        <div className="flex-none border-t border-slate-300/70 bg-[#f8f5e9] px-5 py-4 sm:px-10 lg:px-16">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div className="flex w-full gap-3 sm:w-auto">
+        <div className="flex-none border-t border-slate-300/70 bg-[#f8f5e9] px-5 py-2.5 sm:px-10 lg:px-16">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex w-full gap-2 sm:w-auto">
             <button
               type="button"
               onClick={onDecline}
-              className="w-full min-w-32 bg-slate-100 px-8 py-2.5 text-sm font-semibold text-slate-700 transition-colors duration-200 hover:bg-slate-200 sm:w-auto"
+              className="min-w-0 flex-1 bg-slate-100 px-5 py-2 text-sm font-semibold text-slate-700 transition-colors duration-200 hover:bg-slate-200 sm:min-w-28 sm:flex-none"
             >
               I Decline
             </button>
             <button
               type="button"
               onClick={onAgree}
-              className="w-full min-w-32 bg-navy px-8 py-2.5 text-sm font-semibold text-white shadow-md transition-colors duration-200 hover:bg-navy-dark sm:w-auto"
+              className="min-w-0 flex-1 bg-navy px-5 py-2 text-sm font-semibold text-white shadow-md transition-colors duration-200 hover:bg-navy-dark sm:min-w-28 sm:flex-none"
             >
               I Agree
             </button>
