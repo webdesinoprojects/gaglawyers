@@ -28,6 +28,15 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  // Forgot-password: stores a SHA-256 HASH of the reset token (never the raw token)
+  resetPasswordToken: {
+    type: String,
+    default: null,
+  },
+  resetPasswordExpire: {
+    type: Date,
+    default: null,
+  },
 }, {
   timestamps: true,
 });

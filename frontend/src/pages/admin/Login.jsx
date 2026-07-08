@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
 import Button from '../../components/Button';
 import API_BASE_URL from '../../config/api';
@@ -93,6 +93,12 @@ const AdminLogin = () => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition-colors font-sans"
                 placeholder="Enter your password"
               />
+            </div>
+
+            <div className="text-right -mt-2">
+              <Link to="/admin/forgot-password" className="font-sans text-sm text-navy hover:text-gold">
+                Forgot password?
+              </Link>
             </div>
 
             <Button type="submit" variant="primary" size="lg" className="w-full" disabled={loading}>
