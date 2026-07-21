@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { MapPin, Phone, Mail, ArrowRight, CheckCircle, ChevronRight, Scale, MessageCircleQuestion, Home, AlertCircle, Loader2 } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import SectionRenderer from '../components/sections/SectionRenderer';
+import LocationConsultationSection from '../components/location/LocationConsultationSection';
 import API_BASE_URL from '../config/api';
 
 const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://gaglawyers.com').replace(/\/+$/, '');
@@ -435,6 +436,7 @@ const LocationPageDynamic = () => {
     `Expert ${serviceName.toLowerCase()} services in ${city}.`;
   const pageSeoKeywords = seo?.keywords || `${serviceName}, ${city}, lawyers`;
   const pageCanonical = `${SITE_URL}/${slug || ''}`;
+  const serviceHeroIndex = serviceStyledSections.findIndex((section) => section.type === 'hero');
 
   if (templateMode === 'service') {
     return (
@@ -465,47 +467,59 @@ const LocationPageDynamic = () => {
         </div>
 
         {serviceStyledSections.length > 0 ? (
-          serviceStyledSections.map((section, index) => {
-            const isHowGroverSection = /how grover/i.test(section?.heading || '');
+          <>
+            {serviceHeroIndex === -1 && (
+              <LocationConsultationSection serviceName={serviceName} city={city} />
+            )}
+            {serviceStyledSections.map((section, index) => {
+              const isHowGroverSection = section.type !== 'hero' && /how grover/i.test(section?.heading || '');
 
-            if (isHowGroverSection) {
-              const teamImageSrc = section?.content?.imageUrl || null;
-              const teamImageAlt = section?.content?.imageAlt || 'Grover & Grover Advocates team';
+              if (isHowGroverSection) {
+                const teamImageSrc = section?.content?.imageUrl || null;
+                const teamImageAlt = section?.content?.imageAlt || 'Grover & Grover Advocates team';
+
+                return (
+                  <div key={section._id || `section-${index}`} className="mx-auto max-w-7xl px-4 py-10 sm:px-6 md:px-8">
+                    <div className={teamImageSrc ? 'section-split' : ''}>
+                      <div className={teamImageSrc ? 'section-split__text' : ''}>
+                        <SectionRenderer section={section} sectionIndex={index} serviceSlug={slug} />
+                      </div>
+                      {teamImageSrc && (
+                        <div className="section-split__image">
+                          <img
+                            src={teamImageSrc}
+                            alt={teamImageAlt}
+                            loading="lazy"
+                            style={{ borderRadius: '12px', width: '100%', objectFit: 'cover', maxHeight: '360px' }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
 
               return (
-                <div key={section._id || `section-${index}`} className="mx-auto max-w-7xl px-4 py-10 sm:px-6 md:px-8">
-                  <div className={teamImageSrc ? 'section-split' : ''}>
-                    <div className={teamImageSrc ? 'section-split__text' : ''}>
-                      <SectionRenderer section={section} sectionIndex={index} serviceSlug={slug} />
-                    </div>
-                    {teamImageSrc && (
-                      <div className="section-split__image">
-                        <img
-                          src={teamImageSrc}
-                          alt={teamImageAlt}
-                          loading="lazy"
-                          style={{ borderRadius: '12px', width: '100%', objectFit: 'cover', maxHeight: '360px' }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <React.Fragment key={section._id || `section-${index}`}>
+                  <SectionRenderer
+                    section={section}
+                    sectionIndex={index}
+                    serviceSlug={slug}
+                  />
+                  {index === serviceHeroIndex && (
+                    <LocationConsultationSection serviceName={serviceName} city={city} />
+                  )}
+                </React.Fragment>
               );
-            }
-
-            return (
-              <SectionRenderer
-                key={section._id || `section-${index}`}
-                section={section}
-                sectionIndex={index}
-                serviceSlug={slug}
-              />
-            );
-          })
+            })}
+          </>
         ) : (
-          <div className="py-20 text-center">
-            <p className="text-gray-600 font-sans">No content available for this service yet.</p>
-          </div>
+          <>
+            <LocationConsultationSection serviceName={serviceName} city={city} />
+            <div className="py-20 text-center">
+              <p className="text-gray-600 font-sans">No content available for this service yet.</p>
+            </div>
+          </>
         )}
       </div>
     );
@@ -665,6 +679,8 @@ const LocationPageDynamic = () => {
           </div>
         </div>
       </section>
+
+      <LocationConsultationSection serviceName={serviceName} city={city} />
 
       <section className="bg-white py-14 md:py-16">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
