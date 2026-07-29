@@ -26,26 +26,35 @@ const buildTitle = (serviceName, city) => `${serviceName} in ${city} - GAG Lawye
 const buildMetaDescription = (serviceName, city) =>
   `${serviceName} in ${city} - GAG Lawyers. We offer expert legal guidance and personalized attention to meet your specific legal needs in ${city}. Our dedicated team of experienced attorneys is committed to delivering exceptional and effective legal services to individuals, businesses, and corporations`;
 
+// Base service name without a trailing "Lawyer"/"Advocate" word, so phrases that
+// append "lawyer/lawyers" don't double up: "Criminal Lawyer" -> "Criminal", giving
+// "best criminal lawyers near me" instead of "best criminal lawyer lawyers near me".
+// Non-lawyer names ("Bail", "Cheque Bounce") are returned unchanged.
+const baseService = (serviceName = '') =>
+  String(serviceName).replace(/\s+(lawyers?|advocates?)\s*$/i, '').trim() || String(serviceName).trim();
+
 const buildKeywords = (serviceName, city) => {
-  const lowerService = serviceName.toLowerCase();
-  const lowerCity = city.toLowerCase();
+  const s = serviceName;               // full, e.g. "Criminal Lawyer"
+  const b = baseService(serviceName);  // base, e.g. "Criminal"
+  const ls = s.toLowerCase();
+  const lb = b.toLowerCase();
+  const lc = city.toLowerCase();
 
   return unique([
-    `${lowerService} in ${lowerCity}`,
-    `advocate for ${lowerService} matters in ${lowerCity}`,
-    `best ${lowerService} lawyers near me`,
-    `${lowerService} lawyer fees in ${lowerCity}`,
-    `${serviceName} lawyer near me`,
-    `best ${serviceName} lawyers in ${city}`,
-    `best ${serviceName} lawyers near me`,
-    `top ${serviceName} lawyer in india`,
-    `best advocates for ${serviceName} cases in ${city}`,
-    `best lawyers for ${serviceName} cases in ${city}`,
-    `lawyer for ${serviceName} cases in ${city}`,
-    `lawyer for ${serviceName} matters in ${city}`,
-    `lawyer for ${serviceName} disputes in ${city}`,
-    `${serviceName} lawyer in high court`,
-    `top ${serviceName} lawyer in supreme court`,
+    `${ls} in ${lc}`,
+    `advocate for ${lb} matters in ${lc}`,
+    `best ${lb} lawyers near me`,
+    `${lb} lawyer fees in ${lc}`,
+    `${lb} lawyer near me`,
+    `best ${lb} lawyers in ${city}`,
+    `top ${lb} lawyer in india`,
+    `best advocates for ${lb} cases in ${city}`,
+    `best lawyers for ${lb} cases in ${city}`,
+    `lawyer for ${lb} cases in ${city}`,
+    `lawyer for ${lb} matters in ${city}`,
+    `lawyer for ${lb} disputes in ${city}`,
+    `${lb} lawyer in high court`,
+    `${lb} lawyer in supreme court`,
   ]).join(', ');
 };
 
