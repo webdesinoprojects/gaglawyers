@@ -10,23 +10,6 @@ const PANEL = '#FFFFFF';
 const MAP_EMBED_SRC =
   'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6998.3752460208125!2d77.13081933769948!3d28.71393836202312!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d010b75f3e47d%3A0x4e92383cc436853f!2sGAG%20Lawyers%20-%20Grover%20%26%20Grover%2C%20Advocates%20%7C%20Best%20Divorce%20Lawyer%20in%20Delhi%2C%20Property%20Lawyer%20in%20Delhi%2C%20Civil%20%26%20Criminal%20Lawyers!5e0!3m2!1sen!2sin!4v1775508641842!5m2!1sen!2sin';
 
-const DEFAULT_OTHER_OFFICES = [
-  {
-    heading: 'Mumbai Office',
-    address: 'Maker Chamber VI, Nariman Point, Mumbai, Maharashtra 400021',
-    email: 'mumbai@gaglawyers.com',
-    phone: '+91 22 4012 3456',
-    mapEmbedUrl: 'https://www.google.com/maps?q=Nariman%20Point%2C%20Mumbai&output=embed',
-  },
-  {
-    heading: 'Chandigarh Office',
-    address: 'SCO 17, Sector 17-C, Chandigarh, 160017',
-    email: 'chandigarh@gaglawyers.com',
-    phone: '+91 172 405 8899',
-    mapEmbedUrl: 'https://www.google.com/maps?q=Sector%2017%20Chandigarh&output=embed',
-  },
-];
-
 const Contact = () => {
   const captchaRef = useRef(null);
   const [formData, setFormData] = useState({
@@ -40,7 +23,7 @@ const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
   const [captchaToken, setCaptchaToken] = useState(null);
-  const [otherOffices, setOtherOffices] = useState(DEFAULT_OTHER_OFFICES);
+  const [otherOffices, setOtherOffices] = useState([]);
   const [contactEmails, setContactEmails] = useState(['contact@gaglawyers.com']);
   const [contactPhones, setContactPhones] = useState(['+91 99962 63370']);
   const [officeAddresses, setOfficeAddresses] = useState([OFFICE_ADDRESS_LINES.join(', ')]);
@@ -97,9 +80,7 @@ const Contact = () => {
         }))
         .filter((office) => office.heading && office.address);
 
-      if (normalized.length > 0) {
-        setOtherOffices(normalized);
-      }
+      setOtherOffices(normalized);
     } catch (error) {
       console.error('Error fetching other offices:', error);
     }
@@ -516,6 +497,7 @@ const Contact = () => {
         </div>
       </section>
 
+      {otherOffices.length > 0 ? (
       <section className="bg-[#0B1526] pb-16 lg:pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-lg border border-white/10 bg-[#112240] p-6 md:p-8 lg:p-10">
@@ -575,6 +557,7 @@ const Contact = () => {
           </div>
         </div>
       </section>
+      ) : null}
     </div>
   );
 };
