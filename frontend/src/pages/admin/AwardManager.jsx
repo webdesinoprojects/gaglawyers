@@ -8,6 +8,7 @@ const AwardManager = () => {
   const [awards, setAwards] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editingAward, setEditingAward] = useState(null);
+  const [message, setMessage] = useState({ type: '', text: '' });
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -27,15 +28,15 @@ const AwardManager = () => {
     const token = localStorage.getItem('adminToken');
     
     try {
-      const response = await fetch(`${API_BASE_URL}/api/awards`, {
+      const response = await fetch(`${API_BASE_URL}/api/awards/admin`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
-      if (data.success) {
-        setAwards(data.data);
-      }
+      if (!response.ok || !data.success) throw new Error(data.message || 'Failed to load awards');
+      setAwards(data.data);
     } catch (error) {
       console.error('Error fetching awards:', error);
+      setMessage({ type: 'error', text: error.message || 'Failed to load awards' });
     }
   };
 
@@ -63,12 +64,20 @@ const AwardManager = () => {
         body: JSON.stringify(formData),
       });
 
-      if (response.ok) {
-        fetchAwards();
-        resetForm();
-      }
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.message || 'Failed to save award');
+
+      await fetchAwards();
+      setMessage({
+        type: 'success',
+        text: formData.isPublished
+          ? 'Award saved and published.'
+          : 'Award saved as a draft. It remains here and can be published later.',
+      });
+      resetForm();
     } catch (error) {
       console.error('Error saving award:', error);
+      setMessage({ type: 'error', text: error.message || 'Failed to save award' });
     }
   };
 
@@ -80,6 +89,7 @@ const AwardManager = () => {
       year: award.year,
       issuingBody: award.issuingBody,
       imageUrl: award.imageUrl,
+      cloudinaryPublicId: award.cloudinaryPublicId || '',
       order: award.order,
       isPublished: award.isPublished,
     });
@@ -92,13 +102,17 @@ const AwardManager = () => {
     const token = localStorage.getItem('adminToken');
 
     try {
-      await fetch(`${API_BASE_URL}/api/awards/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/awards/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-      fetchAwards();
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.message || 'Failed to delete award');
+      await fetchAwards();
+      setMessage({ type: 'success', text: 'Award permanently deleted.' });
     } catch (error) {
       console.error('Error deleting award:', error);
+      setMessage({ type: 'error', text: error.message || 'Failed to delete award' });
     }
   };
 
@@ -118,6 +132,16 @@ const AwardManager = () => {
 
   return (
     <div>
+      {message.text && (
+        <div className={`mb-6 rounded-lg border p-4 font-sans text-sm ${
+          message.type === 'success'
+            ? 'border-green-200 bg-green-50 text-green-800'
+            : 'border-red-200 bg-red-50 text-red-800'
+        }`}>
+          {message.text}
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="font-serif text-3xl font-bold text-navy mb-2">Awards Manager</h1>
@@ -228,7 +252,7 @@ const AwardManager = () => {
                   className="w-5 h-5 text-navy focus:ring-navy/20 rounded"
                 />
                 <label htmlFor="isPublished" className="font-sans text-sm font-medium text-gray-700">
-                  Published
+                  Published (uncheck to save as draft)
                 </label>
               </div>
             </div>

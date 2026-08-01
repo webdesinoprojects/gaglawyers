@@ -36,6 +36,7 @@ import TeamManager from './pages/admin/TeamManager';
 import ResourceCenterManager from './pages/admin/ResourceCenterManager';
 import ReviewManager from './pages/admin/ReviewManager';
 import AwardManager from './pages/admin/AwardManager';
+import HomeAwardsManager from './pages/admin/HomeAwardsManager';
 import GalleryManager from './pages/admin/GalleryManager';
 import CareerManager from './pages/admin/CareerManager';
 import ServiceManager from './pages/admin/ServiceManager';
@@ -112,6 +113,7 @@ function App() {
             <Route path="services/import" element={<ServiceImport />} />
             <Route path="gallery" element={<GalleryManager />} />
             <Route path="awards" element={<AwardManager />} />
+            <Route path="home-awards" element={<HomeAwardsManager />} />
             <Route path="reviews" element={<ReviewManager />} />
             <Route path="careers" element={<CareerManager />} />
             <Route path="locations" element={<LocationManager />} />

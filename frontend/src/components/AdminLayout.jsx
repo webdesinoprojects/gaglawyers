@@ -21,6 +21,7 @@ import {
   Loader2,
   Eye,
   Share2,
+  Trophy,
 } from 'lucide-react';
 import API_BASE_URL from '../config/api';
 
@@ -236,6 +237,7 @@ const AdminLayout = () => {
         { name: 'Services', path: '/admin/services', icon: Briefcase },
         { name: 'Gallery', path: '/admin/gallery', icon: Image },
         { name: 'Awards', path: '/admin/awards', icon: Award },
+        { name: 'Home Awards', path: '/admin/home-awards', icon: Trophy },
         { name: 'Reviews', path: '/admin/reviews', icon: Star },
         { name: 'Careers', path: '/admin/careers', icon: Briefcase },
       ],

@@ -182,7 +182,7 @@ const Home = () => {
             if (b.year !== a.year) return b.year - a.year;
             return (a.order || 0) - (b.order || 0);
           });
-          setAwards(sorted.slice(0, 16));
+          setAwards(sorted);
         }
       })
       .catch((error) => {
@@ -464,6 +464,14 @@ const Home = () => {
     .filter(Boolean);
   const awardGalleryImagesToShow =
     selectedAwardGalleryImages.length > 0 ? selectedAwardGalleryImages : galleryImages.slice(0, 6);
+  const homeAwardSelectionConfigured = home?.awardsHome?.awardSelectionConfigured === true;
+  const selectedHomeAwardIds = Array.isArray(home?.awardsHome?.awardIds)
+    ? home.awardsHome.awardIds.map((id) => String(id))
+    : [];
+  const awardsById = new Map(awards.map((awardItem) => [String(awardItem?._id), awardItem]));
+  const homeAwardsToShow = homeAwardSelectionConfigured
+    ? selectedHomeAwardIds.map((id) => awardsById.get(id)).filter(Boolean).slice(0, 16)
+    : awards.slice(0, 16);
   const practiceAreasSection = home.practiceAreas || {
     heading: 'Practice Areas',
     subheading: 'Comprehensive legal expertise across multiple domains',
@@ -1224,7 +1232,7 @@ const Home = () => {
       )}
 
       {/* Awards */}
-      {awards.length > 0 && (
+      {homeAwardsToShow.length > 0 && (
         <section
           id="awards"
           className="scroll-mt-[var(--site-header-height)] bg-[#081629] py-14 lg:py-20 border-t border-gold/20"
@@ -1248,7 +1256,7 @@ const Home = () => {
               </div>
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {awards.map((a) => (
+                {homeAwardsToShow.map((a) => (
                   <div
                     key={a._id}
                     className="flex gap-4 rounded-xl border-l-4 border-gold bg-[#0B1F3A] p-5 shadow-lg transition-all hover:shadow-xl hover:shadow-gold/10"

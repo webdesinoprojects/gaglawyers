@@ -159,6 +159,10 @@ export const DEFAULT_AWARDS_HOME = {
   viewAllText: 'View all awards',
   galleryTitle: 'From Our Image Gallery',
   galleryImageIds: [],
+  // False preserves the original automatic latest-awards behavior until an
+  // administrator explicitly saves a custom homepage selection.
+  awardSelectionConfigured: false,
+  awardIds: [],
 };
 
 export const DEFAULT_CONSULTATION_CTA = {
