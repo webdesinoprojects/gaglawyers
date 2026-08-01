@@ -73,7 +73,25 @@ const globalSettingsSchema = new mongoose.Schema({
       isVisible: { type: Boolean, default: false },
     },
   },
-  
+
+  // Managed social links list (used by header top-bar + footer). Additive — the
+  // legacy `socialMedia` object above is left intact and unused.
+  socialLinks: {
+    type: [{
+      platform: { type: String, required: true, trim: true },
+      url: { type: String, required: true, trim: true },
+      showInHeader: { type: Boolean, default: true },
+      showInFooter: { type: Boolean, default: true },
+      order: { type: Number, default: 0 },
+    }],
+    default: () => [
+      { platform: 'facebook', url: 'https://www.facebook.com/gaglawyers', showInHeader: true, showInFooter: true, order: 1 },
+      { platform: 'instagram', url: 'https://instagram.com/gaglawyers', showInHeader: true, showInFooter: false, order: 2 },
+      { platform: 'linkedin', url: 'https://www.linkedin.com/company/gaglawyers', showInHeader: true, showInFooter: true, order: 3 },
+      { platform: 'twitter', url: 'https://twitter.com/gaglawyers', showInHeader: true, showInFooter: true, order: 4 },
+    ],
+  },
+
   // Business Information
   business: {
     yearsOfExperience: Number,

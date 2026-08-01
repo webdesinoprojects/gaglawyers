@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
 import { OFFICE_ADDRESS_LINE } from '../constants/officeAddress';
+import { FOOTER_DEFAULT_LINKS } from '../constants/socialLinks';
+import { getGlobalSettings } from '../utils/globalSettings';
 
 const SEOHead = ({ 
   title = 'GAG Lawyers - Grover & Grover Advocates',
@@ -22,6 +25,27 @@ const SEOHead = ({
   robots = 'index, follow',
   language = 'en',
 }) => {
+  const [socialProfileUrls, setSocialProfileUrls] = useState(
+    FOOTER_DEFAULT_LINKS.map((link) => link.url),
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    getGlobalSettings().then((settings) => {
+      if (cancelled) return;
+      const links = Array.isArray(settings?.socialLinks) ? settings.socialLinks : null;
+      if (links?.length) {
+        setSocialProfileUrls(
+          links
+            .filter((link) => link?.url)
+            .sort((a, b) => (a.order || 0) - (b.order || 0))
+            .map((link) => link.url),
+        );
+      }
+    });
+    return () => { cancelled = true; };
+  }, []);
+
   const rawSite = (import.meta.env.VITE_SITE_URL || 'https://gaglawyers.com').replace(/\/+$/, '');
   const configuredSiteUrl = rawSite.replace(/^https:\/\/www\.(?=gaglawyers\.com)/i, 'https://');
   const { pathname } = useLocation();
@@ -70,11 +94,7 @@ const SEOHead = ({
         name: 'India',
       },
     ],
-    sameAs: [
-      'https://www.facebook.com/gaglawyers',
-      'https://www.linkedin.com/company/gaglawyers',
-      'https://twitter.com/gaglawyers',
-    ],
+    sameAs: socialProfileUrls,
     aggregateRating: {
       '@type': 'AggregateRating',
       ratingValue: '4.8',

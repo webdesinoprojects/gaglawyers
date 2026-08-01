@@ -20,6 +20,7 @@ import {
   User,
   Loader2,
   Eye,
+  Share2,
 } from 'lucide-react';
 import API_BASE_URL from '../config/api';
 
@@ -259,6 +260,7 @@ const AdminLayout = () => {
       items: [
         { name: 'Page Visibility', path: '/admin/page-visibility', icon: Eye },
         { name: 'Site Settings', path: '/admin/settings', icon: Settings },
+        { name: 'Social Links', path: '/admin/social-links', icon: Share2 },
       ],
     },
   ];

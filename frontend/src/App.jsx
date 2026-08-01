@@ -45,6 +45,7 @@ import LocationManager from './pages/admin/LocationManager';
 import SEOManager from './pages/admin/SEOManager';
 import PageVisibilityManager from './pages/admin/PageVisibilityManager';
 import ComingSoon from './pages/admin/ComingSoon';
+import SocialLinksManager from './pages/admin/SocialLinksManager';
 import Affiliation from './pages/Affiliation';
 import API_BASE_URL from './config/api';
 
@@ -118,6 +119,7 @@ function App() {
             <Route path="contacts" element={<ContactForms />} />
             <Route path="forms" element={<FormRequirementManager />} />
             <Route path="settings" element={<SiteSettings />} />
+            <Route path="social-links" element={<SocialLinksManager />} />
             <Route path="*" element={<ComingSoon />} />
           </Route>
 

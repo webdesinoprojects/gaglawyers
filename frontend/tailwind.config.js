@@ -4,6 +4,16 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  // Footer social per-brand hover colours are applied dynamically from the social
+  // catalog, so safelist them to guarantee Tailwind always generates the classes.
+  safelist: [
+    'hover:bg-[#1877F2]',
+    'hover:bg-[#E4405F]',
+    'hover:bg-[#0A66C2]',
+    'hover:bg-[#1DA1F2]',
+    'hover:bg-[#FF0000]',
+    'hover:bg-[#25D366]',
+  ],
   theme: {
     extend: {
       colors: {
