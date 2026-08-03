@@ -1,49 +1,26 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const GoogleAnalytics = ({ measurementId }) => {
   const location = useLocation();
+  const currentPath = location.pathname + location.search;
+  const lastTrackedPath = useRef(currentPath);
 
+  // The initial page view is sent by the Google tag in index.html. Only send
+  // subsequent client-side route changes here so the first view is not counted twice.
   useEffect(() => {
-    // Only load if measurement ID is provided
-    if (!measurementId || measurementId === 'YOUR_GA_MEASUREMENT_ID') {
+    if (currentPath !== lastTrackedPath.current) {
+      lastTrackedPath.current = currentPath;
+    } else {
       return;
     }
 
-    // Load Google Analytics script
-    const script1 = document.createElement('script');
-    script1.async = true;
-    script1.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
-    document.head.appendChild(script1);
-
-    // Initialize gtag
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {
-      window.dataLayer.push(arguments);
-    }
-    window.gtag = gtag;
-    gtag('js', new Date());
-    gtag('config', measurementId, {
-      page_path: location.pathname + location.search,
-      send_page_view: true,
-    });
-
-    return () => {
-      // Cleanup if needed
-      if (script1.parentNode) {
-        script1.parentNode.removeChild(script1);
-      }
-    };
-  }, [measurementId]);
-
-  // Track page views on route change
-  useEffect(() => {
-    if (window.gtag && measurementId && measurementId !== 'YOUR_GA_MEASUREMENT_ID') {
+    if (typeof window.gtag === 'function' && measurementId) {
       window.gtag('config', measurementId, {
-        page_path: location.pathname + location.search,
+        page_path: currentPath,
       });
     }
-  }, [location, measurementId]);
+  }, [currentPath, measurementId]);
 
   return null;
 };
