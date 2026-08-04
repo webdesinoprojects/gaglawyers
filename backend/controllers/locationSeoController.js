@@ -61,11 +61,15 @@ exports.applyTemplate = async (req, res) => {
     const dryRun = req.body?.dryRun !== false; // default to dry-run for safety
     const service = await Service.findOne({ slug: req.params.slug }).lean();
     if (!service) return res.status(404).json({ success: false, message: 'Service not found' });
-    const tpl = hasTpl(service.locationSeoTemplate) ? service.locationSeoTemplate : DEFAULT_TEMPLATE;
+    // Use the template sent from the editor (WYSIWYG — dry-run/apply reflect exactly what you
+    // see); else the saved one. No DEFAULT fallback here, so a fully-blank template changes
+    // nothing (each blank field is skipped per page below).
+    const provided = req.body && req.body.template;
+    const tpl = (provided && hasTpl(provided)) ? provided : (service.locationSeoTemplate || {});
 
     const pages = await LocationPage.find({ service: service._id }).select('slug city serviceName seo').lean();
-    let updated = 0;
     const samples = [];
+    const ops = [];
     for (const page of pages) {
       const ctx = { service: String(page.serviceName || service.name || '').trim(), base: baseService(page.serviceName || service.name), city: String(page.city || '').trim() };
       const next = { ...(page.seo || {}) };
@@ -73,12 +77,11 @@ exports.applyTemplate = async (req, res) => {
       if (tpl.description) next.description = render(tpl.description, ctx);
       if (tpl.keywords) next.keywords = render(tpl.keywords, ctx);
       if (samples.length < 3) samples.push({ slug: page.slug, title: next.title, keywords: (next.keywords || '').slice(0, 160) });
-      if (!dryRun) {
-        await LocationPage.updateOne({ _id: page._id }, { $set: { seo: next } });
-      }
-      updated += 1;
+      if (!dryRun) ops.push({ updateOne: { filter: { _id: page._id }, update: { $set: { seo: next } } } });
     }
-    res.json({ success: true, dryRun, serviceName: service.name, total: pages.length, updated: dryRun ? 0 : updated, samples });
+    // One batched write — fast + avoids HTTP timeouts on large services. Only $set seo; no deletes/drops.
+    if (!dryRun && ops.length) await LocationPage.bulkWrite(ops, { ordered: false });
+    res.json({ success: true, dryRun, serviceName: service.name, total: pages.length, updated: dryRun ? 0 : ops.length, samples });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
   }

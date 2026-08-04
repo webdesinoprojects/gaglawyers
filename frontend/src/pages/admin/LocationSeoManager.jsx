@@ -39,7 +39,7 @@ const LocationSeoManager = () => {
   const runApply = async (dryRun) => {
     if (!dryRun && !window.confirm(`Apply this template to ALL ${meta.pageCount} "${meta.serviceName}" city pages? Existing meta for any blank field is kept.`)) return;
     setBusy(true); setMsg({ type: '', text: '' }); setPreview(null);
-    const r = await fetch(`${API_BASE_URL}/api/cms/services/${slug}/location-seo-template/apply`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth() }, body: JSON.stringify({ dryRun }) });
+    const r = await fetch(`${API_BASE_URL}/api/cms/services/${slug}/location-seo-template/apply`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth() }, body: JSON.stringify({ dryRun, template: tpl }) });
     const d = await r.json();
     if (!d.success) { setMsg({ type: 'error', text: d.message || 'Failed' }); setBusy(false); return; }
     if (dryRun) { setPreview(d.samples); setMsg({ type: 'success', text: `Dry-run: ${d.total} pages would update. Nothing written yet — review the preview below.` }); }
