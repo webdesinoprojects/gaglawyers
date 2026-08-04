@@ -34,6 +34,7 @@ const { seoInjectionMiddleware, FRONTEND_DIST } = require('./middleware/seoInjec
 
 // CMS Routes
 const globalSettingsRoutes = require('./routes/globalSettingsRoutes');
+const locationSeoRoutes = require('./routes/locationSeoRoutes');
 const navigationRoutes = require('./routes/navigationRoutes');
 const mediaLibraryRoutes = require('./routes/mediaLibraryRoutes');
 const pageRoutes = require('./routes/pageRoutes');
@@ -104,6 +105,7 @@ app.use('/api/cloudinary', cloudinaryRoutes);
 
 // CMS Routes
 app.use('/api/cms/global-settings', globalSettingsRoutes);
+app.use('/api/cms/services', locationSeoRoutes);
 app.use('/api/cms/navigation', navigationRoutes);
 app.use('/api/cms/media', mediaLibraryRoutes);
 app.use('/api/cms/pages', pageRoutes);

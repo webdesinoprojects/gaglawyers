@@ -42,6 +42,13 @@ const serviceSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.Mixed,
     default: {},
   },
+  // Per-service template for the CITY location-page meta (title/description/keywords
+  // with {city}/{service} placeholders). Separate from `seo` above (which is the
+  // service page's own meta) — this only drives LocationPage.seo when "Apply" is run.
+  locationSeoTemplate: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {},
+  },
   globalSettings: {
     type: mongoose.Schema.Types.Mixed,
     default: {},

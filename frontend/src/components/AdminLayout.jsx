@@ -263,6 +263,7 @@ const AdminLayout = () => {
         { name: 'Page Visibility', path: '/admin/page-visibility', icon: Eye },
         { name: 'Site Settings', path: '/admin/settings', icon: Settings },
         { name: 'Social Links', path: '/admin/social-links', icon: Share2 },
+        { name: 'Location SEO', path: '/admin/location-seo', icon: Search },
       ],
     },
   ];
