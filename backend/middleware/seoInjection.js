@@ -110,15 +110,14 @@ const injectIntoHtml = (template, { title, description, keywords, canonical, rob
   const fallbackContent = buildFallbackContent({ title, description, canonical, robots });
   html = html.replace(/<div\s+id="root"\s*><\/div>/i, `<div id="root">${fallbackContent}</div>`);
 
+  // JS-enabled visitors: hide the SEO fallback immediately and keep it hidden — React
+  // takes over #root whenever it's ready (no timed "re-show", which used to flash the
+  // fallback on cold/hard-refresh loads where the bundle took >3s). No-JS crawlers never
+  // get the js-enabled class, so they still see the server-rendered fallback content.
   const fallbackVisibilityGuard = fallbackContent
     ? [
         '<script>',
         'document.documentElement.classList.add("js-enabled");',
-        'window.setTimeout(function(){',
-        '  if (document.querySelector("[data-seo-fallback=true]")) {',
-        '    document.documentElement.classList.remove("js-enabled");',
-        '  }',
-        '}, 3000);',
         '</script>',
         '<style>.js-enabled .seo-fallback-content{display:none!important;}</style>',
       ].join('\n  ')
