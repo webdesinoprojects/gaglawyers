@@ -79,12 +79,19 @@ const buildFallbackContent = ({ title, description, canonical, robots }) => {
   ].join('');
 };
 
+// react-helmet-async marks the tags it manages with data-rh. Stamping the same
+// attribute on the tags we inject server-side lets Helmet *replace* them on
+// hydration instead of appending a second copy — otherwise every page ends up
+// with two canonicals, two descriptions and two keywords in the rendered DOM.
+// The attribute is inert for crawlers that never execute JS.
+const RH = 'data-rh="true"';
+
 const injectIntoHtml = (template, { title, description, keywords, canonical, robots = 'index, follow' }) => {
   let html = template;
 
   // Replace title and description in-place
   html = html.replace(/<title>[^<]*<\/title>/i, `<title>${escHtml(title)}</title>`);
-  html = html.replace(/<meta\s+name="description"[^>]*\/?>/gi, `<meta name="description" content="${escHtml(description)}" />`);
+  html = html.replace(/<meta\s+name="description"[^>]*\/?>/gi, `<meta name="description" content="${escHtml(description)}" ${RH} />`);
 
   // Strip ALL existing SEO tags we will re-inject — critical when dist/index.html
   // was overwritten by the prerender script with homepage-specific canonical/OG tags.
@@ -97,14 +104,14 @@ const injectIntoHtml = (template, { title, description, keywords, canonical, rob
   html = html.replace(/<meta\s+name="twitter:[^"]*"[^>]*\/?>/gi, '');
 
   const extraTags = [
-    `<meta name="robots" content="${robots}" />`,
-    `<link rel="canonical" href="${escHtml(canonical)}" />`,
-    `<meta name="keywords" content="${escHtml(keywords)}" />`,
-    `<meta property="og:title" content="${escHtml(title)}" />`,
-    `<meta property="og:description" content="${escHtml(description)}" />`,
-    `<meta property="og:url" content="${escHtml(canonical)}" />`,
-    `<meta name="twitter:title" content="${escHtml(title)}" />`,
-    `<meta name="twitter:description" content="${escHtml(description)}" />`,
+    `<meta name="robots" content="${robots}" ${RH} />`,
+    `<link rel="canonical" href="${escHtml(canonical)}" ${RH} />`,
+    `<meta name="keywords" content="${escHtml(keywords)}" ${RH} />`,
+    `<meta property="og:title" content="${escHtml(title)}" ${RH} />`,
+    `<meta property="og:description" content="${escHtml(description)}" ${RH} />`,
+    `<meta property="og:url" content="${escHtml(canonical)}" ${RH} />`,
+    `<meta name="twitter:title" content="${escHtml(title)}" ${RH} />`,
+    `<meta name="twitter:description" content="${escHtml(description)}" ${RH} />`,
   ].join('\n  ');
 
   const fallbackContent = buildFallbackContent({ title, description, canonical, robots });
