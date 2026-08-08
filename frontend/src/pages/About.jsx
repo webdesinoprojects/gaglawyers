@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Shield, Target, Globe, Users, Award, Scale, Briefcase, Heart, CheckCircle } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import API_BASE_URL from '../config/api';
+import { optimizeImage } from '../utils/imageUrl';
 
 const About = () => {
   const [pageContent, setPageContent] = useState(null);
@@ -206,7 +207,7 @@ const About = () => {
                 <div className="absolute -inset-4 bg-gradient-to-br from-gold/20 to-navy/20 rounded-3xl blur-2xl"></div>
                 <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
                   <img
-                    src={founder.imageUrl}
+                    src={optimizeImage(founder.imageUrl)}
                     alt={founder.name}
                     className="w-full h-full object-cover"
                   />

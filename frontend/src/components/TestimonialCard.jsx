@@ -1,5 +1,6 @@
 import React from 'react';
 import { Quote, Star } from 'lucide-react';
+import { optimizeImage } from '../utils/imageUrl';
 
 const TestimonialCard = ({ content, author, designation, imageUrl, rating = 5 }) => {
   const normalizedContent = (() => {
@@ -45,7 +46,7 @@ const TestimonialCard = ({ content, author, designation, imageUrl, rating = 5 })
           {imageUrl ? (
             <div className="flex-shrink-0">
               <img
-                src={imageUrl}
+                src={optimizeImage(imageUrl)}
                 alt={author}
                 className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-gold/30 shadow-md transition-transform duration-500 group-hover/testimonial:scale-105"
               />

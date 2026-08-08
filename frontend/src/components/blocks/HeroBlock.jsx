@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { optimizeImage } from '../../utils/imageUrl';
 
 const HeroBlock = ({ content }) => {
   return (
@@ -9,7 +10,7 @@ const HeroBlock = ({ content }) => {
       {content.backgroundImage && (
         <div className="absolute inset-0 z-0">
           <img 
-            src={content.backgroundImage}
+            src={optimizeImage(content.backgroundImage)}
             alt="Hero background"
             className="w-full h-full object-cover"
           />

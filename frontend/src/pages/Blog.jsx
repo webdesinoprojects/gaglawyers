@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Calendar, User, ArrowRight } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import API_BASE_URL from '../config/api';
+import { optimizeImage } from '../utils/imageUrl';
 
 const Blog = () => {
   const [posts, setPosts] = useState([]);
@@ -120,7 +121,7 @@ const Blog = () => {
                   <div className="aspect-video overflow-hidden bg-grey-light">
                     {post.featuredImage && (
                       <img
-                        src={post.featuredImage}
+                        src={optimizeImage(post.featuredImage)}
                         alt={post.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         loading="lazy"

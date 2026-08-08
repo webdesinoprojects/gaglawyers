@@ -4,6 +4,7 @@ import { Home, ChevronRight, AlertCircle, Loader2 } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import SectionRenderer from '../components/sections/SectionRenderer';
 import API_BASE_URL from '../config/api';
+import { optimizeImage } from '../utils/imageUrl';
 
 const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://gaglawyers.com').replace(/\/+$/, '');
 const servicePageCache = new Map();
@@ -202,7 +203,7 @@ const ServicePageDynamic = () => {
                   {teamImageSrc && (
                     <div className="section-split__image">
                       <img
-                        src={teamImageSrc}
+                        src={optimizeImage(teamImageSrc)}
                         alt={teamImageAlt}
                         loading="lazy"
                         style={{ borderRadius: '12px', width: '100%', objectFit: 'cover', maxHeight: '360px' }}

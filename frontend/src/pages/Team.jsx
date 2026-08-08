@@ -3,6 +3,7 @@ import { Users, Award, Target, Globe, Heart, Shield, TrendingUp, BookOpen, Brief
 import TeamCard from '../components/TeamCard';
 import SEOHead from '../components/SEOHead';
 import API_BASE_URL from '../config/api';
+import { optimizeImage } from '../utils/imageUrl';
 
 const Team = () => {
   const [teamMembers, setTeamMembers] = useState([]);
@@ -144,10 +145,10 @@ const Team = () => {
                 <div className="absolute -inset-4 bg-gradient-to-br from-gold/20 to-navy/20 rounded-3xl blur-2xl"></div>
                 <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
                   <img
-                    src={
+                    src={optimizeImage(
                       founderMember?.imageUrl ||
-                      'https://images.unsplash.com/photo-1556157382-97eda2d62296?w=600&h=750&fit=crop'
-                    }
+                        'https://images.unsplash.com/photo-1556157382-97eda2d62296?w=600&h=750&fit=crop'
+                    )}
                     alt={founderMember?.name || 'Advocate Rahul Grover'}
                     className="w-full h-full object-cover"
                   />

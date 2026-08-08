@@ -1,5 +1,6 @@
 import React from 'react';
 import { CheckCircle, ShieldCheck } from 'lucide-react';
+import { optimizeImage } from '../../utils/imageUrl';
 
 
 /**
@@ -41,7 +42,7 @@ const BenefitsSection = ({ heading, content, background }) => {
           {imgSrc && (
             <div className="relative overflow-hidden rounded-2xl shadow-[0_20px_56px_rgba(0,0,0,0.18)]">
               <img
-                src={imgSrc}
+                src={optimizeImage(imgSrc)}
                 alt={content?.imageAlt || heading || 'Legal benefits'}
                 loading="lazy"
                 className="w-full object-cover"

@@ -5,6 +5,7 @@ import SEOHead from '../components/SEOHead';
 import SectionRenderer from '../components/sections/SectionRenderer';
 import LocationConsultationSection from '../components/location/LocationConsultationSection';
 import API_BASE_URL from '../config/api';
+import { optimizeImage } from '../utils/imageUrl';
 
 const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://gaglawyers.com').replace(/\/+$/, '');
 const locationPageCache = new Map();
@@ -487,7 +488,7 @@ const LocationPageDynamic = () => {
                       {teamImageSrc && (
                         <div className="section-split__image">
                           <img
-                            src={teamImageSrc}
+                            src={optimizeImage(teamImageSrc)}
                             alt={teamImageAlt}
                             loading="lazy"
                             style={{ borderRadius: '12px', width: '100%', objectFit: 'cover', maxHeight: '360px' }}
@@ -658,7 +659,7 @@ const LocationPageDynamic = () => {
               <div className="rounded-2xl overflow-hidden border border-white/20 shadow-2xl bg-white/5">
                 {heroImage?.url ? (
                   <img
-                    src={heroImage.url}
+                    src={optimizeImage(heroImage.url)}
                     alt={heroImage.alt || `${serviceName} in ${city}`}
                     className="w-full h-[300px] object-cover"
                     loading="lazy"
@@ -703,7 +704,7 @@ const LocationPageDynamic = () => {
               {galleryImages.map((image, idx) => (
                 <div key={idx} className="rounded-xl overflow-hidden shadow-md bg-white border border-gray-200">
                   <img
-                    src={image.url}
+                    src={optimizeImage(image.url)}
                     alt={image.alt || `${serviceName} in ${city}`}
                     className="w-full h-56 object-cover"
                     loading="lazy"

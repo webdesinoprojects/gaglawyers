@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useMemo, useState } from 'react';
+import { optimizeImage } from '../utils/imageUrl';
 
 const TeamCard = ({ name, designation, imageUrl, bio }) => {
   const [isBioOpen, setIsBioOpen] = useState(false);
@@ -45,7 +46,7 @@ const TeamCard = ({ name, designation, imageUrl, bio }) => {
       <div className="group relative bg-white rounded-sm overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2">
         <div className="aspect-[3/4] overflow-hidden bg-grey-light">
           <img
-            src={imageUrl}
+            src={optimizeImage(imageUrl)}
             alt={name}
             className="w-full h-full object-contain object-top grayscale group-hover:grayscale-0 transition-all duration-500"
           />

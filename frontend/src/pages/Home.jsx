@@ -22,6 +22,7 @@ import SectionReveal from '../components/SectionReveal';
 import ReCaptcha from '../components/ReCaptcha';
 import API_BASE_URL from '../config/api';
 import { mergeHomeSections } from '../data/homePageContentDefaults';
+import { optimizeImage } from '../utils/imageUrl';
 
 const SECTION_ICONS = { Shield, Users, Award, TrendingUp, Scale, FileText, CheckCircle };
 
@@ -907,7 +908,7 @@ const Home = () => {
                 <div className="mb-14 flex flex-col items-center rounded-2xl border-l-4 border-gold bg-white shadow-xl overflow-hidden lg:flex-row lg:items-stretch lg:gap-8 lg:pr-10 lg:pt-10 lg:pb-10 transition-all duration-300 hover:shadow-2xl hover:border-gold hover:scale-[1.01]">
                   <div className="relative w-full aspect-[4/5] flex-shrink-0 lg:aspect-auto lg:h-auto lg:w-[28rem] lg:min-w-[28rem] lg:rounded-xl lg:overflow-hidden lg:border-r lg:border-gray-200">
                     <img
-                      src={teamMembers[0].imageUrl}
+                      src={optimizeImage(teamMembers[0].imageUrl)}
                       alt={teamMembers[0].name}
                       className="absolute inset-0 h-full w-full object-cover object-top"
                     />
@@ -957,7 +958,7 @@ const Home = () => {
                   >
                     <div className="relative overflow-hidden">
                       <img
-                        src={member.imageUrl}
+                        src={optimizeImage(member.imageUrl)}
                         alt={member.name}
                         className="w-full h-72 object-contain object-top bg-grey-light group-hover:scale-105 transition-transform duration-500"
                       />
@@ -1152,7 +1153,7 @@ const Home = () => {
                       isExternalArticle(post) ? (
                         <a href={getArticleUrl(post)} className="aspect-video overflow-hidden block">
                           <img
-                            src={post.featuredImage}
+                            src={optimizeImage(post.featuredImage)}
                             alt={post.title || 'Legal insights article'}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
@@ -1160,7 +1161,7 @@ const Home = () => {
                       ) : (
                         <Link to={getArticleUrl(post)} className="aspect-video overflow-hidden block">
                           <img
-                            src={post.featuredImage}
+                            src={optimizeImage(post.featuredImage)}
                             alt={post.title || 'Legal insights article'}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
@@ -1263,7 +1264,7 @@ const Home = () => {
                   >
                     <div className="w-20 h-20 flex-shrink-0 rounded-lg bg-gold/10 overflow-hidden flex items-center justify-center">
                       {a.imageUrl ? (
-                        <img src={a.imageUrl} alt={a.title || 'Award badge'} className="w-full h-full object-contain" />
+                        <img src={optimizeImage(a.imageUrl)} alt={a.title || 'Award badge'} className="w-full h-full object-contain" />
                       ) : (
                         <Award className="w-10 h-10 text-gold" />
                       )}
@@ -1290,7 +1291,7 @@ const Home = () => {
                       >
                         <div className="aspect-[4/3] w-full overflow-hidden">
                           <img
-                            src={img.imageUrl}
+                            src={optimizeImage(img.imageUrl)}
                             alt={img.title || 'Gallery image'}
                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                             style={{ objectPosition: '50% 35%' }}

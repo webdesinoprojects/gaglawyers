@@ -1,5 +1,6 @@
 import React from 'react';
 import { FileText } from 'lucide-react';
+import { optimizeImage } from '../../utils/imageUrl';
 
 
 const BULLET_LINE_REGEX = /^([-*•]\s+|\d+\.\s+)/;
@@ -135,7 +136,7 @@ const OverviewSection = ({ heading, content, background }) => {
             {imgSrc && (
               <div className="relative min-h-[280px] overflow-hidden lg:min-h-0">
                 <img
-                  src={imgSrc}
+                  src={optimizeImage(imgSrc)}
                   alt={content?.imageAlt || heading || 'Legal service'}
                   loading="lazy"
                   className="absolute inset-0 h-full w-full object-cover"

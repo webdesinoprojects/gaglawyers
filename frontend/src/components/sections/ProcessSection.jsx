@@ -1,5 +1,6 @@
 import React from 'react';
 import { ClipboardList } from 'lucide-react';
+import { optimizeImage } from '../../utils/imageUrl';
 
 
 /**
@@ -88,7 +89,7 @@ const ProcessSection = ({ heading, content, background }) => {
             <div className="lg:sticky lg:top-28 lg:self-start">
               <div className="relative overflow-hidden rounded-3xl shadow-[0_24px_64px_rgba(0,0,0,0.22)]">
                 <img
-                  src={imgSrc}
+                  src={optimizeImage(imgSrc)}
                   alt={content?.imageAlt || 'Legal process'}
                   loading="lazy"
                   className="w-full object-cover"

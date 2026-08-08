@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Quote, Star } from 'lucide-react';
+import { optimizeImage } from '../../utils/imageUrl';
 
 const TestimonialsSection = ({ heading, content, background }) => {
   const { items = [] } = content || {};
@@ -139,7 +140,7 @@ const TestimonialsSection = ({ heading, content, background }) => {
                         `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name || 'Client')}&background=0A193C&color=C9A84C&size=64`;
                       return (
                         <img
-                          src={avatarSrc}
+                          src={optimizeImage(avatarSrc)}
                           alt={item.name || 'Client'}
                           loading="lazy"
                           className="h-14 w-14 rounded-full object-cover ring-2 ring-[#c9a84c]/30"

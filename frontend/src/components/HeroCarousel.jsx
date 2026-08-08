@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight, ChevronDown, Scale, Trophy, Award } from 'lucide-react';
 import AnimatedStatValue from './AnimatedStatValue';
 import { DEFAULT_CAROUSEL_SLIDES, DEFAULT_CAROUSEL_TRUST_STRIP } from '../data/homePageContentDefaults';
+import { optimizeImage } from '../utils/imageUrl';
 
 /** Reliable legal-themed fallback if CMS URL fails or is empty */
 export const HERO_IMAGE_FALLBACK =
@@ -159,7 +160,7 @@ const HeroCarousel = ({
         >
           <div className="absolute inset-0">
             <img
-              src={resolveHeroSrc(s)}
+              src={optimizeImage(resolveHeroSrc(s))}
               alt={s.heading ? `${s.heading} ${s.headingAccent || ''}`.trim() : 'GAG Lawyers legal services'}
               className="h-full w-full object-cover object-center"
               loading={index === 0 ? 'eager' : 'lazy'}

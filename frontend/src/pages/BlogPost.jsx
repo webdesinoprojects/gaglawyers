@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Calendar, User, ArrowLeft, Eye, Clock, Share2, Mail } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import API_BASE_URL from '../config/api';
+import { optimizeImage } from '../utils/imageUrl';
 
 const BlogPost = () => {
   const { slug } = useParams();
@@ -266,7 +267,7 @@ const BlogPost = () => {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="aspect-[21/9] rounded-2xl overflow-hidden shadow-2xl border-8 border-white">
               <img
-                src={post.featuredImage}
+                src={optimizeImage(post.featuredImage)}
                 alt={post.title}
                 className="w-full h-full object-cover"
               />
@@ -452,7 +453,7 @@ const BlogPost = () => {
                             {relatedPost.featuredImage && (
                               <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
                                 <img
-                                  src={relatedPost.featuredImage}
+                                  src={optimizeImage(relatedPost.featuredImage)}
                                   alt={relatedPost.title}
                                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                 />

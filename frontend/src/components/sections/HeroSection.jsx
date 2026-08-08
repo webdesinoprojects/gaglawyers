@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
+import { optimizeImage } from '../../utils/imageUrl';
 
 const HERO_BG =
   'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1600&q=80';
@@ -10,7 +11,7 @@ const HERO_BG =
  */
 const HeroSection = ({ heading, content, background }) => {
   const { subheading, description, ctaText, ctaLink } = content || {};
-  const heroBgImage = content?.backgroundImageUrl || HERO_BG;
+  const heroBgImage = optimizeImage(content?.backgroundImageUrl || HERO_BG);
 
   return (
     <section

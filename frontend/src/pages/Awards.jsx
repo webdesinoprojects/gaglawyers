@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Award, Trophy, Star, Calendar, Building2, Sparkles, ArrowRight, ExternalLink } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import API_BASE_URL from '../config/api';
+import { optimizeImage } from '../utils/imageUrl';
 
 const Awards = () => {
   const [awards, setAwards] = useState([]);
@@ -156,7 +157,7 @@ const Awards = () => {
                   {award.imageUrl && (
                     <div className="relative h-56 overflow-hidden bg-gradient-to-br from-navy/5 to-gold/5">
                       <img
-                        src={award.imageUrl}
+                        src={optimizeImage(award.imageUrl)}
                         alt={award.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         onError={(e) => {

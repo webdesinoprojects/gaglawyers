@@ -17,6 +17,7 @@ import { Link } from 'react-router-dom';
 import SEOHead from '../components/SEOHead';
 import FAQItem from '../components/FAQItem';
 import API_BASE_URL from '../config/api';
+import { optimizeImage } from '../utils/imageUrl';
 
 const FALLBACK_CARD_IMAGE =
   'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1200&q=80';
@@ -331,7 +332,7 @@ const Services = () => {
                   {/* Image Container */}
                   <div className="relative h-64 overflow-hidden">
                     <img
-                      src={service.cardImageUrl || FALLBACK_CARD_IMAGE}
+                      src={optimizeImage(service.cardImageUrl || FALLBACK_CARD_IMAGE)}
                       alt={service.cardImageAlt}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       loading="lazy"
@@ -456,7 +457,7 @@ const Services = () => {
                   }}
                 >
                   <img
-                    src={service.cardImageUrl || FALLBACK_CARD_IMAGE}
+                    src={optimizeImage(service.cardImageUrl || FALLBACK_CARD_IMAGE)}
                     alt={service.cardImageAlt}
                     className="h-36 w-full object-cover"
                     loading="lazy"

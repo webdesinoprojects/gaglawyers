@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { X, ZoomIn, Camera, Users, Award, BookOpen, Heart, TrendingUp, Scale, ChevronLeft, ChevronRight } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import API_BASE_URL from '../config/api';
+import { optimizeImage } from '../utils/imageUrl';
 
 const Gallery = () => {
   const [images, setImages] = useState([]);
@@ -291,7 +292,7 @@ const Gallery = () => {
                   onClick={() => setSelectedIndex(index)}
                 >
                   <img
-                    src={image.imageUrl}
+                    src={optimizeImage(image.imageUrl)}
                     alt={image.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     loading="lazy"
@@ -395,7 +396,7 @@ const Gallery = () => {
                   <X size={24} />
                 </button>
                 <img
-                  src={selectedImage.imageUrl}
+                  src={optimizeImage(selectedImage.imageUrl)}
                   alt={selectedImage.title}
                   className="max-w-full max-h-full w-auto h-auto object-contain select-none"
                 />
