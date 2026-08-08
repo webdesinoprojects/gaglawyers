@@ -34,6 +34,9 @@ const FloatingWidgets = () => {
   });
   const [isVisible, setIsVisible] = useState(false);
   const [phoneVariant, setPhoneVariant] = useState('dark');
+  // Gates only the Tawk *script load* — not hasTawkConfig, so widget positioning
+  // is unaffected. See the deferral effect below.
+  const [tawkAllowed, setTawkAllowed] = useState(false);
   const resolvedTawkEnabled = parseSettingBoolean(settings.tawkEnabled, TAWK_ENABLED);
   const resolvedTawkPropertyId = (settings.tawkPropertyId || TAWK_PROPERTY_ID || '').trim();
   const resolvedTawkWidgetId = (settings.tawkWidgetId || TAWK_WIDGET_ID || '').trim();
@@ -249,9 +252,39 @@ const FloatingWidgets = () => {
     };
   }, [location.pathname, hasPhone, isAdminPanel]);
 
+  // Defer the Tawk script until the visitor interacts, or an 8s fallback fires.
+  // Loading it eagerly cost ~423KB across 27 requests on first paint, and its
+  // injected iframe accounted for 98% of the page's cumulative layout shift
+  // (0.2829 of 0.2884). Chat behaviour is unchanged — it just starts a moment
+  // later, and the fallback timer guarantees it appears even if the visitor
+  // never scrolls or clicks.
+  useEffect(() => {
+    if (isAdminPanel || !hasTawkConfig || tawkAllowed) return undefined;
+
+    let timer;
+    let fired = false;
+    const events = ['scroll', 'pointerdown', 'keydown', 'touchstart'];
+
+    const trigger = () => {
+      if (fired) return;
+      fired = true;
+      events.forEach((e) => window.removeEventListener(e, trigger));
+      window.clearTimeout(timer);
+      setTawkAllowed(true);
+    };
+
+    events.forEach((e) => window.addEventListener(e, trigger, { passive: true }));
+    timer = window.setTimeout(trigger, 8000);
+
+    return () => {
+      events.forEach((e) => window.removeEventListener(e, trigger));
+      window.clearTimeout(timer);
+    };
+  }, [isAdminPanel, hasTawkConfig, tawkAllowed]);
+
   useEffect(() => {
     const desiredSrc =
-      hasTawkConfig && !isAdminPanel
+      hasTawkConfig && tawkAllowed && !isAdminPanel
         ? `https://embed.tawk.to/${resolvedTawkPropertyId}/${resolvedTawkWidgetId}`
         : '';
 
@@ -297,6 +330,7 @@ const FloatingWidgets = () => {
     return undefined;
   }, [
     hasTawkConfig,
+    tawkAllowed,
     isAdminPanel,
     resolvedTawkPropertyId,
     resolvedTawkWidgetId,
@@ -331,7 +365,9 @@ const FloatingWidgets = () => {
   }, [hasTawkConfig, isAdminPanel, location.pathname]);
 
   useEffect(() => {
-    if (!hasTawkConfig || isAdminPanel) return undefined;
+    // Only start polling once the script is actually allowed to load, so we
+    // don't run a 700ms interval on every page for a widget that isn't there.
+    if (!hasTawkConfig || !tawkAllowed || isAdminPanel) return undefined;
 
     const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
 
@@ -373,7 +409,7 @@ const FloatingWidgets = () => {
       window.clearInterval(timer);
       observer.disconnect();
     };
-  }, [hasTawkConfig, isAdminPanel]);
+  }, [hasTawkConfig, tawkAllowed, isAdminPanel]);
 
   const handleWhatsAppClick = () => {
     if (settings.whatsappNumber) {
