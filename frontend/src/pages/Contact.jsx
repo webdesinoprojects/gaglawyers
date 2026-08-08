@@ -3,6 +3,7 @@ import { Mail, Phone, MapPin, ChevronDown } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import ReCaptcha from '../components/ReCaptcha';
 import API_BASE_URL from '../config/api';
+import { getLeadSource } from '../utils/leadSource';
 import { OFFICE_ADDRESS_LINES } from '../constants/officeAddress';
 
 const PANEL = '#FFFFFF';
@@ -162,6 +163,7 @@ const Contact = () => {
         },
         body: JSON.stringify({
           ...formData,
+          ...getLeadSource(),
           formIdentifier: 'contact',
           captchaToken
         }),

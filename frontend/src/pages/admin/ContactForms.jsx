@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Mail, Phone, Calendar, Trash2, MessageSquare, AlertCircle, CheckCircle2, Clock, ChevronDown, Loader2, ArrowUpDown, Filter, Eye, X, User } from 'lucide-react';
+import { Mail, Phone, Calendar, Trash2, MessageSquare, AlertCircle, CheckCircle2, Clock, ChevronDown, Loader2, ArrowUpDown, Filter, Eye, X, User, Globe } from 'lucide-react';
 import API_BASE_URL from '../../config/api';
 
 const ContactForms = () => {
@@ -314,6 +314,32 @@ const ContactForms = () => {
                       </p>
                     </div>
                   </div>
+
+                  {selectedInquiry.sourcePage && (
+                    <div className="flex items-start gap-4 pt-2 border-t border-gray-200">
+                      <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Globe size={20} className="text-amber-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-sans text-xs text-gray-500 mb-1">Enquiry Came From</p>
+                        <a
+                          href={selectedInquiry.sourceUrl || selectedInquiry.sourcePage}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-sans text-sm font-medium text-blue-600 hover:text-blue-800 break-all"
+                        >
+                          {selectedInquiry.sourcePage}
+                        </a>
+                        {selectedInquiry.utmCampaign && (
+                          <p className="font-sans text-xs text-gray-500 mt-1">
+                            Campaign: {selectedInquiry.utmCampaign}
+                            {selectedInquiry.utmSource ? ` (${selectedInquiry.utmSource}` : ''}
+                            {selectedInquiry.utmMedium ? `/${selectedInquiry.utmMedium})` : selectedInquiry.utmSource ? ')' : ''}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 

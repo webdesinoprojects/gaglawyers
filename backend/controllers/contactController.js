@@ -116,6 +116,50 @@ const createContactInquiry = async (req, res) => {
       });
     }
 
+    // FORM-01 attribution. Prefer what the client reports; fall back to the
+    // Referer header so a lead is still traceable if the field is missing.
+    const refererPath = (() => {
+      try {
+        return new URL(req.get('referer') || '').pathname;
+      } catch {
+        return '';
+      }
+    })();
+    const attribution = {
+      sourcePage: String(req.body.sourcePage || refererPath || '').slice(0, 300),
+      sourceUrl: String(req.body.sourceUrl || req.get('referer') || '').slice(0, 600),
+      formIdentifier: requestedFormIdentifier,
+      utmSource: String(req.body.utmSource || '').slice(0, 120),
+      utmMedium: String(req.body.utmMedium || '').slice(0, 120),
+      utmCampaign: String(req.body.utmCampaign || '').slice(0, 120),
+    };
+
+    // FORM-01 duplicate-submission prevention: a double-click, an impatient
+    // re-submit or a network retry must not create a second lead. Treated as
+    // success so the visitor still sees confirmation rather than an error.
+    const DUPLICATE_WINDOW_MS = 60 * 1000;
+    const duplicateMatch = {
+      createdAt: { $gte: new Date(Date.now() - DUPLICATE_WINDOW_MS) },
+      message: payload.message || '',
+      // Scoped to the same form: someone who books an appointment and then also
+      // sends a contact enquiry within the window is two real leads, not one.
+      formIdentifier: requestedFormIdentifier,
+    };
+    if (email) duplicateMatch.email = String(email).trim().toLowerCase();
+    else if (phone) duplicateMatch.phone = String(phone).trim();
+
+    if (email || phone) {
+      const existing = await ContactInquiry.findOne(duplicateMatch).sort({ createdAt: -1 });
+      if (existing) {
+        return res.status(200).json({
+          success: true,
+          duplicate: true,
+          message: 'Inquiry already received',
+          data: existing,
+        });
+      }
+    }
+
     if (req.file) {
       try {
         const uploadResult = await uploadResumeToCloudinary(req.file.buffer, req.file.originalname);
@@ -141,6 +185,7 @@ const createContactInquiry = async (req, res) => {
       serviceOfInterest: payload.serviceOfInterest,
       message: payload.message,
       ...resumeMeta,
+      ...attribution,
     });
 
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
@@ -173,6 +218,8 @@ const createContactInquiry = async (req, res) => {
             <p><strong>Message:</strong></p>
             <p>${payload.message}</p>
             ${resumeMeta.resumeUrl ? `<p><strong>Resume:</strong> <a href="${resumeMeta.resumeUrl}" target="_blank" rel="noopener noreferrer">${resumeMeta.resumeOriginalName || 'View Resume'}</a></p>` : ''}
+            ${attribution.sourcePage ? `<hr /><p><strong>Enquiry came from:</strong> ${attribution.sourcePage}</p>` : ''}
+            ${attribution.utmCampaign ? `<p><strong>Campaign:</strong> ${attribution.utmCampaign} (${attribution.utmSource}/${attribution.utmMedium})</p>` : ''}
           `,
         });
       } catch (emailError) {

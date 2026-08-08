@@ -21,6 +21,7 @@ import AnimatedStatValue from '../components/AnimatedStatValue';
 import SectionReveal from '../components/SectionReveal';
 import ReCaptcha from '../components/ReCaptcha';
 import API_BASE_URL from '../config/api';
+import { getLeadSource } from '../utils/leadSource';
 import { mergeHomeSections } from '../data/homePageContentDefaults';
 import { optimizeImage } from '../utils/imageUrl';
 
@@ -284,6 +285,7 @@ const Home = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          ...getLeadSource(),
           formIdentifier: 'appointment',
           name: appointmentForm.name,
           email: appointmentForm.email,
@@ -394,6 +396,7 @@ const Home = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          ...getLeadSource(),
           formIdentifier: 'consultation',
           name: ctaForm.name,
           email: ctaForm.email,

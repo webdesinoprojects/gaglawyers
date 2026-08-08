@@ -46,6 +46,38 @@ const contactInquirySchema = new mongoose.Schema({
     enum: ['new', 'in-progress', 'resolved'],
     default: 'new',
   },
+  // FORM-01 lead attribution: which page produced this enquiry. All default to
+  // '' so existing records are unaffected and no migration is required.
+  sourcePage: {
+    type: String,
+    trim: true,
+    default: '',
+  },
+  sourceUrl: {
+    type: String,
+    trim: true,
+    default: '',
+  },
+  formIdentifier: {
+    type: String,
+    trim: true,
+    default: '',
+  },
+  utmSource: {
+    type: String,
+    trim: true,
+    default: '',
+  },
+  utmMedium: {
+    type: String,
+    trim: true,
+    default: '',
+  },
+  utmCampaign: {
+    type: String,
+    trim: true,
+    default: '',
+  },
 }, {
   timestamps: true,
 });

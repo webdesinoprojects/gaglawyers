@@ -3,6 +3,7 @@ import { BriefcaseBusiness, GraduationCap, Handshake, Trophy, MapPin, Clock3 } f
 import SEOHead from '../components/SEOHead';
 import ReCaptcha from '../components/ReCaptcha';
 import API_BASE_URL from '../config/api';
+import { appendLeadSource } from '../utils/leadSource';
 
 const PERKS = [
   {
@@ -239,6 +240,7 @@ const Careers = () => {
       payload.append('serviceOfInterest', `Careers - ${appliedFor}`);
       payload.append('message', messageLines.join('\n'));
       payload.append('captchaToken', captchaToken);
+      appendLeadSource(payload);
       if (resumeFile) {
         payload.append('resume', resumeFile);
       }

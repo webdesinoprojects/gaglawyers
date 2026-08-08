@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, Calendar, CheckCircle, Mail, Phone } from 'lucide-react';
 import ReCaptcha from '../ReCaptcha';
 import API_BASE_URL from '../../config/api';
+import { getLeadSource } from '../../utils/leadSource';
 
 const DEFAULT_FORM_COPY = {
   title: 'Book Your Consultation',
@@ -145,6 +146,7 @@ const LocationConsultationSection = ({ serviceName, city }) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          ...getLeadSource(),
           formIdentifier: 'appointment',
           name: form.name,
           email: form.email,

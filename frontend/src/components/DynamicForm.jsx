@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReCaptcha from './ReCaptcha';
 import API_BASE_URL from '../config/api';
+import { getLeadSource } from '../utils/leadSource';
 
 const DynamicForm = ({ formIdentifier, onSuccess, services = [] }) => {
   const captchaRef = useRef(null);
@@ -57,6 +58,7 @@ const DynamicForm = ({ formIdentifier, onSuccess, services = [] }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          ...getLeadSource(),
           formIdentifier,
           captchaToken
         }),
