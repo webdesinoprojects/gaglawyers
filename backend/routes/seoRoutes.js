@@ -3,6 +3,7 @@ const {
   generateSitemap,
   generateNamedSitemap,
   generateRobotsTxt,
+  generateLlmsTxt,
 } = require('../controllers/sitemapController');
 
 const router = express.Router();
@@ -47,5 +48,8 @@ router.get('/articles-sitemap.xml', (req, res) => res.redirect(301, '/blogs.xml'
 router.get('/newsletters-sitemap.xml', (req, res) => res.redirect(301, '/blogs.xml'));
 
 router.get('/robots.txt', generateRobotsTxt);
+
+// GEO-01: optional AI-readable site map. Non-blocking enhancement.
+router.get('/llms.txt', generateLlmsTxt);
 
 module.exports = router;

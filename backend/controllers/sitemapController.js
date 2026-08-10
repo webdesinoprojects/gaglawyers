@@ -271,8 +271,83 @@ const generateRobotsTxt = (req, res) => {
   res.send(txt);
 };
 
+// GEO-01: llms.txt — a plain-text map of the site for AI systems.
+// Per the spec this lists ONLY canonical public pages and factual firm
+// information: no /admin, no /api, no parameter URLs, and no unverified claims
+// (ratings, awards or superlatives are deliberately excluded).
+const generateLlmsTxt = async (req, res) => {
+  try {
+    const baseUrl = getBaseUrl(req);
+
+    // Canonical equivalents only — /blog redirects to /articles, so it is
+    // excluded here in favour of the destination URL.
+    const mainPages = [
+      ['Home', '/'],
+      ['About', '/about'],
+      ['The Firm', '/firm'],
+      ['Our Team', '/team'],
+      ['Practice Areas', '/services'],
+      ['Articles', '/articles'],
+      ['Newsletter', '/newsletter'],
+      ['Awards', '/awards'],
+      ['Gallery', '/gallery'],
+      ['Affiliations', '/affiliation'],
+      ['Careers', '/careers'],
+      ['Contact', '/contact'],
+      ['Privacy Policy', '/privacy'],
+      ['Terms of Service', '/terms'],
+    ];
+
+    const services = await Service.find({ isActive: true, slug: { $exists: true, $ne: '' } })
+      .select('name slug')
+      .sort({ name: 1 })
+      .lean();
+
+    let txt = '# GAG Lawyers\n\n';
+    txt += '> GAG Lawyers (Grover & Grover Advocates & Solicitors) is a law firm in India '
+      + 'providing legal representation and advisory services across criminal, civil, corporate, '
+      + 'family, property and related practice areas.\n\n';
+
+    txt += '## Firm information\n\n';
+    txt += '- Name: GAG Lawyers\n';
+    txt += '- Legal name: Grover & Grover Advocates & Solicitors\n';
+    txt += `- Website: ${baseUrl}/\n`;
+    txt += '- Email: contact@gaglawyers.com\n';
+    txt += '- Telephone: +91 9996263370\n';
+    txt += `- Contact page: ${baseUrl}/contact\n\n`;
+
+    txt += '## Main pages\n\n';
+    mainPages.forEach(([label, path]) => {
+      txt += `- [${label}](${baseUrl}${path})\n`;
+    });
+    txt += '\n';
+
+    if (services.length) {
+      txt += '## Practice areas\n\n';
+      services.forEach((s) => {
+        txt += `- [${s.name}](${baseUrl}/${s.slug})\n`;
+      });
+      txt += '\n';
+    }
+
+    txt += '## Notes\n\n';
+    txt += '- City-specific pages follow the pattern /{service-slug}-in-{city}, '
+      + `for example ${baseUrl}/criminal-lawyer-in-delhi\n`;
+    txt += `- A complete list of public URLs is available at ${baseUrl}/sitemap.xml\n`;
+    txt += '- Content on this site is general information about legal services and is not legal advice.\n';
+
+    res.header('Content-Type', 'text/plain; charset=utf-8');
+    res.header('Cache-Control', 'public, max-age=86400');
+    res.send(txt);
+  } catch (error) {
+    console.error('[llms.txt] generation failed:', error.message);
+    res.status(500).header('Content-Type', 'text/plain').send('# GAG Lawyers\n');
+  }
+};
+
 module.exports = {
   generateSitemap,
   generateNamedSitemap,
   generateRobotsTxt,
+  generateLlmsTxt,
 };
