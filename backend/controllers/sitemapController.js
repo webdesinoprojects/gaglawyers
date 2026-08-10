@@ -298,7 +298,10 @@ const generateLlmsTxt = async (req, res) => {
       ['Terms of Service', '/terms'],
     ];
 
-    const services = await Service.find({ isActive: true, slug: { $exists: true, $ne: '' } })
+    // $ne:false (not ===true) to match how the public /api/services controller
+    // treats this field, so a record missing isActive isn't silently dropped here
+    // while still appearing everywhere else on the site.
+    const services = await Service.find({ isActive: { $ne: false }, slug: { $exists: true, $ne: '' } })
       .select('name slug')
       .sort({ name: 1 })
       .lean();
