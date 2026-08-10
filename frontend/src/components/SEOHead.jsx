@@ -80,7 +80,9 @@ const SEOHead = ({
       streetAddress: OFFICE_ADDRESS_LINE,
       addressLocality: 'New Delhi',
       addressRegion: 'Delhi',
-      postalCode: '110001',
+      // 110085 = Prashant Vihar / Sector 14, Rohini (client-confirmed).
+      // Was 110001, left over from the firm's previous Connaught Place address.
+      postalCode: '110085',
       addressCountry: 'IN',
     },
     geo: {
@@ -88,6 +90,17 @@ const SEOHead = ({
       latitude: '28.6139',
       longitude: '77.2090',
     },
+    // LOCAL-01: client-confirmed hours. Sunday is omitted, which schema.org
+    // treats as closed. Note the Google Business Profile currently shows 9am;
+    // the client confirmed 10am, so the profile needs updating to match.
+    openingHoursSpecification: [
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        opens: '10:00',
+        closes: '19:00',
+      },
+    ],
     areaServed: [
       {
         '@type': 'Country',
