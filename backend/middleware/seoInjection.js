@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const Service = require('../models/Service');
+const ServiceSection = require('../models/ServiceSection');
 const LocationPage = require('../models/LocationPage');
 
 const SITE_URL = (process.env.SITE_URL || 'https://gaglawyers.com').replace(/\/+$/, '');
@@ -27,8 +28,16 @@ const getServiceSections = async (serviceId) => {
   const key = String(serviceId);
   const hit = _sectionsCache.get(key);
   if (hit && Date.now() - hit.at < SECTIONS_TTL_MS) return hit.sections;
-  const svc = await Service.findById(serviceId).select('sections').lean();
-  const sections = Array.isArray(svc?.sections) ? svc.sections : [];
+  // Sections live in their own collection, not on the Service document. Mirrors
+  // the query in serviceController.getServicePageData so the server-rendered
+  // content matches what the page actually shows.
+  const sections = await ServiceSection.find({
+    serviceId,
+    visible: true,
+    type: { $ne: 'cta_banner' },
+  })
+    .sort({ order: 1 })
+    .lean();
   _sectionsCache.set(key, { at: Date.now(), sections });
   return sections;
 };
