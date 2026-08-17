@@ -36,29 +36,58 @@ const getServiceContext = async (serviceId) => {
   // Sections live in their own collection, not on the Service document. Mirrors
   // the query in serviceController.getServicePageData so the server-rendered
   // content matches what the page actually shows.
-  const [sections, siblings, service] = await Promise.all([
+  const [sections, service] = await Promise.all([
     ServiceSection.find({ serviceId, visible: true, type: { $ne: 'cta_banner' } })
       .sort({ order: 1 })
-      .lean(),
-    // SEO-03 internal links: a few sibling city pages for the same service, so
-    // crawlers without JS have a path onward. Sorted by city to use the
-    // { service, city } compound index rather than an in-memory sort.
-    LocationPage.find({ service: serviceId, isActive: true })
-      .select('slug city serviceName')
-      .sort({ city: 1 })
-      .limit(SIBLING_LINK_LIMIT)
       .lean(),
     Service.findById(serviceId).select('slug name').lean(),
   ]);
 
   const value = {
     sections,
-    siblings,
     serviceSlug: service?.slug || '',
     serviceName: service?.name || '',
   };
   _sectionsCache.set(key, { at: Date.now(), value });
   return value;
+};
+
+// SEO-03 internal links. Deliberately NOT the alphabetically-first cities: that
+// gave every one of a service's ~2k pages the identical 12 links, so those 12
+// collected every internal link and the remaining ~1,945 cities were reachable
+// from none of them. Instead each page links to the cities that follow its own
+// alphabetically, wrapping at Z, so every page carries a different set and the
+// pages form a chain a crawler can walk end to end.
+//
+// Not cached: the result differs per page. Uses the { service, city } compound
+// index with a small limit, so it stays a cheap indexed lookup.
+const getSiblingCities = async (serviceId, city) => {
+  if (!serviceId) return [];
+  const select = 'slug city serviceName';
+  const after = await LocationPage.find({
+    service: serviceId,
+    isActive: true,
+    city: { $gt: city || '' },
+  })
+    .select(select)
+    .sort({ city: 1 })
+    .limit(SIBLING_LINK_LIMIT)
+    .lean();
+
+  if (after.length >= SIBLING_LINK_LIMIT) return after;
+
+  // Near the end of the alphabet — wrap around to the start so the chain closes.
+  const wrap = await LocationPage.find({
+    service: serviceId,
+    isActive: true,
+    city: { $lt: city || '' },
+  })
+    .select(select)
+    .sort({ city: 1 })
+    .limit(SIBLING_LINK_LIMIT - after.length)
+    .lean();
+
+  return after.concat(wrap);
 };
 
 const getTemplate = () => {
@@ -465,6 +494,8 @@ const seoInjectionMiddleware = async (req, res, next) => {
               try {
                 context = await getServiceContext(page.service);
                 sections = context.sections;
+                // Per-page (not cached): each page links to different cities.
+                context = { ...context, siblings: await getSiblingCities(page.service, page.city) };
               } catch (e) {
                 console.error('[seoInjection] section lookup failed for', slug, e.message);
               }
