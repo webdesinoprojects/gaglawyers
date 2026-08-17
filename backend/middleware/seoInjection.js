@@ -4,6 +4,7 @@ const path = require('path');
 const Service = require('../models/Service');
 const ServiceSection = require('../models/ServiceSection');
 const LocationPage = require('../models/LocationPage');
+const { OFFICE_ADDRESS_LINE } = require('../config/officeAddress');
 
 const SITE_URL = (process.env.SITE_URL || 'https://gaglawyers.com').replace(/\/+$/, '');
 const SITE_URL_INFO = new URL(SITE_URL);
@@ -163,6 +164,67 @@ const buildFallbackContent = ({ title, description, canonical, robots, page, sec
 // The attribute is inert for crawlers that never execute JS.
 const RH = 'data-rh="true"';
 
+// SCHEMA-01 / LOCAL-01: the firm's identity as one authoritative LegalService
+// entity, server-rendered so crawlers that never execute JavaScript still receive
+// the verified name, address, phone and opening hours. Values are client-confirmed
+// and kept identical to the client-side copy in SEOHead.jsx.
+//
+// Deliberately no aggregateRating — see the note in SEOHead.jsx.
+const ORG_ID = `${SITE_URL}/#organization`;
+
+const buildOrganisationSchema = () => ({
+  '@context': 'https://schema.org',
+  '@type': 'LegalService',
+  '@id': ORG_ID,
+  name: 'GAG Lawyers',
+  alternateName: 'Grover & Grover Advocates',
+  legalName: 'Grover & Grover Advocates & Solicitors',
+  url: `${SITE_URL}/`,
+  logo: `${SITE_URL}/logo.png`,
+  telephone: '+919996263370',
+  email: 'contact@gaglawyers.com',
+  priceRange: '$$',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: OFFICE_ADDRESS_LINE,
+    addressLocality: 'New Delhi',
+    addressRegion: 'Delhi',
+    postalCode: '110085',
+    addressCountry: 'IN',
+  },
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+      opens: '10:00',
+      closes: '19:00',
+    },
+  ],
+  areaServed: [{ '@type': 'Country', name: 'India' }],
+});
+
+// Escaped for embedding inside a <script> block: </script> in any string value
+// would otherwise terminate the tag early, and < can start a comment sequence.
+const jsonLdScript = (data) => {
+  const json = JSON.stringify(data).replace(/</g, '\\u003c');
+  return `<script type="application/ld+json" ${RH}>${json}</script>`;
+};
+
+const buildSchemaBlock = ({ canonical, title, description, robots }) => {
+  if (String(robots || '').toLowerCase().includes('noindex')) return '';
+  const webPage = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': `${canonical}#webpage`,
+    url: canonical,
+    name: title,
+    description,
+    about: { '@id': ORG_ID },
+    inLanguage: 'en',
+  };
+  return jsonLdScript(buildOrganisationSchema()) + jsonLdScript(webPage);
+};
+
 const injectIntoHtml = (template, { title, description, keywords, canonical, robots = 'index, follow', page = null, sections = null }) => {
   let html = template;
 
@@ -207,7 +269,12 @@ const injectIntoHtml = (template, { title, description, keywords, canonical, rob
       ].join('\n  ')
     : '';
 
-  return html.replace('</head>', `  ${fallbackVisibilityGuard}\n  ${extraTags}\n</head>`);
+  // SCHEMA-01 / GEO-01: identity + page schema in the initial HTML. Marked data-rh
+  // so Helmet replaces these on hydration rather than leaving two copies of the
+  // same entity in the DOM.
+  const schemaBlock = buildSchemaBlock({ canonical, title, description, robots });
+
+  return html.replace('</head>', `  ${fallbackVisibilityGuard}\n  ${extraTags}\n  ${schemaBlock}\n</head>`);
 };
 
 // ─── Static page SEO (no DB lookup needed) ────────────────────────────────────
