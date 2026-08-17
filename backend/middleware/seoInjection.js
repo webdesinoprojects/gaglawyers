@@ -24,23 +24,41 @@ let _cachedTemplate = null;
 const SECTIONS_TTL_MS = 5 * 60 * 1000;
 const _sectionsCache = new Map();
 
-const getServiceSections = async (serviceId) => {
-  if (!serviceId) return [];
+const SIBLING_LINK_LIMIT = 12;
+
+const getServiceContext = async (serviceId) => {
+  const empty = { sections: [], siblings: [], serviceSlug: '', serviceName: '' };
+  if (!serviceId) return empty;
   const key = String(serviceId);
   const hit = _sectionsCache.get(key);
-  if (hit && Date.now() - hit.at < SECTIONS_TTL_MS) return hit.sections;
+  if (hit && Date.now() - hit.at < SECTIONS_TTL_MS) return hit.value;
+
   // Sections live in their own collection, not on the Service document. Mirrors
   // the query in serviceController.getServicePageData so the server-rendered
   // content matches what the page actually shows.
-  const sections = await ServiceSection.find({
-    serviceId,
-    visible: true,
-    type: { $ne: 'cta_banner' },
-  })
-    .sort({ order: 1 })
-    .lean();
-  _sectionsCache.set(key, { at: Date.now(), sections });
-  return sections;
+  const [sections, siblings, service] = await Promise.all([
+    ServiceSection.find({ serviceId, visible: true, type: { $ne: 'cta_banner' } })
+      .sort({ order: 1 })
+      .lean(),
+    // SEO-03 internal links: a few sibling city pages for the same service, so
+    // crawlers without JS have a path onward. Sorted by city to use the
+    // { service, city } compound index rather than an in-memory sort.
+    LocationPage.find({ service: serviceId, isActive: true })
+      .select('slug city serviceName')
+      .sort({ city: 1 })
+      .limit(SIBLING_LINK_LIMIT)
+      .lean(),
+    Service.findById(serviceId).select('slug name').lean(),
+  ]);
+
+  const value = {
+    sections,
+    siblings,
+    serviceSlug: service?.slug || '',
+    serviceName: service?.name || '',
+  };
+  _sectionsCache.set(key, { at: Date.now(), value });
+  return value;
 };
 
 const getTemplate = () => {
@@ -124,7 +142,7 @@ const sectionParagraphs = (content) => {
   return out.filter((t) => typeof t === 'string' && t.trim());
 };
 
-const buildFallbackContent = ({ title, description, canonical, robots, page, sections }) => {
+const buildFallbackContent = ({ title, description, canonical, robots, page, sections, context }) => {
   if (String(robots || '').toLowerCase().includes('noindex')) {
     return '';
   }
@@ -152,6 +170,29 @@ const buildFallbackContent = ({ title, description, canonical, robots, page, sec
       parts.push(`<p>${escHtml(localizeText(text, city))}</p>`);
     });
   });
+
+  // SEO-03 internal links. Without JavaScript the only link on the page was the
+  // self-referencing canonical, leaving crawlers no path onward across 61k pages.
+  // Contextually relevant links with natural anchor text — deliberately not a
+  // mirror of the 212-link site-wide footer, which the spec warns against.
+  const links = [];
+  if (context?.serviceSlug && context?.serviceName) {
+    links.push([`${SITE_URL}/${context.serviceSlug}`, `${context.serviceName} — overview`]);
+  }
+  (context?.siblings || []).forEach((sib) => {
+    if (!sib?.slug || sib.slug === page?.slug) return;
+    links.push([`${SITE_URL}/${sib.slug}`, `${sib.serviceName || 'Legal services'} in ${sib.city}`]);
+  });
+  links.push([`${SITE_URL}/services`, 'All practice areas']);
+  links.push([`${SITE_URL}/contact`, 'Contact GAG Lawyers']);
+
+  if (links.length) {
+    parts.push('<nav aria-label="Related pages"><ul>');
+    links.forEach(([href, label]) => {
+      parts.push(`<li><a href="${escHtml(href)}">${escHtml(label)}</a></li>`);
+    });
+    parts.push('</ul></nav>');
+  }
 
   parts.push(`<a href="${escHtml(canonical)}">View page</a>`, '</main>');
   return parts.join('');
@@ -225,7 +266,7 @@ const buildSchemaBlock = ({ canonical, title, description, robots }) => {
   return jsonLdScript(buildOrganisationSchema()) + jsonLdScript(webPage);
 };
 
-const injectIntoHtml = (template, { title, description, keywords, canonical, robots = 'index, follow', page = null, sections = null }) => {
+const injectIntoHtml = (template, { title, description, keywords, canonical, robots = 'index, follow', page = null, sections = null, context = null }) => {
   let html = template;
 
   // Replace title and description in-place
@@ -253,7 +294,7 @@ const injectIntoHtml = (template, { title, description, keywords, canonical, rob
     `<meta name="twitter:description" content="${escHtml(description)}" ${RH} />`,
   ].join('\n  ');
 
-  const fallbackContent = buildFallbackContent({ title, description, canonical, robots, page, sections });
+  const fallbackContent = buildFallbackContent({ title, description, canonical, robots, page, sections, context });
   html = html.replace(/<div\s+id="root"\s*><\/div>/i, `<div id="root">${fallbackContent}</div>`);
 
   // JS-enabled visitors: hide the SEO fallback immediately and keep it hidden — React
@@ -393,6 +434,7 @@ const seoInjectionMiddleware = async (req, res, next) => {
   // SEO-03: populated for location pages so the fallback can render real content.
   let page = null;
   let sections = null;
+  let context = null;
 
   if (!seoData) {
     const slug = urlPath.replace(/^\//, '');
@@ -421,7 +463,8 @@ const seoInjectionMiddleware = async (req, res, next) => {
             // and we must not publish text the visitor never sees.
             if (page.content?.templateMode !== 'custom') {
               try {
-                sections = await getServiceSections(page.service);
+                context = await getServiceContext(page.service);
+                sections = context.sections;
               } catch (e) {
                 console.error('[seoInjection] section lookup failed for', slug, e.message);
               }
@@ -462,7 +505,7 @@ const seoInjectionMiddleware = async (req, res, next) => {
     };
   }
 
-  const html = injectIntoHtml(template, { ...seoData, canonical, robots, page, sections });
+  const html = injectIntoHtml(template, { ...seoData, canonical, robots, page, sections, context });
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   
   // Determine if this is a 404 (robots = noindex indicates non-existent page)
