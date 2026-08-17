@@ -108,13 +108,17 @@ const SEOHead = ({
       },
     ],
     sameAs: socialProfileUrls,
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.8',
-      reviewCount: '150',
-      bestRating: '5',
-      worstRating: '1',
-    },
+    // SCHEMA-01: no aggregateRating here, deliberately.
+    //
+    // This previously declared a hardcoded 4.8 / 150 reviews. Those numbers were
+    // typed by hand and matched nothing: the Google Business Profile shows 4
+    // reviews, and the site's own CMS holds 16. Removed with client approval.
+    //
+    // Do not re-add it using the Google Business Profile figures either — Google's
+    // review-snippet guidelines don't permit marking up ratings sourced from a
+    // third-party platform on your own site, and Google already surfaces the
+    // profile rating in local results without this. It may only return if the site
+    // collects genuine first-party reviews and the value is computed from them.
   };
 
   // WebSite Schema
