@@ -16,6 +16,23 @@ const FRONTEND_DIST = process.env.FRONTEND_DIST_PATH
 
 let _cachedTemplate = null;
 
+// SEO-03: section content is per-service (56 of them) but needed by 61k+ location
+// pages, so cache it in memory rather than hitting Mongo on every page view.
+// Short TTL so edits made in the admin appear without a restart.
+const SECTIONS_TTL_MS = 5 * 60 * 1000;
+const _sectionsCache = new Map();
+
+const getServiceSections = async (serviceId) => {
+  if (!serviceId) return [];
+  const key = String(serviceId);
+  const hit = _sectionsCache.get(key);
+  if (hit && Date.now() - hit.at < SECTIONS_TTL_MS) return hit.sections;
+  const svc = await Service.findById(serviceId).select('sections').lean();
+  const sections = Array.isArray(svc?.sections) ? svc.sections : [];
+  _sectionsCache.set(key, { at: Date.now(), sections });
+  return sections;
+};
+
 const getTemplate = () => {
   if (_cachedTemplate) return _cachedTemplate;
   const indexPath = path.join(FRONTEND_DIST, 'index.html');
@@ -64,19 +81,70 @@ const stripSiteSuffix = (value = '') =>
     .replace(/\s*-\s*GAG Lawyers\s*$/i, '')
     .trim();
 
-const buildFallbackContent = ({ title, description, canonical, robots }) => {
+// SEO-03. Service sections are authored once and shared by every city page for
+// that service, with the city swapped in at render time. This mirrors the first
+// pass of the frontend pipeline (LocationPageDynamic `localizeText`) so the
+// server-rendered copy names the correct city. The frontend additionally applies
+// cosmetic passes (heading suffixes, de-duplicating "in <city>"); we skip those
+// deliberately — the text here is the same content and the same meaning, just
+// less polished, which keeps this simple and avoids two copies of fiddly regex.
+const localizeText = (value, city) => {
+  if (typeof value !== 'string' || !city) return value;
+  return value
+    .replace(/\bNew Delhi\b/gi, city)
+    .replace(/\bDelhi\b/gi, city)
+    .replace(/\{city\}/gi, city);
+};
+
+// Flatten one section's content into plain paragraphs. Section shapes vary by
+// type: overview => {body}, benefits/faq => {items:[...]}, hero => {description}.
+const sectionParagraphs = (content) => {
+  if (!content || typeof content !== 'object') return [];
+  const out = [];
+  if (typeof content.description === 'string') out.push(content.description);
+  if (typeof content.body === 'string') out.push(content.body);
+  if (Array.isArray(content.items)) {
+    content.items.forEach((item) => {
+      if (!item || typeof item !== 'object') return;
+      const label = item.title || item.question || '';
+      const text = item.description || item.answer || '';
+      if (label || text) out.push([label, text].filter(Boolean).join(': '));
+    });
+  }
+  return out.filter((t) => typeof t === 'string' && t.trim());
+};
+
+const buildFallbackContent = ({ title, description, canonical, robots, page, sections }) => {
   if (String(robots || '').toLowerCase().includes('noindex')) {
     return '';
   }
 
-  const heading = stripSiteSuffix(title) || 'GAG Lawyers';
-  return [
+  const city = page?.city || '';
+  // page.content.heading/intro are stored per page and already contain the city
+  // (generated as `${serviceName} in ${city}`), so they need no localisation and
+  // match the H1/intro the visitor sees.
+  const heading = page?.content?.heading || stripSiteSuffix(title) || 'GAG Lawyers';
+  const intro = page?.content?.intro || description;
+
+  const parts = [
     '<main class="seo-fallback-content" data-seo-fallback="true">',
     `<h1>${escHtml(heading)}</h1>`,
-    `<p>${escHtml(description)}</p>`,
-    `<a href="${escHtml(canonical)}">View page</a>`,
-    '</main>',
-  ].join('');
+    `<p>${escHtml(intro)}</p>`,
+  ];
+
+  (Array.isArray(sections) ? sections : []).forEach((section) => {
+    // The hero section supplies the H1 and intro above, so skip it here rather
+    // than repeating the same heading immediately as an <h2>.
+    if (section?.type === 'hero') return;
+    const secHeading = localizeText(section?.heading || '', city);
+    if (secHeading) parts.push(`<h2>${escHtml(secHeading)}</h2>`);
+    sectionParagraphs(section?.content).forEach((text) => {
+      parts.push(`<p>${escHtml(localizeText(text, city))}</p>`);
+    });
+  });
+
+  parts.push(`<a href="${escHtml(canonical)}">View page</a>`, '</main>');
+  return parts.join('');
 };
 
 // react-helmet-async marks the tags it manages with data-rh. Stamping the same
@@ -86,7 +154,7 @@ const buildFallbackContent = ({ title, description, canonical, robots }) => {
 // The attribute is inert for crawlers that never execute JS.
 const RH = 'data-rh="true"';
 
-const injectIntoHtml = (template, { title, description, keywords, canonical, robots = 'index, follow' }) => {
+const injectIntoHtml = (template, { title, description, keywords, canonical, robots = 'index, follow', page = null, sections = null }) => {
   let html = template;
 
   // Replace title and description in-place
@@ -114,7 +182,7 @@ const injectIntoHtml = (template, { title, description, keywords, canonical, rob
     `<meta name="twitter:description" content="${escHtml(description)}" ${RH} />`,
   ].join('\n  ');
 
-  const fallbackContent = buildFallbackContent({ title, description, canonical, robots });
+  const fallbackContent = buildFallbackContent({ title, description, canonical, robots, page, sections });
   html = html.replace(/<div\s+id="root"\s*><\/div>/i, `<div id="root">${fallbackContent}</div>`);
 
   // JS-enabled visitors: hide the SEO fallback immediately and keep it hidden — React
@@ -246,6 +314,9 @@ const seoInjectionMiddleware = async (req, res, next) => {
   let seoData = STATIC_SEO[urlPath] || null;
   // robots defaults to index,follow. Only set noindex when DB confirms page doesn't exist.
   let robots = 'index, follow';
+  // SEO-03: populated for location pages so the fallback can render real content.
+  let page = null;
+  let sections = null;
 
   if (!seoData) {
     const slug = urlPath.replace(/^\//, '');
@@ -258,15 +329,27 @@ const seoInjectionMiddleware = async (req, res, next) => {
       try {
         if (slug.includes('-in-')) {
           // Location page — direct DB lookup, no API overhead
-          const page = await LocationPage.findOne({ slug, isActive: true })
-            .select('seo city serviceName')
+          const found = await LocationPage.findOne({ slug, isActive: true })
+            .select('seo city serviceName service content')
             .lean();
-          if (page?.seo?.title) {
+          if (found?.seo?.title) {
+            page = found;
             seoData = {
               title: page.seo.title,
               description: page.seo.description || `Expert legal services in ${page.city} from GAG Lawyers.`,
               keywords: page.seo.keywords || `${page.serviceName}, ${page.city}, lawyers, GAG Lawyers`,
             };
+            // SEO-03: pull the service's authored sections so crawlers receive the
+            // real page content, not just a heading and one line. Only for
+            // 'service' template pages — 'custom' pages render their own content,
+            // and we must not publish text the visitor never sees.
+            if (page.content?.templateMode !== 'custom') {
+              try {
+                sections = await getServiceSections(page.service);
+              } catch (e) {
+                console.error('[seoInjection] section lookup failed for', slug, e.message);
+              }
+            }
           } else {
             // DB confirms this location page does not exist or is inactive
             robots = 'noindex, follow';
@@ -303,7 +386,7 @@ const seoInjectionMiddleware = async (req, res, next) => {
     };
   }
 
-  const html = injectIntoHtml(template, { ...seoData, canonical, robots });
+  const html = injectIntoHtml(template, { ...seoData, canonical, robots, page, sections });
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   
   // Determine if this is a 404 (robots = noindex indicates non-existent page)
