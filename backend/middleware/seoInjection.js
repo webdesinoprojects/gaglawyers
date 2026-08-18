@@ -171,7 +171,7 @@ const sectionParagraphs = (content) => {
   return out.filter((t) => typeof t === 'string' && t.trim());
 };
 
-const buildFallbackContent = ({ title, description, canonical, robots, page, sections, context }) => {
+const buildFallbackContent = ({ title, description, canonical, robots, page, sections, context, crumbLabel }) => {
   if (String(robots || '').toLowerCase().includes('noindex')) {
     return '';
   }
@@ -183,11 +183,22 @@ const buildFallbackContent = ({ title, description, canonical, robots, page, sec
   const heading = page?.content?.heading || stripSiteSuffix(title) || 'GAG Lawyers';
   const intro = page?.content?.intro || description;
 
-  const parts = [
-    '<main class="seo-fallback-content" data-seo-fallback="true">',
-    `<h1>${escHtml(heading)}</h1>`,
-    `<p>${escHtml(intro)}</p>`,
-  ];
+  const parts = ['<main class="seo-fallback-content" data-seo-fallback="true">'];
+
+  // SEO-06: the same trail the sticky bar shows to visitors, so crawlers that
+  // never run JS receive it too and the BreadcrumbList schema has a visible
+  // counterpart in the initial HTML.
+  if (crumbLabel) {
+    parts.push(
+      '<nav aria-label="Breadcrumb"><ol>',
+      `<li><a href="${escHtml(SITE_URL)}/">Home</a></li>`,
+      `<li><a href="${escHtml(SITE_URL)}/services">Services</a></li>`,
+      `<li>${escHtml(crumbLabel)}</li>`,
+      '</ol></nav>',
+    );
+  }
+
+  parts.push(`<h1>${escHtml(heading)}</h1>`, `<p>${escHtml(intro)}</p>`);
 
   (Array.isArray(sections) ? sections : []).forEach((section) => {
     // The hero section supplies the H1 and intro above, so skip it here rather
@@ -280,7 +291,25 @@ const jsonLdScript = (data) => {
   return `<script type="application/ld+json" ${RH}>${json}</script>`;
 };
 
-const buildSchemaBlock = ({ canonical, title, description, robots }) => {
+// SEO-06 / SCHEMA-02. Must mirror the trail the visitor actually sees — the
+// sticky bar in LocationPageDynamic and ServicePageDynamic renders
+// [Home] > Services > <page name>. Google requires breadcrumb markup to describe
+// visible navigation, so this is derived from the same values, not invented.
+// Returns null for pages that have no such bar (home, contact, articles...).
+const buildBreadcrumbSchema = ({ canonical, crumbLabel }) => {
+  if (!crumbLabel) return null;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Services', item: `${SITE_URL}/services` },
+      { '@type': 'ListItem', position: 3, name: crumbLabel, item: canonical },
+    ],
+  };
+};
+
+const buildSchemaBlock = ({ canonical, title, description, robots, crumbLabel }) => {
   if (String(robots || '').toLowerCase().includes('noindex')) return '';
   const webPage = {
     '@context': 'https://schema.org',
@@ -292,10 +321,16 @@ const buildSchemaBlock = ({ canonical, title, description, robots }) => {
     about: { '@id': ORG_ID },
     inLanguage: 'en',
   };
-  return jsonLdScript(buildOrganisationSchema()) + jsonLdScript(webPage);
+  const crumbs = buildBreadcrumbSchema({ canonical, crumbLabel });
+  if (crumbs) webPage.breadcrumb = { '@id': `${canonical}#breadcrumb` };
+  return (
+    jsonLdScript(buildOrganisationSchema()) +
+    jsonLdScript(webPage) +
+    (crumbs ? jsonLdScript({ ...crumbs, '@id': `${canonical}#breadcrumb` }) : '')
+  );
 };
 
-const injectIntoHtml = (template, { title, description, keywords, canonical, robots = 'index, follow', page = null, sections = null, context = null }) => {
+const injectIntoHtml = (template, { title, description, keywords, canonical, robots = 'index, follow', page = null, sections = null, context = null, crumbLabel = '' }) => {
   let html = template;
 
   // Replace title and description in-place
@@ -323,7 +358,7 @@ const injectIntoHtml = (template, { title, description, keywords, canonical, rob
     `<meta name="twitter:description" content="${escHtml(description)}" ${RH} />`,
   ].join('\n  ');
 
-  const fallbackContent = buildFallbackContent({ title, description, canonical, robots, page, sections, context });
+  const fallbackContent = buildFallbackContent({ title, description, canonical, robots, page, sections, context, crumbLabel });
   html = html.replace(/<div\s+id="root"\s*><\/div>/i, `<div id="root">${fallbackContent}</div>`);
 
   // JS-enabled visitors: hide the SEO fallback immediately and keep it hidden — React
@@ -342,7 +377,7 @@ const injectIntoHtml = (template, { title, description, keywords, canonical, rob
   // SCHEMA-01 / GEO-01: identity + page schema in the initial HTML. Marked data-rh
   // so Helmet replaces these on hydration rather than leaving two copies of the
   // same entity in the DOM.
-  const schemaBlock = buildSchemaBlock({ canonical, title, description, robots });
+  const schemaBlock = buildSchemaBlock({ canonical, title, description, robots, crumbLabel });
 
   return html.replace('</head>', `  ${fallbackVisibilityGuard}\n  ${extraTags}\n  ${schemaBlock}\n</head>`);
 };
@@ -464,6 +499,9 @@ const seoInjectionMiddleware = async (req, res, next) => {
   let page = null;
   let sections = null;
   let context = null;
+  // SEO-06: third crumb, mirroring the visible sticky bar. Location pages show
+  // `<service> in <city>`; service pages show the service name.
+  let crumbLabel = '';
 
   if (!seoData) {
     const slug = urlPath.replace(/^\//, '');
@@ -490,6 +528,8 @@ const seoInjectionMiddleware = async (req, res, next) => {
             // real page content, not just a heading and one line. Only for
             // 'service' template pages — 'custom' pages render their own content,
             // and we must not publish text the visitor never sees.
+            // matches pageTag in LocationPageDynamic: `${serviceName} in ${city}`
+            crumbLabel = [page.serviceName, page.city].filter(Boolean).join(' in ');
             if (page.content?.templateMode !== 'custom') {
               try {
                 context = await getServiceContext(page.service);
@@ -510,6 +550,8 @@ const seoInjectionMiddleware = async (req, res, next) => {
             .select('name seo')
             .lean();
           if (service) {
+            // matches the sticky bar in ServicePageDynamic, which shows the service name
+            crumbLabel = service.name || '';
             seoData = {
               title: service.seo?.title || `${service.name} - GAG Lawyers`,
               description: service.seo?.metaDescription || service.seo?.description || `Professional ${service.name.toLowerCase()} legal assistance from GAG Lawyers.`,
@@ -536,7 +578,7 @@ const seoInjectionMiddleware = async (req, res, next) => {
     };
   }
 
-  const html = injectIntoHtml(template, { ...seoData, canonical, robots, page, sections, context });
+  const html = injectIntoHtml(template, { ...seoData, canonical, robots, page, sections, context, crumbLabel });
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   
   // Determine if this is a 404 (robots = noindex indicates non-existent page)
