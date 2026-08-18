@@ -20,9 +20,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GAG Lawyers</title>
     <meta name="description" content="GAG Lawyers – Grover &amp; Grover Advocates. Trusted legal experts for corporate law, civil litigation, real estate, and family law across India." />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- PERF-04: fonts are self-hosted (see src/fonts.css). The previous
+         fonts.googleapis.com stylesheet blocked first paint for ~1.3s because the
+         browser had to fetch it, then follow it to fonts.gstatic.com. Preloading
+         the two latin files starts them immediately, in parallel with the CSS. -->
+    <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/playfair-latin.woff2" as="font" type="font/woff2" crossorigin />
     <script>
       // Disable browser's automatic scroll restoration
       // This ensures our custom scroll reset logic has full control
