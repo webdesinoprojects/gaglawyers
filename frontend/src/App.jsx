@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Layout from './components/Layout';
-import AdminLayout from './components/AdminLayout';
+const AdminLayout = lazy(() => import('./components/AdminLayout'));
 import ProtectedRoute from './components/ProtectedRoute';
 import PageVisibilityWrapper from './components/PageVisibilityWrapper';
 import GoogleAnalytics from './components/GoogleAnalytics';
@@ -25,29 +25,29 @@ import NotFound from './pages/NotFound';
 import ContentProtection from './components/ContentProtection';
 import ScrollToTop from './components/ScrollToTop';
 import DisclaimerProvider from './components/disclaimer/DisclaimerProvider';
-import AdminLogin from './pages/admin/Login';
-import AdminForgotPassword from './pages/admin/ForgotPassword';
-import AdminResetPassword from './pages/admin/ResetPassword';
-import AdminDashboard from './pages/admin/Dashboard';
-import ContactForms from './pages/admin/ContactForms';
-import FormRequirementManager from './pages/admin/FormRequirementManager';
-import SiteSettings from './pages/admin/SiteSettings';
-import TeamManager from './pages/admin/TeamManager';
-import ResourceCenterManager from './pages/admin/ResourceCenterManager';
-import ReviewManager from './pages/admin/ReviewManager';
-import AwardManager from './pages/admin/AwardManager';
-import HomeAwardsManager from './pages/admin/HomeAwardsManager';
-import GalleryManager from './pages/admin/GalleryManager';
-import CareerManager from './pages/admin/CareerManager';
-import ServiceManager from './pages/admin/ServiceManager';
-import ServiceImport from './pages/admin/ServiceImport';
-import PageContentManager from './pages/admin/PageContentManager';
-import LocationManager from './pages/admin/LocationManager';
-import SEOManager from './pages/admin/SEOManager';
-import PageVisibilityManager from './pages/admin/PageVisibilityManager';
-import ComingSoon from './pages/admin/ComingSoon';
-import SocialLinksManager from './pages/admin/SocialLinksManager';
-import LocationSeoManager from './pages/admin/LocationSeoManager';
+const AdminLogin = lazy(() => import('./pages/admin/Login'));
+const AdminForgotPassword = lazy(() => import('./pages/admin/ForgotPassword'));
+const AdminResetPassword = lazy(() => import('./pages/admin/ResetPassword'));
+const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
+const ContactForms = lazy(() => import('./pages/admin/ContactForms'));
+const FormRequirementManager = lazy(() => import('./pages/admin/FormRequirementManager'));
+const SiteSettings = lazy(() => import('./pages/admin/SiteSettings'));
+const TeamManager = lazy(() => import('./pages/admin/TeamManager'));
+const ResourceCenterManager = lazy(() => import('./pages/admin/ResourceCenterManager'));
+const ReviewManager = lazy(() => import('./pages/admin/ReviewManager'));
+const AwardManager = lazy(() => import('./pages/admin/AwardManager'));
+const HomeAwardsManager = lazy(() => import('./pages/admin/HomeAwardsManager'));
+const GalleryManager = lazy(() => import('./pages/admin/GalleryManager'));
+const CareerManager = lazy(() => import('./pages/admin/CareerManager'));
+const ServiceManager = lazy(() => import('./pages/admin/ServiceManager'));
+const ServiceImport = lazy(() => import('./pages/admin/ServiceImport'));
+const PageContentManager = lazy(() => import('./pages/admin/PageContentManager'));
+const LocationManager = lazy(() => import('./pages/admin/LocationManager'));
+const SEOManager = lazy(() => import('./pages/admin/SEOManager'));
+const PageVisibilityManager = lazy(() => import('./pages/admin/PageVisibilityManager'));
+const ComingSoon = lazy(() => import('./pages/admin/ComingSoon'));
+const SocialLinksManager = lazy(() => import('./pages/admin/SocialLinksManager'));
+const LocationSeoManager = lazy(() => import('./pages/admin/LocationSeoManager'));
 import Affiliation from './pages/Affiliation';
 
 const GA_MEASUREMENT_ID = 'G-QNKLZP7NJS';
@@ -62,6 +62,17 @@ const RedirectBlogToArticles = () => {
   return <Navigate to={`/articles/${slug}`} replace />;
 };
 
+/**
+ * PERF-01. Shown only while an admin chunk downloads — public pages are static
+ * imports and never suspend. Mirrors the spinner the admin pages use themselves
+ * so the transition is not jarring.
+ */
+const AdminChunkFallback = () => (
+  <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="animate-spin w-12 h-12 border-4 border-navy border-t-transparent rounded-full" />
+  </div>
+);
+
 function App() {
   return (
     <Router>
@@ -69,6 +80,10 @@ function App() {
       <DisclaimerProvider>
         <ScrollToTop />
         <ContentProtection />
+        {/* PERF-01: admin routes are lazy-loaded, so this boundary only ever
+            renders while an admin chunk is downloading. Public routes are static
+            imports and never suspend, so visitors are unaffected. */}
+        <Suspense fallback={<AdminChunkFallback />}>
         <Routes>
           {/* Admin routes MUST come before Layout routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
@@ -133,6 +148,7 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
+        </Suspense>
       </DisclaimerProvider>
     </Router>
   );
