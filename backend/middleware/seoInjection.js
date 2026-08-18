@@ -226,9 +226,14 @@ const buildFallbackContent = ({ title, description, canonical, robots, page, sec
   links.push([`${SITE_URL}/services`, 'All practice areas']);
   links.push([`${SITE_URL}/contact`, 'Contact GAG Lawyers']);
 
-  if (links.length) {
+  // Never link a page to itself — /services and /contact would otherwise appear
+  // in their own "related pages" list. Sibling cities are already filtered above.
+  const selfHref = String(canonical || '').replace(/\/+$/, '');
+  const finalLinks = links.filter(([href]) => String(href).replace(/\/+$/, '') !== selfHref);
+
+  if (finalLinks.length) {
     parts.push('<nav aria-label="Related pages"><ul>');
-    links.forEach(([href, label]) => {
+    finalLinks.forEach(([href, label]) => {
       parts.push(`<li><a href="${escHtml(href)}">${escHtml(label)}</a></li>`);
     });
     parts.push('</ul></nav>');
