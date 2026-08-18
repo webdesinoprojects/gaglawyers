@@ -188,7 +188,7 @@ const DynamicNavbar = () => {
         <div className="flex min-h-[56px] items-center justify-between md:h-[72px]">
           <Link to="/" className="flex max-w-[min(100%,calc(100vw-4rem))] items-center gap-2 py-2 md:gap-4 md:py-3">
             <span className="brand-logo-shell">
-              <img
+              <img width="500" height="500"
                 src="/logo.png"
                 alt="GAG Lawyers"
                 className="h-7 w-auto md:h-9 lg:h-11"

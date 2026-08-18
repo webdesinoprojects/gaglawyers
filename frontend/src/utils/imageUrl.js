@@ -30,4 +30,39 @@ export const optimizeImage = (url) => {
   return url;
 };
 
+/** Widths offered to the browser; roughly common device widths at 1x/2x. */
+const SRCSET_WIDTHS = [640, 828, 1080, 1280, 1920];
+
+/**
+ * PERF-02. Builds a `srcset` so phones download an image sized for their screen
+ * instead of the full desktop asset — the hero slides alone were 1920px wide,
+ * ~5x more pixels than a 390px phone can display.
+ *
+ * Only emitted for CDNs that resize from a URL parameter. Anything else returns
+ * '' so the caller simply renders `src` alone, exactly as before.
+ *
+ * Pair with a correct `sizes`: for a full-bleed hero that is `100vw`. A `sizes`
+ * that is too small is the one way this degrades quality, so callers that are
+ * not full-width should pass their real layout width.
+ */
+export const buildSrcSet = (url) => {
+  if (typeof url !== 'string' || !url) return '';
+
+  if (url.includes('images.unsplash.com')) {
+    const base = optimizeImage(url);
+    return SRCSET_WIDTHS
+      .map((w) => `${base.replace(/([?&])w=\d+/, `$1w=${w}`)} ${w}w`)
+      .join(', ');
+  }
+
+  if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+    const base = optimizeImage(url);
+    return SRCSET_WIDTHS
+      .map((w) => `${base.replace('/upload/', `/upload/w_${w},c_limit/`)} ${w}w`)
+      .join(', ');
+  }
+
+  return '';
+};
+
 export default optimizeImage;

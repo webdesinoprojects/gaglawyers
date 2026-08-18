@@ -252,7 +252,7 @@ const Footer = () => {
               <Link to="/" className="flex items-center gap-4">
                 {/* Logo Image - Enlarged */}
                 <span className="brand-logo-shell">
-                  <img 
+                  <img width="500" height="500" 
                     src="/logo.png" 
                     alt="GAG Lawyers" 
                     className="h-12 w-auto"

@@ -47,7 +47,7 @@ export default function DisclaimerModal({ onAgree, onDecline }) {
       >
         <div className="flex flex-none items-center justify-between bg-navy px-5 py-2 sm:px-10 lg:px-16">
           <span className="brand-logo-shell">
-            <img src="/logo.png" alt="GAG Lawyers" className="h-7 w-auto" />
+            <img width="500" height="500" src="/logo.png" alt="GAG Lawyers" className="h-7 w-auto" />
           </span>
           <div className="flex items-center gap-4">
             <span className="text-xs font-bold tracking-[0.3em] uppercase text-white/80">Disclaimer</span>

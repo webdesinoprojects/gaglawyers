@@ -95,7 +95,7 @@ const Navbar = () => {
           <Link to="/" className="flex items-center gap-3">
             {/* Logo Image */}
             <span className="brand-logo-shell">
-              <img 
+              <img width="500" height="500" 
                 src="/logo.png" 
                 alt="GAG Lawyers" 
                 className="h-10 w-auto"
