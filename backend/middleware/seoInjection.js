@@ -314,7 +314,41 @@ const buildBreadcrumbSchema = ({ canonical, crumbLabel }) => {
   };
 };
 
-const buildSchemaBlock = ({ canonical, title, description, robots, crumbLabel }) => {
+// Bullet 11 (FAQ schema). Built from the same `faq` ServiceSection the visitor
+// actually sees, with the same city localisation applied, so the markup describes
+// visible content instead of inventing it — the same correspondence rule that
+// governs the breadcrumb markup above. Returns null when a page has no FAQ.
+const FAQ_ANSWER_MAX = 1200;
+
+const stripTags = (value = '') =>
+  String(value).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
+const buildFaqSchema = ({ canonical, sections, city }) => {
+  const entities = [];
+  (Array.isArray(sections) ? sections : []).forEach((section) => {
+    if (section?.type !== 'faq') return;
+    const items = Array.isArray(section?.content?.items) ? section.content.items : [];
+    items.forEach((item) => {
+      const question = stripTags(localizeText(item?.question || '', city));
+      const answer = stripTags(localizeText(item?.answer || '', city));
+      if (!question || !answer) return;
+      entities.push({
+        '@type': 'Question',
+        name: question,
+        acceptedAnswer: { '@type': 'Answer', text: answer.slice(0, FAQ_ANSWER_MAX) },
+      });
+    });
+  });
+  if (!entities.length) return null;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    '@id': `${canonical}#faq`,
+    mainEntity: entities,
+  };
+};
+
+const buildSchemaBlock = ({ canonical, title, description, robots, crumbLabel, sections, city }) => {
   if (String(robots || '').toLowerCase().includes('noindex')) return '';
   const webPage = {
     '@context': 'https://schema.org',
@@ -328,10 +362,12 @@ const buildSchemaBlock = ({ canonical, title, description, robots, crumbLabel })
   };
   const crumbs = buildBreadcrumbSchema({ canonical, crumbLabel });
   if (crumbs) webPage.breadcrumb = { '@id': `${canonical}#breadcrumb` };
+  const faq = buildFaqSchema({ canonical, sections, city });
   return (
     jsonLdScript(buildOrganisationSchema()) +
     jsonLdScript(webPage) +
-    (crumbs ? jsonLdScript({ ...crumbs, '@id': `${canonical}#breadcrumb` }) : '')
+    (crumbs ? jsonLdScript({ ...crumbs, '@id': `${canonical}#breadcrumb` }) : '') +
+    (faq ? jsonLdScript(faq) : '')
   );
 };
 
@@ -382,7 +418,10 @@ const injectIntoHtml = (template, { title, description, keywords, canonical, rob
   // SCHEMA-01 / GEO-01: identity + page schema in the initial HTML. Marked data-rh
   // so Helmet replaces these on hydration rather than leaving two copies of the
   // same entity in the DOM.
-  const schemaBlock = buildSchemaBlock({ canonical, title, description, robots, crumbLabel });
+  const schemaBlock = buildSchemaBlock({
+    canonical, title, description, robots, crumbLabel,
+    sections, city: page?.city || '',
+  });
 
   return html.replace('</head>', `  ${fallbackVisibilityGuard}\n  ${extraTags}\n  ${schemaBlock}\n</head>`);
 };
