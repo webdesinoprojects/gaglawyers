@@ -5,6 +5,7 @@ const Service = require('../models/Service');
 const ServiceSection = require('../models/ServiceSection');
 const LocationPage = require('../models/LocationPage');
 const TeamMember = require('../models/TeamMember');
+const BlogPost = require('../models/BlogPost');
 const { OFFICE_ADDRESS_LINE } = require('../config/officeAddress');
 
 const SITE_URL = (process.env.SITE_URL || 'https://gaglawyers.com').replace(/\/+$/, '');
@@ -69,6 +70,48 @@ const getTeamMembers = async () => {
   _teamCache.value = members;
   _teamCache.at = Date.now();
   return members;
+};
+
+// Bullet 5 ("...and informative blogs"). Category would have been the natural way
+// to pick a relevant article, but 89 of 100 posts sit in the generic "Legal News"
+// bucket, so category matching would cover almost nothing. Instead every page gets
+// a different slice of the article list, rotated by its own slug — the same reason
+// sibling cities rotate: linking all 61k pages at the same two articles would
+// concentrate every internal link on two URLs and leave the other 331 unreachable.
+const ARTICLE_LINK_LIMIT = 2;
+const _articlesCache = { at: 0, value: null };
+
+const getRecentArticles = async () => {
+  if (_articlesCache.value && Date.now() - _articlesCache.at < SECTIONS_TTL_MS) return _articlesCache.value;
+  let posts = [];
+  try {
+    posts = await BlogPost.find({ isPublished: true, slug: { $exists: true, $ne: '' } })
+      .select('slug title')
+      .sort({ publishedAt: -1 })
+      .limit(200)
+      .lean();
+  } catch {
+    posts = [];
+  }
+  _articlesCache.value = posts;
+  _articlesCache.at = Date.now();
+  return posts;
+};
+
+// Deterministic per-page offset: the same page always gets the same articles
+// (stable for crawlers), but adjacent pages get different ones.
+const pickArticles = (articles, seed) => {
+  const list = Array.isArray(articles) ? articles.filter((a) => a?.slug && a?.title) : [];
+  if (!list.length) return [];
+  let h = 0;
+  const key = String(seed || '');
+  for (let i = 0; i < key.length; i += 1) h = (h * 31 + key.charCodeAt(i)) % 100000;
+  const start = h % list.length;
+  const out = [];
+  for (let i = 0; i < Math.min(ARTICLE_LINK_LIMIT, list.length); i += 1) {
+    out.push(list[(start + i) % list.length]);
+  }
+  return out;
 };
 
 // SEO-03 internal links. Deliberately NOT the alphabetically-first cities: that
@@ -190,7 +233,7 @@ const sectionParagraphs = (content) => {
   return out.filter((t) => typeof t === 'string' && t.trim());
 };
 
-const buildFallbackContent = ({ title, description, canonical, robots, page, sections, context, crumbLabel, team }) => {
+const buildFallbackContent = ({ title, description, canonical, robots, page, sections, context, crumbLabel, team, articles }) => {
   if (String(robots || '').toLowerCase().includes('noindex')) {
     return '';
   }
@@ -258,6 +301,10 @@ const buildFallbackContent = ({ title, description, canonical, robots, page, sec
   (context?.siblings || []).forEach((sib) => {
     if (!sib?.slug || sib.slug === page?.slug) return;
     links.push([`${SITE_URL}/${sib.slug}`, `${sib.serviceName || 'Legal services'} in ${sib.city}`]);
+  });
+  // Natural anchor text: the article's own headline, not "click here".
+  pickArticles(articles, page?.slug || canonical).forEach((a) => {
+    links.push([`${SITE_URL}/articles/${a.slug}`, a.title]);
   });
   links.push([`${SITE_URL}/services`, 'All practice areas']);
   links.push([`${SITE_URL}/contact`, 'Contact GAG Lawyers']);
@@ -436,7 +483,7 @@ const buildSchemaBlock = ({ canonical, title, description, robots, crumbLabel, s
   );
 };
 
-const injectIntoHtml = (template, { title, description, keywords, canonical, robots = 'index, follow', page = null, sections = null, context = null, crumbLabel = '', team = null }) => {
+const injectIntoHtml = (template, { title, description, keywords, canonical, robots = 'index, follow', page = null, sections = null, context = null, crumbLabel = '', team = null, articles = null }) => {
   let html = template;
 
   // Replace title and description in-place
@@ -464,7 +511,7 @@ const injectIntoHtml = (template, { title, description, keywords, canonical, rob
     `<meta name="twitter:description" content="${escHtml(description)}" ${RH} />`,
   ].join('\n  ');
 
-  const fallbackContent = buildFallbackContent({ title, description, canonical, robots, page, sections, context, crumbLabel, team });
+  const fallbackContent = buildFallbackContent({ title, description, canonical, robots, page, sections, context, crumbLabel, team, articles });
   html = html.replace(/<div\s+id="root"\s*><\/div>/i, `<div id="root">${fallbackContent}</div>`);
 
   // JS-enabled visitors: hide the SEO fallback immediately and keep it hidden — React
@@ -613,6 +660,7 @@ const seoInjectionMiddleware = async (req, res, next) => {
   let crumbLabel = '';
   // Bullet 11: the roster, fetched only for /team so no other page pays for it.
   let team = null;
+  let articles = null;
   if (urlPath === '/team') {
     team = await getTeamMembers();
   }
@@ -692,7 +740,13 @@ const seoInjectionMiddleware = async (req, res, next) => {
     };
   }
 
-  const html = injectIntoHtml(template, { ...seoData, canonical, robots, page, sections, context, crumbLabel, team });
+  // Bullet 5: article links only on location and service pages. crumbLabel is set
+  // for exactly those two, so static pages keep byte-identical output.
+  if (crumbLabel) {
+    articles = await getRecentArticles();
+  }
+
+  const html = injectIntoHtml(template, { ...seoData, canonical, robots, page, sections, context, crumbLabel, team, articles });
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   
   // Determine if this is a 404 (robots = noindex indicates non-existent page)
