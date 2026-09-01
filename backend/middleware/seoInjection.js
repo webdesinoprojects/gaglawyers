@@ -4,6 +4,7 @@ const path = require('path');
 const Service = require('../models/Service');
 const ServiceSection = require('../models/ServiceSection');
 const LocationPage = require('../models/LocationPage');
+const TeamMember = require('../models/TeamMember');
 const { OFFICE_ADDRESS_LINE } = require('../config/officeAddress');
 
 const SITE_URL = (process.env.SITE_URL || 'https://gaglawyers.com').replace(/\/+$/, '');
@@ -50,6 +51,24 @@ const getServiceContext = async (serviceId) => {
   };
   _sectionsCache.set(key, { at: Date.now(), value });
   return value;
+};
+
+// Bullet 11 (Person schema). The team page is a STATIC_SEO entry, so it carried
+// no data at all: crawlers without JS saw only the intro line and the page had no
+// Person markup. Cached like the sections above — the roster changes rarely.
+const _teamCache = { at: 0, value: null };
+
+const getTeamMembers = async () => {
+  if (_teamCache.value && Date.now() - _teamCache.at < SECTIONS_TTL_MS) return _teamCache.value;
+  let members = [];
+  try {
+    members = await TeamMember.find({}).select('name designation bio imageUrl').sort({ order: 1 }).lean();
+  } catch {
+    members = [];
+  }
+  _teamCache.value = members;
+  _teamCache.at = Date.now();
+  return members;
 };
 
 // SEO-03 internal links. Deliberately NOT the alphabetically-first cities: that
@@ -171,7 +190,7 @@ const sectionParagraphs = (content) => {
   return out.filter((t) => typeof t === 'string' && t.trim());
 };
 
-const buildFallbackContent = ({ title, description, canonical, robots, page, sections, context, crumbLabel }) => {
+const buildFallbackContent = ({ title, description, canonical, robots, page, sections, context, crumbLabel, team }) => {
   if (String(robots || '').toLowerCase().includes('noindex')) {
     return '';
   }
@@ -210,6 +229,23 @@ const buildFallbackContent = ({ title, description, canonical, robots, page, sec
       parts.push(`<p>${escHtml(localizeText(text, city))}</p>`);
     });
   });
+
+  // Bullet 11. The team roster is rendered client-side, so without JS the page
+  // showed no lawyer at all — which would leave the Person markup describing
+  // content no crawler can see. Emit the same names and roles here so the schema
+  // has a visible counterpart. Only runs on /team, where `team` is supplied.
+  if (Array.isArray(team) && team.length) {
+    parts.push('<h2>Our Team</h2>');
+    team.forEach((member) => {
+      const name = String(member?.name || '').trim();
+      if (!name) return;
+      const role = String(member?.designation || '').trim();
+      parts.push(`<h3>${escHtml(name)}</h3>`);
+      if (role) parts.push(`<p>${escHtml(role)}</p>`);
+      const bio = String(member?.bio || '').trim();
+      if (bio) parts.push(`<p>${escHtml(bio.slice(0, PERSON_BIO_MAX))}</p>`);
+    });
+  }
 
   // SEO-03 internal links. Without JavaScript the only link on the page was the
   // self-referencing canonical, leaving crawlers no path onward across 61k pages.
@@ -348,7 +384,34 @@ const buildFaqSchema = ({ canonical, sections, city }) => {
   };
 };
 
-const buildSchemaBlock = ({ canonical, title, description, robots, crumbLabel, sections, city }) => {
+// Bullet 11 (Person schema). Only the fields the firm already publishes — name,
+// designation, bio, photo. Deliberately no bar enrolment number or qualifications:
+// the client asked that the site keep exactly the details already shown, and
+// marking up data a visitor cannot see is the same fault as a mismatched
+// breadcrumb. Each person is tied to the firm via worksFor.
+const PERSON_BIO_MAX = 600;
+
+const buildPersonSchema = ({ team, canonical }) =>
+  (Array.isArray(team) ? team : [])
+    .filter((m) => m && String(m.name || '').trim())
+    .map((m) => {
+      const person = {
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        '@id': `${canonical}#person-${String(m._id || m.name).toString().replace(/[^a-zA-Z0-9]/g, '')}`,
+        name: stripTags(m.name),
+        worksFor: { '@id': ORG_ID },
+        url: canonical,
+      };
+      const jobTitle = stripTags(m.designation || '');
+      if (jobTitle) person.jobTitle = jobTitle;
+      const bio = stripTags(m.bio || '');
+      if (bio) person.description = bio.slice(0, PERSON_BIO_MAX);
+      if (m.imageUrl) person.image = m.imageUrl;
+      return person;
+    });
+
+const buildSchemaBlock = ({ canonical, title, description, robots, crumbLabel, sections, city, team }) => {
   if (String(robots || '').toLowerCase().includes('noindex')) return '';
   const webPage = {
     '@context': 'https://schema.org',
@@ -363,15 +426,17 @@ const buildSchemaBlock = ({ canonical, title, description, robots, crumbLabel, s
   const crumbs = buildBreadcrumbSchema({ canonical, crumbLabel });
   if (crumbs) webPage.breadcrumb = { '@id': `${canonical}#breadcrumb` };
   const faq = buildFaqSchema({ canonical, sections, city });
+  const people = buildPersonSchema({ team, canonical });
   return (
     jsonLdScript(buildOrganisationSchema()) +
     jsonLdScript(webPage) +
     (crumbs ? jsonLdScript({ ...crumbs, '@id': `${canonical}#breadcrumb` }) : '') +
-    (faq ? jsonLdScript(faq) : '')
+    (faq ? jsonLdScript(faq) : '') +
+    people.map(jsonLdScript).join('')
   );
 };
 
-const injectIntoHtml = (template, { title, description, keywords, canonical, robots = 'index, follow', page = null, sections = null, context = null, crumbLabel = '' }) => {
+const injectIntoHtml = (template, { title, description, keywords, canonical, robots = 'index, follow', page = null, sections = null, context = null, crumbLabel = '', team = null }) => {
   let html = template;
 
   // Replace title and description in-place
@@ -399,7 +464,7 @@ const injectIntoHtml = (template, { title, description, keywords, canonical, rob
     `<meta name="twitter:description" content="${escHtml(description)}" ${RH} />`,
   ].join('\n  ');
 
-  const fallbackContent = buildFallbackContent({ title, description, canonical, robots, page, sections, context, crumbLabel });
+  const fallbackContent = buildFallbackContent({ title, description, canonical, robots, page, sections, context, crumbLabel, team });
   html = html.replace(/<div\s+id="root"\s*><\/div>/i, `<div id="root">${fallbackContent}</div>`);
 
   // JS-enabled visitors: hide the SEO fallback immediately and keep it hidden — React
@@ -420,7 +485,7 @@ const injectIntoHtml = (template, { title, description, keywords, canonical, rob
   // same entity in the DOM.
   const schemaBlock = buildSchemaBlock({
     canonical, title, description, robots, crumbLabel,
-    sections, city: page?.city || '',
+    sections, city: page?.city || '', team,
   });
 
   return html.replace('</head>', `  ${fallbackVisibilityGuard}\n  ${extraTags}\n  ${schemaBlock}\n</head>`);
@@ -546,6 +611,11 @@ const seoInjectionMiddleware = async (req, res, next) => {
   // SEO-06: third crumb, mirroring the visible sticky bar. Location pages show
   // `<service> in <city>`; service pages show the service name.
   let crumbLabel = '';
+  // Bullet 11: the roster, fetched only for /team so no other page pays for it.
+  let team = null;
+  if (urlPath === '/team') {
+    team = await getTeamMembers();
+  }
 
   if (!seoData) {
     const slug = urlPath.replace(/^\//, '');
@@ -622,7 +692,7 @@ const seoInjectionMiddleware = async (req, res, next) => {
     };
   }
 
-  const html = injectIntoHtml(template, { ...seoData, canonical, robots, page, sections, context, crumbLabel });
+  const html = injectIntoHtml(template, { ...seoData, canonical, robots, page, sections, context, crumbLabel, team });
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   
   // Determine if this is a 404 (robots = noindex indicates non-existent page)
