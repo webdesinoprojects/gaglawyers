@@ -215,6 +215,23 @@ const localizeText = (value, city) => {
     .replace(/\{city\}/gi, city);
 };
 
+// Second localisation pass, ported verbatim from LocationPageDynamic
+// (`stripInLocationFromText`). After "Delhi" becomes "Mumbai", a stored phrase
+// like "a Divorce Lawyer in Delhi" would read "a Divorce Lawyer in Mumbai" on a
+// page already headed "Divorce Lawyer in Mumbai", so the frontend removes the
+// redundant "in <city>". The FAQ markup has to apply it too: schema must repeat
+// the text the visitor actually sees, and without this ~4% of questions differed.
+const escapeRegExp = (value = '') => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const stripInLocation = (value, city) => {
+  if (typeof value !== 'string' || !city) return value;
+  return value
+    .replace(new RegExp(`\\s+in\\s+${escapeRegExp(city)}(?=[\\s,.!?;:]|$)`, 'gi'), '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+([,.!?;:])/g, '$1')
+    .trim();
+};
+
 // Flatten one section's content into plain paragraphs. Section shapes vary by
 // type: overview => {body}, benefits/faq => {items:[...]}, hero => {description}.
 const sectionParagraphs = (content) => {
@@ -268,8 +285,14 @@ const buildFallbackContent = ({ title, description, canonical, robots, page, sec
     if (section?.type === 'hero') return;
     const secHeading = localizeText(section?.heading || '', city);
     if (secHeading) parts.push(`<h2>${escHtml(secHeading)}</h2>`);
+    // FAQ paragraphs get the same second pass as the schema above, so the
+    // server-rendered text, the React-rendered text and the FAQPage markup all
+    // carry identical wording. Other section types keep the single pass they
+    // have always had — changing those would rewrite body copy on 61k pages.
+    const isFaq = section?.type === 'faq';
     sectionParagraphs(section?.content).forEach((text) => {
-      parts.push(`<p>${escHtml(localizeText(text, city))}</p>`);
+      const localized = localizeText(text, city);
+      parts.push(`<p>${escHtml(isFaq ? stripInLocation(localized, city) : localized)}</p>`);
     });
   });
 
@@ -412,8 +435,10 @@ const buildFaqSchema = ({ canonical, sections, city }) => {
     if (section?.type !== 'faq') return;
     const items = Array.isArray(section?.content?.items) ? section.content.items : [];
     items.forEach((item) => {
-      const question = stripTags(localizeText(item?.question || '', city));
-      const answer = stripTags(localizeText(item?.answer || '', city));
+      // Same order the frontend applies: localise, then strip the redundant
+      // "in <city>". Without the second pass the markup and the page disagree.
+      const question = stripTags(stripInLocation(localizeText(item?.question || '', city), city));
+      const answer = stripTags(stripInLocation(localizeText(item?.answer || '', city), city));
       if (!question || !answer) return;
       entities.push({
         '@type': 'Question',
