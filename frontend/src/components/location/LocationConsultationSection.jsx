@@ -128,10 +128,11 @@ const LocationConsultationSection = ({ serviceName, city }) => {
       return;
     }
 
-    if (!captchaToken) {
-      setStatus({ type: 'error', message: 'Please complete the captcha verification.' });
-      return;
-    }
+    // TEMP: captcha disabled for enquiry trial - uncomment to restore.
+    // if (!captchaToken) {
+    //   setStatus({ type: 'error', message: 'Please complete the captcha verification.' });
+    //   return;
+    // }
 
     setIsSubmitting(true);
     setStatus(null);
@@ -326,23 +327,25 @@ const LocationConsultationSection = ({ serviceName, city }) => {
               </div>
 
               <div className="flex justify-center overflow-x-auto">
-                <ReCaptcha
-                  ref={captchaRef}
-                  onChange={(token) => {
-                    setCaptchaToken(token);
-                    setStatus(null);
-                  }}
-                  onExpired={() => {
-                    setCaptchaToken(null);
-                    setStatus({ type: 'error', message: 'Captcha expired. Please verify again.' });
-                  }}
-                  theme="light"
-                />
+                {/* TEMP: captcha disabled for enquiry trial - uncomment to restore. */}
+                {/* <ReCaptcha */}
+                {/* ref={captchaRef} */}
+                {/* onChange={(token) => { */}
+                {/* setCaptchaToken(token); */}
+                {/* setStatus(null); */}
+                {/* }} */}
+                {/* onExpired={() => { */}
+                {/* setCaptchaToken(null); */}
+                {/* setStatus({ type: 'error', message: 'Captcha expired. Please verify again.' }); */}
+                {/* }} */}
+                {/* theme="light" */}
+                {/* /> */}
               </div>
 
+              {/* TEMP: captcha disabled for enquiry trial. To restore, re-add `|| !captchaToken` below. */}
               <button
                 type="submit"
-                disabled={isSubmitting || !captchaToken}
+                disabled={isSubmitting}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-gold px-4 py-3 font-sans text-sm font-semibold text-navy transition-all hover:brightness-110 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSubmitting ? 'Submitting...' : formConfig?.submitButtonText || DEFAULT_FORM_COPY.submitLabel}

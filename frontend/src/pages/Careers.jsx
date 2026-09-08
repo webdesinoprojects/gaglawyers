@@ -203,13 +203,14 @@ const Careers = () => {
     event.preventDefault();
 
     if (!validateForm()) return;
-    if (!captchaToken) {
-      setSubmitStatus({
-        type: 'error',
-        message: 'Please complete the captcha verification.',
-      });
-      return;
-    }
+    // TEMP: captcha disabled for enquiry trial - uncomment to restore.
+    // if (!captchaToken) {
+    //   setSubmitStatus({
+    //     type: 'error',
+    //     message: 'Please complete the captcha verification.',
+    //   });
+    //   return;
+    // }
 
     setIsSubmitting(true);
     setSubmitStatus(null);
@@ -507,16 +508,18 @@ const Careers = () => {
 
               <div className="pt-1">
                 <div className="mb-4 flex justify-start">
-                  <ReCaptcha
-                    ref={captchaRef}
-                    onChange={handleCaptchaChange}
-                    onExpired={handleCaptchaExpired}
-                    theme="light"
-                  />
+                  {/* TEMP: captcha disabled for enquiry trial - uncomment to restore. */}
+                  {/* <ReCaptcha */}
+                  {/* ref={captchaRef} */}
+                  {/* onChange={handleCaptchaChange} */}
+                  {/* onExpired={handleCaptchaExpired} */}
+                  {/* theme="light" */}
+                  {/* /> */}
                 </div>
+                {/* TEMP: captcha disabled for enquiry trial. To restore, re-add `|| !captchaToken` below. */}
                 <button
                   type="submit"
-                  disabled={isSubmitting || !captchaToken}
+                  disabled={isSubmitting}
                   className="w-full md:w-auto inline-flex items-center justify-center px-8 py-3 bg-gold text-navy font-sans text-sm font-semibold rounded-lg transition-all duration-200 hover:brightness-110 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   {isSubmitting ? 'Submitting...' : (formConfig.submitButtonText || CAREER_FORM_DEFAULT.submitButtonText)}

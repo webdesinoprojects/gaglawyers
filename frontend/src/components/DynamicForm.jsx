@@ -41,13 +41,14 @@ const DynamicForm = ({ formIdentifier, onSuccess, services = [] }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!captchaToken) {
-      setSubmitStatus({ 
-        type: 'error', 
-        message: 'Please complete the captcha verification.' 
-      });
-      return;
-    }
+    // TEMP: captcha disabled for enquiry trial - uncomment to restore.
+    // if (!captchaToken) {
+    //   setSubmitStatus({ 
+    //     type: 'error', 
+    //     message: 'Please complete the captcha verification.' 
+    //   });
+    //   return;
+    // }
     
     setIsSubmitting(true);
     setSubmitStatus(null);
@@ -218,17 +219,19 @@ const DynamicForm = ({ formIdentifier, onSuccess, services = [] }) => {
 
         {/* reCAPTCHA */}
         <div className="flex justify-center">
-          <ReCaptcha
-            ref={captchaRef}
-            onChange={handleCaptchaChange}
-            onExpired={handleCaptchaExpired}
-            theme="light"
-          />
+          {/* TEMP: captcha disabled for enquiry trial - uncomment to restore. */}
+          {/* <ReCaptcha */}
+          {/* ref={captchaRef} */}
+          {/* onChange={handleCaptchaChange} */}
+          {/* onExpired={handleCaptchaExpired} */}
+          {/* theme="light" */}
+          {/* /> */}
         </div>
 
+        {/* TEMP: captcha disabled for enquiry trial. To restore, re-add `|| !captchaToken` below. */}
         <button
           type="submit"
-          disabled={isSubmitting || !formConfig.isActive || !captchaToken}
+          disabled={isSubmitting || !formConfig.isActive}
           className="w-full px-6 py-3 bg-gold text-navy font-sans text-sm font-semibold rounded-lg transition-all duration-200 hover:brightness-110 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? 'Submitting...' : formConfig.submitButtonText}

@@ -108,13 +108,14 @@ const createContactInquiry = async (req, res) => {
       }
     }
 
-    const isCaptchaValid = await verifyRecaptcha(captchaToken, req.ip);
-    if (!isCaptchaValid) {
-      return res.status(400).json({
-        success: false,
-        message: 'reCAPTCHA verification failed',
-      });
-    }
+    // TEMP: captcha disabled for enquiry trial — uncomment this block to restore.
+    // const isCaptchaValid = await verifyRecaptcha(captchaToken, req.ip);
+    // if (!isCaptchaValid) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'reCAPTCHA verification failed',
+    //   });
+    // }
 
     // FORM-01 attribution. Prefer what the client reports; fall back to the
     // Referer header so a lead is still traceable if the field is missing.

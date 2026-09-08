@@ -147,10 +147,11 @@ const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!captchaToken) {
-      setSubmitStatus({ type: 'error', message: 'Please complete the captcha verification.' });
-      return;
-    }
+    // TEMP: captcha disabled for enquiry trial - uncomment to restore.
+    // if (!captchaToken) {
+    //   setSubmitStatus({ type: 'error', message: 'Please complete the captcha verification.' });
+    //   return;
+    // }
     
     setIsSubmitting(true);
     setSubmitStatus(null);
@@ -477,17 +478,19 @@ const Contact = () => {
 
                   {/* reCAPTCHA */}
                   <div className="flex justify-center">
-                    <ReCaptcha
-                      ref={captchaRef}
-                      onChange={handleCaptchaChange}
-                      onExpired={handleCaptchaExpired}
-                      theme="dark"
-                    />
+                    {/* TEMP: captcha disabled for enquiry trial - uncomment to restore. */}
+                    {/* <ReCaptcha */}
+                    {/* ref={captchaRef} */}
+                    {/* onChange={handleCaptchaChange} */}
+                    {/* onExpired={handleCaptchaExpired} */}
+                    {/* theme="dark" */}
+                    {/* /> */}
                   </div>
 
+                  {/* TEMP: captcha disabled for enquiry trial. To restore, re-add `|| !captchaToken` below. */}
                   <button
                     type="submit"
-                    disabled={isSubmitting || !captchaToken}
+                    disabled={isSubmitting}
                     className="w-full rounded-md bg-[#C9A84C] px-6 py-3.5 font-sans text-base font-bold text-[#0B1526] shadow-md transition-all duration-200 hover:bg-[#B08A3E] hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 min-h-[48px] md:w-auto md:min-w-[200px]"
                   >
                     {isSubmitting ? 'Submitting...' : 'Submit Inquiry →'}

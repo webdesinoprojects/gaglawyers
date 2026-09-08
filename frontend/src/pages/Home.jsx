@@ -266,13 +266,14 @@ const Home = () => {
       return;
     }
     
-    if (!appointmentCaptchaToken) {
-      setAppointmentStatus({
-        type: 'error',
-        message: 'Please complete the captcha verification.',
-      });
-      return;
-    }
+    // TEMP: captcha disabled for enquiry trial - uncomment to restore.
+    // if (!appointmentCaptchaToken) {
+    //   setAppointmentStatus({
+    //     type: 'error',
+    //     message: 'Please complete the captcha verification.',
+    //   });
+    //   return;
+    // }
     
     setIsSubmittingAppointment(true);
     setAppointmentStatus(null);
@@ -372,13 +373,14 @@ const Home = () => {
   const handleCtaSubmit = async (e) => {
     e.preventDefault();
     
-    if (!ctaCaptchaToken) {
-      setCtaStatus({
-        type: 'error',
-        message: 'Please complete the captcha verification.',
-      });
-      return;
-    }
+    // TEMP: captcha disabled for enquiry trial - uncomment to restore.
+    // if (!ctaCaptchaToken) {
+    //   setCtaStatus({
+    //     type: 'error',
+    //     message: 'Please complete the captcha verification.',
+    //   });
+    //   return;
+    // }
     
     setIsSubmittingCta(true);
     setCtaStatus(null);
@@ -632,17 +634,19 @@ const Home = () => {
           
           {/* reCAPTCHA */}
           <div className="flex justify-center">
-            <ReCaptcha
-              ref={appointmentCaptchaRef}
-              onChange={handleAppointmentCaptchaChange}
-              onExpired={handleAppointmentCaptchaExpired}
-              theme="light"
-            />
+            {/* TEMP: captcha disabled for enquiry trial - uncomment to restore. */}
+            {/* <ReCaptcha */}
+            {/* ref={appointmentCaptchaRef} */}
+            {/* onChange={handleAppointmentCaptchaChange} */}
+            {/* onExpired={handleAppointmentCaptchaExpired} */}
+            {/* theme="light" */}
+            {/* /> */}
           </div>
           
+          {/* TEMP: captcha disabled for enquiry trial. To restore, re-add `|| !appointmentCaptchaToken` below. */}
           <button
             type="submit"
-            disabled={isSubmittingAppointment || !appointmentCaptchaToken}
+            disabled={isSubmittingAppointment}
             className="w-full px-4 py-3 bg-gold text-navy font-sans text-sm font-semibold rounded-lg transition-all hover:brightness-110 hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {isSubmittingAppointment ? cf.submittingLabel || 'Submitting...' : cf.submitLabel || 'Book appointment'}
@@ -1441,17 +1445,19 @@ const Home = () => {
                   
                   {/* reCAPTCHA */}
                   <div className="flex justify-center">
-                    <ReCaptcha
-                      ref={ctaCaptchaRef}
-                      onChange={handleCtaCaptchaChange}
-                      onExpired={handleCtaCaptchaExpired}
-                      theme="light"
-                    />
+                    {/* TEMP: captcha disabled for enquiry trial - uncomment to restore. */}
+                    {/* <ReCaptcha */}
+                    {/* ref={ctaCaptchaRef} */}
+                    {/* onChange={handleCtaCaptchaChange} */}
+                    {/* onExpired={handleCtaCaptchaExpired} */}
+                    {/* theme="light" */}
+                    {/* /> */}
                   </div>
                   
+                  {/* TEMP: captcha disabled for enquiry trial. To restore, re-add `|| !ctaCaptchaToken` below. */}
                   <button
                     type="submit"
-                    disabled={isSubmittingCta || !ctaCaptchaToken}
+                    disabled={isSubmittingCta}
                     className="w-full px-4 py-3.5 bg-gold text-navy font-sans text-sm font-bold rounded-lg transition-all hover:brightness-110 hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
                   >
                     {isSubmittingCta
