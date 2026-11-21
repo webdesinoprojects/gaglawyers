@@ -11,7 +11,7 @@ const HOME_ANCHOR_LINKS = [
   { label: 'Our team', hash: 'team' },
   { label: 'Testimonials', hash: 'testimonials' },
   { label: 'Experience', hash: 'experience' },
-  { label: 'Articles', hash: 'articles' },
+  { label: 'Blog', hash: 'blog' },
   { label: 'Awards', hash: 'awards' },
   { label: 'Consultation', hash: 'consultation' },
 ];
@@ -20,7 +20,7 @@ const DEFAULT_MENU_ITEMS = [
   { label: 'Home', url: '/' },
   { label: 'About', url: '/about' },
   { label: 'Services', url: '/services' },
-  { label: 'Resource Center', url: '/articles' },
+  { label: 'Blog', url: '/blog' },
   { label: 'Careers', url: '/careers' },
   { label: 'Contact', url: '/contact' },
 ];
@@ -153,15 +153,17 @@ const DynamicNavbar = () => {
           path: `/${service.slug}`
         }))
       };
-    } else if (item.label === 'Blog' || item.label === 'Resource Center') {
+    } else if (item.label === 'Blog' || item.label === 'Resource Center' || item.label === 'Articles') {
+      // Older nav records saved in the admin may still say "Resource Center";
+      // they all render as the Blog menu.
       return {
         ...item,
-        label: 'Resource Center',
-        url: '/articles',
+        label: 'Blog',
+        url: '/blog',
         hasDropdown: true,
         dropdownType: 'resource',
         submenu: [
-          { name: 'Articles', path: '/articles' },
+          { name: 'Blog', path: '/blog' },
           { name: 'Newsletter', path: '/newsletter' },
         ],
       };

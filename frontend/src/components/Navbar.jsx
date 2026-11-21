@@ -70,12 +70,12 @@ const Navbar = () => {
       }))
     },
     {
-      name: 'Resource Center',
-      path: '/articles',
+      name: 'Blog',
+      path: '/blog',
       hasDropdown: true,
       dropdownType: 'resource',
       submenu: [
-        { name: 'Articles', path: '/articles' },
+        { name: 'Blog', path: '/blog' },
         { name: 'Newsletter', path: '/newsletter' },
       ],
     },

@@ -97,7 +97,7 @@ const AdminDashboard = () => {
       bgColor: 'bg-orange-50',
       textColor: 'text-orange-600',
       change: `${stats.blog} total`,
-      link: '/admin/resource-center'
+      link: '/admin/blog'
     },
     {
       title: 'Career Openings',
@@ -112,7 +112,7 @@ const AdminDashboard = () => {
   ];
 
   const quickActions = [
-    { title: 'Manage Resource Center', description: 'Articles and newsletter content', link: '/admin/resource-center', icon: BookOpen, color: 'text-orange-600' },
+    { title: 'Manage Blog', description: 'Blog and newsletter content', link: '/admin/blog', icon: BookOpen, color: 'text-orange-600' },
     { title: 'Manage Careers', description: 'Control open positions on website', link: '/admin/careers', icon: Briefcase, color: 'text-indigo-600' },
     { title: 'Add Team Member', description: 'Add new lawyer to the team', link: '/admin/team', icon: Users, color: 'text-blue-600' },
     { title: 'Manage Gallery', description: 'Upload and organize images', link: '/admin/gallery', icon: Eye, color: 'text-purple-600' },

@@ -234,14 +234,14 @@ const main = async () => {
       },
     },
     {
-      route: '/articles',
+      route: '/blog',
       seo: {
-        title: 'Legal Insights & News | GAG Lawyers Articles',
+        title: 'Legal Insights & News | GAG Lawyers Blog',
         description:
           'Stay informed with expert legal analysis, case updates, and insights on Indian law from GAG Lawyers.',
         keywords:
-          'legal articles, law updates, legal insights, corporate law news, litigation updates',
-        canonical: `${SITE_URL}/articles`,
+          'legal blog, law updates, legal insights, corporate law news, litigation updates',
+        canonical: `${SITE_URL}/blog`,
       },
     },
     {

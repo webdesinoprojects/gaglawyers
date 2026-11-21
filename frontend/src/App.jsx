@@ -57,9 +57,11 @@ const RedirectToSlug = () => {
   return <Navigate to={`/${slug}`} replace />;
 };
 
-const RedirectBlogToArticles = () => {
+// /blog is the canonical address for posts. /articles was used for a while, so
+// old links (and anything Google indexed) are sent to the matching /blog URL.
+const RedirectArticlesToBlog = () => {
   const { slug } = useParams();
-  return <Navigate to={`/articles/${slug}`} replace />;
+  return <Navigate to={`/blog/${slug}`} replace />;
 };
 
 /**
@@ -99,8 +101,8 @@ function App() {
             }
           >
             <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="resource-center" element={<ResourceCenterManager />} />
-            <Route path="blog" element={<Navigate to="/admin/resource-center" replace />} />
+            <Route path="blog" element={<ResourceCenterManager />} />
+            <Route path="resource-center" element={<Navigate to="/admin/blog" replace />} />
             <Route path="pages" element={<PageContentManager />} />
             <Route path="page-visibility" element={<PageVisibilityManager />} />
             <Route path="team" element={<TeamManager />} />
@@ -131,12 +133,12 @@ function App() {
             <Route path="gallery" element={<PageVisibilityWrapper pageKey="gallery"><Gallery /></PageVisibilityWrapper>} />
             <Route path="services" element={<PageVisibilityWrapper pageKey="services"><Services /></PageVisibilityWrapper>} />
             <Route path="services/:slug" element={<RedirectToSlug />} />
-            <Route path="articles" element={<PageVisibilityWrapper pageKey="blog"><Blog /></PageVisibilityWrapper>} />
+            <Route path="blog" element={<PageVisibilityWrapper pageKey="blog"><Blog /></PageVisibilityWrapper>} />
             <Route path="newsletter" element={<PageVisibilityWrapper pageKey="newsletter"><Newsletter /></PageVisibilityWrapper>} />
             <Route path="newsletter/:slug" element={<BlogPost />} />
-            <Route path="articles/:slug" element={<BlogPost />} />
-            <Route path="blog" element={<Navigate to="/articles" replace />} />
-            <Route path="blog/:slug" element={<RedirectBlogToArticles />} />
+            <Route path="blog/:slug" element={<BlogPost />} />
+            <Route path="articles" element={<Navigate to="/blog" replace />} />
+            <Route path="articles/:slug" element={<RedirectArticlesToBlog />} />
             <Route path="contact" element={<PageVisibilityWrapper pageKey="contact"><Contact /></PageVisibilityWrapper>} />
             <Route path="careers" element={<PageVisibilityWrapper pageKey="careers"><Careers /></PageVisibilityWrapper>} />
             <Route path="affiliation" element={<PageVisibilityWrapper pageKey="affiliation"><Affiliation /></PageVisibilityWrapper>} />

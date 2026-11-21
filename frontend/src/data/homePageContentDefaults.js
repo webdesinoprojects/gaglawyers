@@ -122,9 +122,9 @@ export const DEFAULT_TEAM_SECTION = {
 
 export const DEFAULT_BLOG_SECTION = {
   eyebrow: 'Legal Insights',
-  title: 'Latest from Our Article',
+  title: 'Latest from Our Blog',
   subtitle: 'Stay informed with expert legal insights, case studies, and industry updates',
-  viewAllText: 'View All Articles',
+  viewAllText: 'View All Blogs',
 };
 
 export const DEFAULT_TESTIMONIALS_INTRO = {

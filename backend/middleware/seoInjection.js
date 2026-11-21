@@ -183,15 +183,19 @@ const buildRedirectTarget = (req, normalizedPath) => {
     canonicalHost &&
     requestHost !== canonicalHost;
   const shouldRedirectSlash = req.path.length > 1 && req.path.endsWith('/');
+  // Posts live under /blog. /articles was used for a while, so old links and
+  // indexed URLs get a permanent redirect to the same post under /blog.
+  const targetPath = normalizedPath.replace(/^\/articles(?=\/|$)/, '/blog');
+  const shouldRedirectArticles = targetPath !== normalizedPath;
 
-  if (!shouldRedirectHost && !shouldRedirectSlash) return '';
+  if (!shouldRedirectHost && !shouldRedirectSlash && !shouldRedirectArticles) return '';
 
   const query = req.originalUrl.includes('?') ? req.originalUrl.slice(req.originalUrl.indexOf('?')) : '';
   const origin =
     process.env.NODE_ENV === 'production' && hostIsProductionDomain
       ? CANONICAL_ORIGIN
       : `${req.protocol}://${req.get('host')}`;
-  return `${origin}${normalizedPath}${query}`;
+  return `${origin}${targetPath}${query}`;
 };
 
 const stripSiteSuffix = (value = '') =>
@@ -327,7 +331,7 @@ const buildFallbackContent = ({ title, description, canonical, robots, page, sec
   });
   // Natural anchor text: the article's own headline, not "click here".
   pickArticles(articles, page?.slug || canonical).forEach((a) => {
-    links.push([`${SITE_URL}/articles/${a.slug}`, a.title]);
+    links.push([`${SITE_URL}/blog/${a.slug}`, a.title]);
   });
   links.push([`${SITE_URL}/services`, 'All practice areas']);
   links.push([`${SITE_URL}/contact`, 'Contact GAG Lawyers']);
@@ -600,15 +604,15 @@ const STATIC_SEO = {
     description: 'Visual journey into the life of GAG Lawyers - courtroom advocacy, events, milestones, and community outreach.',
     keywords: 'GAG Lawyers gallery, law firm photos, legal events, courtroom advocacy',
   },
-  '/articles': {
-    title: 'Legal Insights & News | GAG Lawyers Articles',
+  '/blog': {
+    title: 'Legal Insights & News | GAG Lawyers Blog',
     description: 'Expert legal analysis, case updates, and insights on Indian law from GAG Lawyers.',
-    keywords: 'legal articles, law updates, legal insights, Indian law news',
+    keywords: 'legal blog, law updates, legal insights, Indian law news',
   },
   '/newsletter': {
-    title: 'Newsletter | GAG Lawyers - Resource Center',
-    description: 'Legal newsletter updates and practical insights from GAG Lawyers Resource Center.',
-    keywords: 'legal newsletter, law updates, resource center, GAG Lawyers',
+    title: 'Newsletter | GAG Lawyers Blog',
+    description: 'Legal newsletter updates and practical insights from the GAG Lawyers blog.',
+    keywords: 'legal newsletter, law updates, legal blog, GAG Lawyers',
   },
   '/firm': {
     title: 'The Firm | GAG Lawyers - Grover & Grover Advocates',

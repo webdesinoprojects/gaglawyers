@@ -89,10 +89,10 @@ const PageVisibilityManager = () => {
     },
     {
       key: 'blog',
-      name: 'Resource Center',
+      name: 'Blog',
       path: '/blog',
       icon: BookOpen,
-      description: 'Articles',
+      description: 'Blog and newsletter',
       category: 'Content',
       canDisable: true,
     },

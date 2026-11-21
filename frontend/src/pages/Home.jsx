@@ -59,7 +59,9 @@ const normalizeInlineHtml = (value, fallback = '') => {
   return hasHtml ? raw : raw.replace(/\n/g, '<br />');
 };
 
-const replaceBlogWord = (value = '') => String(value).replace(/\bblog\b/gi, 'article');
+// The blog section text comes from the admin (Page Content -> Home). It used to be
+// force-rewritten from "blog" to "article"; it is now shown exactly as entered.
+const replaceBlogWord = (value = '') => String(value);
 
 const Home = () => {
   const location = useLocation();
@@ -486,7 +488,7 @@ const Home = () => {
     heading: 'What Our Clients Say',
     subheading: 'Trusted by leading businesses and individuals across India',
   };
-  const getArticleUrl = (post) => post.externalUrl || `/articles/${post.slug}`;
+  const getArticleUrl = (post) => post.externalUrl || `/blog/${post.slug}`;
   const isExternalArticle = (post) => Boolean(post.externalUrl && /^https?:\/\//i.test(post.externalUrl));
   const isMarqueeEnabled = reviews.length > 1;
   const marqueeReviews = isMarqueeEnabled ? [...reviews, ...reviews] : reviews;
@@ -1122,9 +1124,9 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Articles */}
+      {/* Blog */}
       {blogPosts.length > 0 && (
-        <section id="articles" className="scroll-mt-[var(--site-header-height)] bg-[#F7F9FC] py-16 lg:py-24 border-t border-gold/20">
+        <section id="blog" className="scroll-mt-[var(--site-header-height)] bg-[#F7F9FC] py-16 lg:py-24 border-t border-gold/20">
           <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
             <SectionReveal>
               {/* Section Heading with Gold Ornament */}
@@ -1142,7 +1144,7 @@ const Home = () => {
                   <p className="font-sans text-base lg:text-lg text-gray-600 max-w-2xl">{replaceBlogWord(home.blogSection.subtitle)}</p>
                 </div>
                 <Link
-                  to="/articles"
+                  to="/blog"
                   className="hidden sm:inline-flex items-center gap-2 px-6 py-3 bg-gold text-navy font-sans font-semibold rounded-lg hover:brightness-110 transition-all shrink-0 shadow-lg shadow-gold/20"
                 >
                   {replaceBlogWord(home.blogSection.viewAllText)}
@@ -1227,7 +1229,7 @@ const Home = () => {
 
               <div className="text-center mt-10 sm:hidden">
                 <Link
-                  to="/articles"
+                  to="/blog"
                   className="inline-flex items-center gap-2 px-8 py-3 bg-gold text-navy font-sans font-semibold rounded-lg hover:brightness-110 transition-all shadow-lg shadow-gold/20"
                 >
                   {replaceBlogWord(home.blogSection.viewAllText)}

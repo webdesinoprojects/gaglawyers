@@ -279,15 +279,14 @@ const generateLlmsTxt = async (req, res) => {
   try {
     const baseUrl = getBaseUrl(req);
 
-    // Canonical equivalents only — /blog redirects to /articles, so it is
-    // excluded here in favour of the destination URL.
+    // Canonical URLs only. Posts live under /blog (/articles redirects there).
     const mainPages = [
       ['Home', '/'],
       ['About', '/about'],
       ['The Firm', '/firm'],
       ['Our Team', '/team'],
       ['Practice Areas', '/services'],
-      ['Articles', '/articles'],
+      ['Blog', '/blog'],
       ['Newsletter', '/newsletter'],
       ['Awards', '/awards'],
       ['Gallery', '/gallery'],

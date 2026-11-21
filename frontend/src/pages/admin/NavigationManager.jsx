@@ -15,8 +15,8 @@ const NavigationManager = () => {
 
   const normalizeNavItems = (items = []) =>
     items.map((item) => {
-      const label = item.label === 'Blog' ? 'Resource Center' : item.label;
-      const url = label === 'Resource Center' ? '/blog' : item.url;
+      const label = (item.label === 'Resource Center' || item.label === 'Articles') ? 'Blog' : item.label;
+      const url = label === 'Blog' ? '/blog' : item.url;
       return {
         ...item,
         label,
@@ -192,7 +192,7 @@ const NavigationManager = () => {
             </div>
             {menuData.menuLocation === 'header' && (
               <p className="text-xs text-gray-500 mb-4">
-                Use label `Resource Center` for `/blog` to automatically show `Articles` and `Newsletter` dropdown on the live navbar.
+                Use label `Blog` for `/blog` to automatically show the `Blog` and `Newsletter` dropdown on the live navbar.
               </p>
             )}
 

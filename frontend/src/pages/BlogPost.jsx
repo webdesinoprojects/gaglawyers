@@ -139,10 +139,10 @@ const BlogPost = () => {
   );
 
   const isNewsletterPost = post?.contentType === 'newsletter';
-  const backListPath = isNewsletterPost ? '/newsletter' : '/articles';
-  const backListLabel = isNewsletterPost ? 'Back to Newsletter' : 'Back to Articles';
-  const exploreLabel = isNewsletterPost ? 'Explore More Newsletter Updates' : 'Explore More Articles';
-  const canonicalPath = isNewsletterPost ? `/newsletter/${post?.slug || slug}` : `/articles/${post?.slug || slug}`;
+  const backListPath = isNewsletterPost ? '/newsletter' : '/blog';
+  const backListLabel = isNewsletterPost ? 'Back to Newsletter' : 'Back to Blog';
+  const exploreLabel = isNewsletterPost ? 'Explore More Newsletter Updates' : 'Explore More Blog Posts';
+  const canonicalPath = isNewsletterPost ? `/newsletter/${post?.slug || slug}` : `/blog/${post?.slug || slug}`;
 
   if (loading) {
     return (
@@ -178,9 +178,9 @@ const BlogPost = () => {
   return (
     <div className="bg-grey-light">
       <SEOHead 
-        title={`${post.title} | GAG Lawyers Articles`}
+        title={`${post.title} | GAG Lawyers Blog`}
         description={post.excerpt || post.content.substring(0, 160).replace(/<[^>]*>/g, '')}
-        keywords={post.tags?.join(', ') || 'legal articles, law articles'}
+        keywords={post.tags?.join(', ') || 'legal blog, law blog'}
         canonical={`${(import.meta.env.VITE_SITE_URL || 'https://gaglawyers.com').replace(/\/+$/, '')}${canonicalPath}`}
       />
 
@@ -201,7 +201,7 @@ const BlogPost = () => {
             className="inline-flex items-center gap-2 font-sans text-sm text-gray-300 hover:text-gold transition-colors mb-8 group"
           >
             <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-            <span>{isNewsletterPost ? 'Back to Newsletter' : 'Back to All Articles'}</span>
+            <span>{isNewsletterPost ? 'Back to Newsletter' : 'Back to Blog'}</span>
           </Link>
           
           <div className="max-w-4xl">
@@ -440,13 +440,13 @@ const BlogPost = () => {
                   <div className="bg-white rounded-2xl shadow-lg p-6">
                     <h3 className="font-serif text-xl font-bold text-navy mb-6 flex items-center gap-2">
                       <span className="w-1 h-6 bg-gold rounded-full"></span>
-                      Related Articles
+                      Related Posts
                     </h3>
                     <div className="space-y-4">
                       {relatedPosts.map((relatedPost) => (
                         <Link
                           key={relatedPost._id}
-                          to={`/articles/${relatedPost.slug}`}
+                          to={`/blog/${relatedPost.slug}`}
                           className="block group"
                         >
                           <div className="flex gap-3">
@@ -493,7 +493,7 @@ const BlogPost = () => {
         </div>
       </article>
 
-      {/* Back to Articles CTA */}
+      {/* Back to Blog CTA */}
       <section className="bg-white py-12 border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <Link

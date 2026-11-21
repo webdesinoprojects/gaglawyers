@@ -83,15 +83,15 @@ const Blog = () => {
     });
   };
 
-  const getPostUrl = (post) => post.externalUrl || `/articles/${post.slug}`;
+  const getPostUrl = (post) => post.externalUrl || `/blog/${post.slug}`;
   const isExternalPost = (post) => Boolean(post.externalUrl && /^https?:\/\//i.test(post.externalUrl));
 
   return (
     <div>
       <SEOHead 
-        title="Legal Insights & News | GAG Lawyers Articles"
-        description="Stay informed with expert legal analysis, case updates, and insights on Indian law. Read articles on corporate law, litigation, real estate, family law, and more from GAG Lawyers."
-        keywords="legal articles, law articles, indian law updates, legal insights, corporate law news, litigation updates"
+        title="Legal Insights & News | GAG Lawyers Blog"
+        description="Stay informed with expert legal analysis, case updates, and insights on Indian law. Read our blog on corporate law, litigation, real estate, family law, and more from GAG Lawyers."
+        keywords="legal blog, law blog, indian law updates, legal insights, corporate law news, litigation updates"
       />
       
       <section className="bg-navy text-white py-16 lg:py-20">
@@ -109,7 +109,7 @@ const Blog = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {loading ? (
             <div className="text-center py-12">
-              <p className="font-sans text-gray-600">Loading articles...</p>
+              <p className="font-sans text-gray-600">Loading posts...</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">

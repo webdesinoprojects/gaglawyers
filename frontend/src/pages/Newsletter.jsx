@@ -39,15 +39,15 @@ const Newsletter = () => {
   return (
     <div>
       <SEOHead
-        title="Newsletter | GAG Lawyers - Resource Center"
-        description="Legal newsletter updates and practical insights from GAG Lawyers Resource Center."
-        keywords="legal newsletter, law updates, resource center, gag lawyers"
+        title="Newsletter | GAG Lawyers Blog"
+        description="Legal newsletter updates and practical insights from the GAG Lawyers blog."
+        keywords="legal newsletter, law updates, legal blog, gag lawyers"
       />
 
       <section className="bg-gradient-to-br from-navy via-navy/95 to-[#0a1628] text-white py-20 lg:py-28">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="inline-block px-4 py-1.5 bg-gold/20 text-gold text-xs font-sans font-bold uppercase tracking-wider rounded-full mb-5">
-            Resource Center
+            Blog
           </span>
           <h1 className="font-serif text-4xl lg:text-5xl font-bold mb-5">Newsletter</h1>
           <p className="font-sans text-lg text-gray-300 max-w-2xl mx-auto">

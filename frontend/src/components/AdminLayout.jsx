@@ -156,11 +156,11 @@ const AdminLayout = () => {
           .slice(0, 5)
           .forEach(item => {
             results.push({
-              type: item.contentType === 'newsletter' ? 'Newsletter' : 'Article',
+              type: item.contentType === 'newsletter' ? 'Newsletter' : 'Blog',
               icon: BookOpen,
               title: item.title,
               subtitle: item.author?.name || item.category || '',
-              path: '/admin/resource-center',
+              path: '/admin/blog',
             });
           });
       }
@@ -232,7 +232,7 @@ const AdminLayout = () => {
     {
       title: 'Content Management',
       items: [
-        { name: 'Resource Center', path: '/admin/resource-center', icon: BookOpen },
+        { name: 'Blog', path: '/admin/blog', icon: BookOpen },
         { name: 'Team Members', path: '/admin/team', icon: Users },
         { name: 'Services', path: '/admin/services', icon: Briefcase },
         { name: 'Gallery', path: '/admin/gallery', icon: Image },

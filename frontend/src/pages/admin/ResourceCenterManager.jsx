@@ -8,8 +8,8 @@ const ResourceCenterManager = () => {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="font-serif text-3xl font-bold text-navy mb-2">Resource Center</h1>
-        <p className="font-sans text-gray-600">Manage Articles and Newsletter from one place.</p>
+        <h1 className="font-serif text-3xl font-bold text-navy mb-2">Blog</h1>
+        <p className="font-sans text-gray-600">Manage Blog and Newsletter from one place.</p>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-6">
@@ -23,7 +23,7 @@ const ResourceCenterManager = () => {
           }`}
         >
           <BookOpen size={16} />
-          Articles
+          Blog
         </button>
         <button
           type="button"
@@ -43,9 +43,9 @@ const ResourceCenterManager = () => {
         <BlogManager
           key="articles"
           contentType="article"
-          managerTitle="Articles Manager"
-          managerSubtitle="Create and manage Resource Center articles"
-          createLabel="New Article"
+          managerTitle="Blog Manager"
+          managerSubtitle="Create and manage blog posts"
+          createLabel="New Blog Post"
         />
       ) : (
         <BlogManager

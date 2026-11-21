@@ -8,9 +8,9 @@ import API_BASE_URL from '../../config/api';
 
 const BlogManager = ({
   contentType = 'article',
-  managerTitle = 'Articles Manager',
-  managerSubtitle = 'Create and manage articles',
-  createLabel = 'New Article',
+  managerTitle = 'Blog Manager',
+  managerSubtitle = 'Create and manage blog posts',
+  createLabel = 'New Blog Post',
 }) => {
   const [posts, setPosts] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -501,7 +501,7 @@ const BlogManager = ({
               <p className="font-sans text-gray-500">
                 {debouncedSearch
                   ? 'No posts match your search.'
-                  : `No ${contentType === 'newsletter' ? 'newsletters' : 'articles'} found. Create your first one!`}
+                  : `No ${contentType === 'newsletter' ? 'newsletters' : 'blog posts'} found. Create your first one!`}
               </p>
             </div>
       ) : (
