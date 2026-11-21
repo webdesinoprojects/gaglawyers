@@ -72,6 +72,41 @@ const getTeamMembers = async () => {
   return members;
 };
 
+// Blog and newsletter posts. These used to fall through to the generic homepage
+// title/description, so every post looked identical to crawlers and link
+// previews (WhatsApp, LinkedIn) until JavaScript ran. One lookup on the unique
+// slug index gives each post its own head. Only published posts count: an
+// unpublished or missing slug is reported as not found.
+const getPublishedPost = async (slug) =>
+  BlogPost.findOne({ slug, isPublished: true })
+    .select('title slug excerpt seo featuredImage contentType tags publishedAt createdAt updatedAt')
+    .lean();
+
+// Mirrors BlogPost.jsx so the server and the browser agree: the admin's SEO
+// fields win when filled, otherwise "<title> | GAG Lawyers Blog" and the excerpt.
+const buildPostSeo = (post) => {
+  const title = String(post.seo?.title || '').trim() || `${post.title} | GAG Lawyers Blog`;
+  const description = String(post.seo?.description || '').trim() || String(post.excerpt || '').trim() || post.title;
+  const keywords = String(post.seo?.keywords || '').trim()
+    || (Array.isArray(post.tags) && post.tags.length ? post.tags.join(', ') : 'GAG Lawyers, legal blog');
+  return { title, description, keywords };
+};
+
+const postPath = (post) => `${post.contentType === 'newsletter' ? '/newsletter/' : '/blog/'}${post.slug}`;
+
+// og:image must be an absolute URL for link previews to pick it up.
+const absoluteUrl = (value) => {
+  const v = String(value || '').trim();
+  if (/^https?:\/\//i.test(v)) return v;
+  if (v.startsWith('/')) return `${SITE_URL}${v}`;
+  return '';
+};
+
+const isoDate = (value) => {
+  const d = value ? new Date(value) : null;
+  return d && !Number.isNaN(d.getTime()) ? d.toISOString() : '';
+};
+
 // Bullet 5 ("...and informative blogs"). Category would have been the natural way
 // to pick a relevant article, but 89 of 100 posts sit in the generic "Legal News"
 // bucket, so category matching would cover almost nothing. Instead every page gets
@@ -254,7 +289,7 @@ const sectionParagraphs = (content) => {
   return out.filter((t) => typeof t === 'string' && t.trim());
 };
 
-const buildFallbackContent = ({ title, description, canonical, robots, page, sections, context, crumbLabel, team, articles }) => {
+const buildFallbackContent = ({ title, description, canonical, robots, page, sections, context, crumbLabel, team, articles, post }) => {
   if (String(robots || '').toLowerCase().includes('noindex')) {
     return '';
   }
@@ -263,8 +298,10 @@ const buildFallbackContent = ({ title, description, canonical, robots, page, sec
   // page.content.heading/intro are stored per page and already contain the city
   // (generated as `${serviceName} in ${city}`), so they need no localisation and
   // match the H1/intro the visitor sees.
-  const heading = page?.content?.heading || stripSiteSuffix(title) || 'GAG Lawyers';
-  const intro = page?.content?.intro || description;
+  // A post's H1 is its own title (not the SEO title, which may be reworded for
+  // search), matching the heading the visitor sees on the page.
+  const heading = post?.title || page?.content?.heading || stripSiteSuffix(title) || 'GAG Lawyers';
+  const intro = (post && String(post.excerpt || '').trim()) || page?.content?.intro || description;
 
   const parts = ['<main class="seo-fallback-content" data-seo-fallback="true">'];
 
@@ -487,7 +524,30 @@ const buildPersonSchema = ({ team, canonical }) =>
       return person;
     });
 
-const buildSchemaBlock = ({ canonical, title, description, robots, crumbLabel, sections, city, team }) => {
+// Article schema for a blog/newsletter post. Headline, date and image are all
+// visible on the post page; the firm is author and publisher, referenced by the
+// LegalService entity emitted on the same page.
+const buildPostSchema = ({ post, canonical, description }) => {
+  const image = absoluteUrl(post.featuredImage);
+  const published = isoDate(post.publishedAt || post.createdAt);
+  const modified = isoDate(post.updatedAt) || published;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    '@id': `${canonical}#article`,
+    mainEntityOfPage: { '@id': `${canonical}#webpage` },
+    headline: String(post.title || '').slice(0, 110),
+    description,
+    ...(image ? { image: [image] } : {}),
+    ...(published ? { datePublished: published } : {}),
+    ...(modified ? { dateModified: modified } : {}),
+    author: { '@id': ORG_ID },
+    publisher: { '@id': ORG_ID },
+    inLanguage: 'en',
+  };
+};
+
+const buildSchemaBlock = ({ canonical, title, description, robots, crumbLabel, sections, city, team, post }) => {
   if (String(robots || '').toLowerCase().includes('noindex')) return '';
   const webPage = {
     '@context': 'https://schema.org',
@@ -508,11 +568,12 @@ const buildSchemaBlock = ({ canonical, title, description, robots, crumbLabel, s
     jsonLdScript(webPage) +
     (crumbs ? jsonLdScript({ ...crumbs, '@id': `${canonical}#breadcrumb` }) : '') +
     (faq ? jsonLdScript(faq) : '') +
-    people.map(jsonLdScript).join('')
+    people.map(jsonLdScript).join('') +
+    (post ? jsonLdScript(buildPostSchema({ post, canonical, description })) : '')
   );
 };
 
-const injectIntoHtml = (template, { title, description, keywords, canonical, robots = 'index, follow', page = null, sections = null, context = null, crumbLabel = '', team = null, articles = null }) => {
+const injectIntoHtml = (template, { title, description, keywords, canonical, robots = 'index, follow', page = null, sections = null, context = null, crumbLabel = '', team = null, articles = null, post = null }) => {
   let html = template;
 
   // Replace title and description in-place
@@ -538,9 +599,27 @@ const injectIntoHtml = (template, { title, description, keywords, canonical, rob
     `<meta property="og:url" content="${escHtml(canonical)}" ${RH} />`,
     `<meta name="twitter:title" content="${escHtml(title)}" ${RH} />`,
     `<meta name="twitter:description" content="${escHtml(description)}" ${RH} />`,
-  ].join('\n  ');
+  ];
 
-  const fallbackContent = buildFallbackContent({ title, description, canonical, robots, page, sections, context, crumbLabel, team, articles });
+  // Posts only: the preview image and article metadata that WhatsApp, LinkedIn
+  // and Facebook read straight from this HTML. Other pages are left as they were.
+  if (post) {
+    const image = absoluteUrl(post.featuredImage);
+    const published = isoDate(post.publishedAt || post.createdAt);
+    const modified = isoDate(post.updatedAt);
+    extraTags.push(`<meta property="og:type" content="article" ${RH} />`);
+    if (image) {
+      extraTags.push(
+        `<meta property="og:image" content="${escHtml(image)}" ${RH} />`,
+        `<meta name="twitter:card" content="summary_large_image" ${RH} />`,
+        `<meta name="twitter:image" content="${escHtml(image)}" ${RH} />`,
+      );
+    }
+    if (published) extraTags.push(`<meta property="article:published_time" content="${published}" ${RH} />`);
+    if (modified) extraTags.push(`<meta property="article:modified_time" content="${modified}" ${RH} />`);
+  }
+
+  const fallbackContent = buildFallbackContent({ title, description, canonical, robots, page, sections, context, crumbLabel, team, articles, post });
   html = html.replace(/<div\s+id="root"\s*><\/div>/i, `<div id="root">${fallbackContent}</div>`);
 
   // JS-enabled visitors: hide the SEO fallback immediately and keep it hidden — React
@@ -561,10 +640,10 @@ const injectIntoHtml = (template, { title, description, keywords, canonical, rob
   // same entity in the DOM.
   const schemaBlock = buildSchemaBlock({
     canonical, title, description, robots, crumbLabel,
-    sections, city: page?.city || '', team,
+    sections, city: page?.city || '', team, post,
   });
 
-  return html.replace('</head>', `  ${fallbackVisibilityGuard}\n  ${extraTags}\n  ${schemaBlock}\n</head>`);
+  return html.replace('</head>', `  ${fallbackVisibilityGuard}\n  ${extraTags.join('\n  ')}\n  ${schemaBlock}\n</head>`);
 };
 
 // ─── Static page SEO (no DB lookup needed) ────────────────────────────────────
@@ -662,7 +741,8 @@ const seoInjectionMiddleware = async (req, res, next) => {
     return next();
   }
 
-  const canonical = `${SITE_URL}${urlPath}`;
+  // let: a post's canonical follows its content type (see the post lookup below).
+  let canonical = `${SITE_URL}${urlPath}`;
 
   if (urlPath === '/admin' || urlPath.startsWith('/admin/')) {
     const html = injectIntoHtml(template, {
@@ -690,6 +770,7 @@ const seoInjectionMiddleware = async (req, res, next) => {
   // Bullet 11: the roster, fetched only for /team so no other page pays for it.
   let team = null;
   let articles = null;
+  let post = null;
   if (urlPath === '/team') {
     team = await getTeamMembers();
   }
@@ -697,10 +778,30 @@ const seoInjectionMiddleware = async (req, res, next) => {
   if (!seoData) {
     const slug = urlPath.replace(/^\//, '');
 
-    // Multi-segment paths (articles/:slug, newsletter/:slug, services/:slug) — skip DB lookup.
-    // React client handles SEO for these; serve generic fallback indexable HTML.
+    // Multi-segment paths. Posts (/blog/:slug, /newsletter/:slug) get their own
+    // head from the database; anything else (e.g. services/:slug) keeps the
+    // generic fallback, as before.
     if (slug.includes('/')) {
-      seoData = null; // falls to generic fallback below
+      const postMatch = /^(blog|newsletter)\/([^/]+)$/i.exec(slug);
+      if (postMatch) {
+        let postSlug = postMatch[2];
+        try { postSlug = decodeURIComponent(postSlug); } catch { /* keep raw */ }
+        try {
+          const found = await getPublishedPost(postSlug.toLowerCase());
+          if (found) {
+            post = found;
+            seoData = buildPostSeo(found);
+            // Same canonical BlogPost.jsx emits, so server and browser agree.
+            canonical = `${SITE_URL}${postPath(found)}`;
+          } else {
+            // DB confirms no published post with this slug.
+            robots = 'noindex, follow';
+          }
+        } catch (err) {
+          // Transient DB error: do NOT noindex; fall back to the generic head.
+          console.error('[seoInjection] post lookup error for', slug, err.message);
+        }
+      }
     } else {
       try {
         if (slug.includes('-in-')) {
@@ -775,7 +876,7 @@ const seoInjectionMiddleware = async (req, res, next) => {
     articles = await getRecentArticles();
   }
 
-  const html = injectIntoHtml(template, { ...seoData, canonical, robots, page, sections, context, crumbLabel, team, articles });
+  const html = injectIntoHtml(template, { ...seoData, canonical, robots, page, sections, context, crumbLabel, team, articles, post });
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   
   // Determine if this is a 404 (robots = noindex indicates non-existent page)

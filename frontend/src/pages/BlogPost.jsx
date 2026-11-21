@@ -178,10 +178,21 @@ const BlogPost = () => {
   return (
     <div className="bg-grey-light">
       <SEOHead 
-        title={`${post.title} | GAG Lawyers Blog`}
-        description={post.excerpt || post.content.substring(0, 160).replace(/<[^>]*>/g, '')}
-        keywords={post.tags?.join(', ') || 'legal blog, law blog'}
+        // Admin "SEO" fields win when filled; same precedence the server uses
+        // (backend/middleware/seoInjection.js buildPostSeo), so View Source and
+        // the browser tab show the same title.
+        title={post.seo?.title?.trim() || `${post.title} | GAG Lawyers Blog`}
+        description={post.seo?.description?.trim() || post.excerpt || post.content.substring(0, 160).replace(/<[^>]*>/g, '')}
+        keywords={post.seo?.keywords?.trim() || post.tags?.join(', ') || 'GAG Lawyers, legal blog'}
         canonical={`${(import.meta.env.VITE_SITE_URL || 'https://gaglawyers.com').replace(/\/+$/, '')}${canonicalPath}`}
+        type="article"
+        ogImage={/^https?:\/\//i.test(post.featuredImage || '')
+          ? post.featuredImage
+          : (String(post.featuredImage || '').startsWith('/')
+            ? `${(import.meta.env.VITE_SITE_URL || 'https://gaglawyers.com').replace(/\/+$/, '')}${post.featuredImage}`
+            : '')}
+        publishedTime={post.publishedAt || post.createdAt || ''}
+        modifiedTime={post.updatedAt || ''}
       />
 
       {/* Hero Section with Featured Image */}
